@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Flask
+instance/
+.webassets-cache
+
+# Base de datos
+*.db
+*.sqlite
+
+# Configuración sensible
+config.py
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
