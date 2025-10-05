@@ -17,7 +17,6 @@ instance/
 *.sqlite
 
 # Configuración sensible
-config.py
 .env
 
 # IDEs
