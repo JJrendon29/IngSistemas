@@ -1,28 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import pymysql
 from datetime import datetime
+from config import Config
+from db_connection import get_db_connection
 
+# Crear la aplicación Flask
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta_aqui_cambiar'
 
-# Configuración de la base de datos
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'tu_password_mysql',
-    'database': 'proyecto_unidades',
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
-}
-
-def get_db_connection():
-    """Crear conexión a la base de datos"""
-    try:
-        connection = pymysql.connect(**db_config)
-        return connection
-    except Exception as e:
-        print(f"Error al conectar a la base de datos: {e}")
-        return None
+# Cargar configuración desde config.py
+app.config.from_object(Config)
 
 # Ruta principal
 @app.route('/')
@@ -67,7 +52,7 @@ def guardar_contacto():
             flash('Por favor completa todos los campos obligatorios', 'error')
             return redirect(url_for('perfiles'))
         
-        # Conectar a la base de datos
+        # Conectar a la base de datos usando db_connection.py
         connection = get_db_connection()
         if connection is None:
             flash('Error al conectar con la base de datos', 'error')
@@ -89,11 +74,15 @@ def guardar_contacto():
         flash('Error al guardar el contacto', 'error')
         return redirect(url_for('perfiles'))
 
-
 # Manejador de errores 404
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+# Manejador de errores 500
+@app.errorhandler(500)
+def internal_error(e):
+    return "Error interno del servidor", 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
