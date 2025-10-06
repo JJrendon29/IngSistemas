@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Proyecto Ingeniería de Sistemas{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Proyecto Académico</h1>
+        <h2 class="hero-subtitle">Ingeniería de Sistemas</h2>
+        <p class="hero-description">
+            Presentación de las 4 unidades del semestre junto con los perfiles profesionales de nuestro equipo
+        </p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('perfiles') }}" class="btn btn-primary">Ver Perfiles</a>
+            <a href="#unidades" class="btn btn-secondary">Ver Unidades</a>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Unidades -->
+<section class="unidades-section" id="unidades">
+    <div class="container">
+        <h2 class="section-title">Unidades del Semestre</h2>
+        <div class="unidades-grid">
+            <!-- Unidad 1 -->
+            <div class="unidad-card">
+                <div class="unidad-number">01</div>
+                <h3 class="unidad-title">Unidad 1</h3>
+                <p class="unidad-description">
+                    Introducción a los conceptos fundamentales de la Ingeniería de Sistemas
+                </p>
+                <a href="{{ url_for('unidad1') }}" class="btn btn-outline">Ver más</a>
+            </div>
+
+            <!-- Unidad 2 -->
+            <div class="unidad-card">
+                <div class="unidad-number">02</div>
+                <h3 class="unidad-title">Unidad 2</h3>
+                <p class="unidad-description">
+                    Desarrollo de metodologías y procesos de ingeniería
+                </p>
+                <a href="{{ url_for('unidad2') }}" class="btn btn-outline">Ver más</a>
+            </div>
+
+            <!-- Unidad 3 -->
+            <div class="unidad-card">
+                <div class="unidad-number">03</div>
+                <h3 class="unidad-title">Unidad 3</h3>
+                <p class="unidad-description">
+                    Aplicaciones prácticas y casos de estudio
+                </p>
+                <a href="{{ url_for('unidad3') }}" class="btn btn-outline">Ver más</a>
+            </div>
+
+            <!-- Unidad 4 -->
+            <div class="unidad-card">
+                <div class="unidad-number">04</div>
+                <h3 class="unidad-title">Unidad 4</h3>
+                <p class="unidad-description">
+                    Proyectos integradores y conclusiones
+                </p>
+                <a href="{{ url_for('unidad4') }}" class="btn btn-outline">Ver más</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Equipo -->
+<section class="team-section">
+    <div class="container">
+        <h2 class="section-title">Nuestro Equipo</h2>
+        <p class="section-subtitle">Conoce a los integrantes de este proyecto</p>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="{{ url_for('static', filename='images/perfil1.jpg') }}" alt="Juan José Rendón" onerror="this.src='https://via.placeholder.com/300x300?text=Perfil+1'">
+                </div>
+                <h3>Juan José Rendón</h3>
+                <p class="member-role">Estudiante de Ingeniería de Sistemas</p>
+                <a href="{{ url_for('perfiles') }}#perfil1" class="btn btn-sm">Ver perfil</a>
+            </div>
+
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="{{ url_for('static', filename='images/perfil2.jpg') }}" alt="Integrante 2" onerror="this.src='https://via.placeholder.com/300x300?text=Perfil+2'">
+                </div>
+                <h3>Integrante 2</h3>
+                <p class="member-role">Estudiante de Ingeniería de Sistemas</p>
+                <a href="{{ url_for('perfiles') }}#perfil2" class="btn btn-sm">Ver perfil</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección de Contacto -->
+<section class="cta-section">
+    <div class="container">
+        <h2>¿Quieres contactarnos?</h2>
+        <p>Deja tu información y nos pondremos en contacto contigo</p>
+        <a href="{{ url_for('perfiles') }}#contacto" class="btn btn-primary btn-lg">Contactar</a>
+    </div>
+</section>
+{% endblock %}

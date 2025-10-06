@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Proyecto Ingeniería de Sistemas{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Barra de Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="{{ url_for('index') }}">Proyecto ING</a>
+            </div>
+            
+            <!-- Menú de hamburguesa para móvil -->
+            <button class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="nav-menu" id="navMenu">
+                <!-- Menú de Unidades -->
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Unidades</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('unidad1') }}">Unidad 1</a></li>
+                        <li><a href="{{ url_for('unidad2') }}">Unidad 2</a></li>
+                        <li><a href="{{ url_for('unidad3') }}">Unidad 3</a></li>
+                        <li><a href="{{ url_for('unidad4') }}">Unidad 4</a></li>
+                    </ul>
+                </li>
+                
+                <!-- Menú de Perfiles -->
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle">Perfiles</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{{ url_for('perfiles') }}#perfil1">Juan José Rendón</a></li>
+                        <li><a href="{{ url_for('perfiles') }}#perfil2">Integrante 2</a></li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{{ url_for('perfiles') }}" class="nav-link">Contacto</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="close-alert">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2025 Proyecto Ingeniería de Sistemas. Todos los derechos reservados.</p>
+            <p>Universidad - Medellín, Colombia</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
