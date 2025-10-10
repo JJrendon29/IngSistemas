@@ -829,6 +829,72 @@ img {
     margin: var(--spacing-xs) 0;
     opacity: 0.8;
 }
+/* ========================================
+   MODO OSCURO
+   ======================================== */
+   body.dark-mode {
+    --bg-color: #0f172a;
+    --bg-light: #1e293b;
+    --bg-dark: #1e293b;
+    
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-light: #94a3b8;
+    
+    --border-color: #334155;
+    
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .navbar {
+    background-color: #1e293b;
+}
+
+body.dark-mode .unidad-card,
+body.dark-mode .team-member,
+body.dark-mode .perfil-card,
+body.dark-mode .topic-card,
+body.dark-mode .form-container {
+    background-color: #1e293b;
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .dropdown-menu {
+    background-color: #1e293b;
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .dropdown-menu a:hover {
+    background-color: #334155;
+}
+
+body.dark-mode input,
+body.dark-mode textarea {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+body.dark-mode .footer {
+    background-color: #0f172a;
+    border-top: 1px solid var(--border-color);
+}
+
+body.dark-mode .skill-tag {
+    background-color: #334155;
+    color: var(--primary-light);
+}
+
+body.dark-mode .resource-item {
+    background-color: #1e293b;
+    border: 1px solid var(--border-color);
+}
 
 /* ========================================
    RESPONSIVE DESIGN
