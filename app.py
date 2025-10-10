@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 from config import Config
-from config import get_db_connection
+from db_connection import get_db_connection
 
 # Crear la aplicación Flask
 app = Flask(__name__)
