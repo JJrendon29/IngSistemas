@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 from config import Config
-from config import get_db_connection
+from db_connection import get_db_connection
 
 # Crear la aplicación Flask
 app = Flask(__name__)
@@ -26,10 +26,6 @@ def unidad2():
 @app.route('/unidad3')
 def unidad3():
     return render_template('unidad3.html')
-
-@app.route('/unidad4')
-def unidad4():
-    return render_template('unidad4.html')
 
 # Ruta de perfiles
 @app.route('/perfiles')
