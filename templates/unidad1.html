@@ -1,145 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}Perfiles - Proyecto Ingeniería{% endblock %}
+{% block title %}Unidad 1 - Fundamentos y Pensamiento Sistémico{% endblock %}
 
 {% block content %}
-<!-- Header de Perfiles -->
+<!-- Header de la Unidad -->
 <section class="page-header">
     <div class="container">
-        <h1>Nuestros Perfiles</h1>
-        <p>Conoce más sobre los integrantes del equipo</p>
+        <h1>Unidad 1</h1>
+        <p>Fundamentos y el Pensamiento Sistémico</p>
     </div>
 </section>
 
-<!-- Perfil 1 -->
-<section class="perfil-section" id="perfil1">
+<!-- Contenido de la Unidad -->
+<section class="unidad-content">
     <div class="container">
-        <div class="perfil-card">
-            <div class="perfil-image">
-                <img src="{{ url_for('static', filename='images/perfil1.jpg') }}" alt="Juan José Rendón" onerror="this.src='https://via.placeholder.com/400x400?text=Juan+José+Rendón'">
-            </div>
-            <div class="perfil-info">
-                <h2>Juan José Rendón</h2>
-                <p class="perfil-title">Estudiante de Ingeniería de Sistemas</p>
+        <!-- Introducción -->
+        <div class="content-section">
+            <h2>Introducción</h2>
+            <p>
+                Esta unidad establece los cimientos de la ingeniería de sistemas, explorando desde 
+                sus conceptos fundamentales hasta el pensamiento sistémico que caracteriza esta disciplina. 
+                Aprenderemos a ver el mundo desde una perspectiva integradora, donde cada elemento forma 
+                parte de un sistema más amplio.
+            </p>
+        </div>
+
+        <!-- Temas -->
+        <div class="content-section">
+            <h2>Temas Principales</h2>
+            <div class="topics-grid">
+                <div class="topic-card">
+                    <h3>1.1 ¿Qué es la ingeniería?</h3>
+                    <p>Es la aplicación del conocimiento científico y técnico para crear soluciones a problemas del mundo real, diseñando, construyendo y optimizando cosas que mejoren la vida de las personas, combinando creatividad con lógica.</p>
+                </div>
                 
-                <div class="perfil-description">
-                    <h3>Sobre mí</h3>
-                    <p>
-                        Estudiante apasionado por la tecnología, el desarrollo de software y la innovación. 
-                        Con experiencia en programación web, bases de datos y desarrollo de aplicaciones.
-                    </p>
+                <div class="topic-card">
+                    <h3>1.2 Historia y evolución</h3>
+                    <p>La ingeniería de sistemas surgió para enfrentar problemas complejos que involucraban muchos componentes conectados entre sí. Con el tiempo, ha pasado de enfocarse solo en computadoras a abarcar todo tipo de sistemas.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>1.3 Ingeniería de sistemas vs. otras ramas</h3>
+                    <p>A diferencia de otras ingenierías que se centran en áreas específicas, la ingeniería de sistemas se enfoca en la integración de todos los elementos, buscando que el sistema completo funcione de forma eficiente y armoniosa.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>1.4 Problemas que resuelve</h3>
+                    <p>Esta rama ayuda a resolver problemas complejos donde intervienen personas, procesos y tecnología. Por ejemplo, optimiza procesos en empresas, diseña software o mejora la comunicación entre diferentes sistemas.</p>
                 </div>
 
-                <div class="perfil-skills">
-                    <h3>Habilidades</h3>
-                    <div class="skills-list">
-                        <span class="skill-tag">Python</span>
-                        <span class="skill-tag">JavaScript</span>
-                        <span class="skill-tag">HTML/CSS</span>
-                        <span class="skill-tag">Flask</span>
-                        <span class="skill-tag">MySQL</span>
-                        <span class="skill-tag">Git</span>
-                    </div>
+                <div class="topic-card">
+                    <h3>1.5 Pensamiento sistémico</h3>
+                    <p>El pensamiento sistémico permite analizar un problema viendo cómo cada parte afecta al todo. En lugar de centrarse solo en una falla, busca entender las relaciones entre los elementos para encontrar soluciones más completas y sostenibles.</p>
                 </div>
 
-                <div class="perfil-contact">
-                    <a href="{{ url_for('static', filename='cv/cv_juan.pdf') }}" class="btn btn-primary" target="_blank">
-                        📄 Ver mi CV
-                    </a>
-                    <a href="mailto:jjrendongg@gmail.com" class="btn btn-secondary">
-                        ✉️ Email
-                    </a>
+                <div class="topic-card">
+                    <h3>1.6 Modelado y diagramas</h3>
+                    <p>El modelado y los diagramas de flujo ayudan a representar visualmente cómo funciona un proceso o sistema. Son herramientas que facilitan entender y comunicar ideas antes de implementarlas en la práctica.</p>
+                </div>
+
+                <div class="topic-card">
+                    <h3>1.7 Teoría General de Sistemas</h3>
+                    <p>La TGS explica que todos los sistemas comparten principios comunes como la interdependencia y la retroalimentación. Nos enseña a ver cualquier organización o proceso como un conjunto de partes que trabajan juntas.</p>
+                </div>
+
+                <div class="topic-card">
+                    <h3>1.8 Componentes del sistema</h3>
+                    <p>Todo sistema tiene entradas, procesos y salidas. En el caso de los sistemas de información, pueden ser transaccionales, de apoyo a decisiones o estratégicos, dependiendo del tipo de datos que manejan.</p>
+                </div>
+
+                <div class="topic-card">
+                    <h3>1.9 La empresa como sistema</h3>
+                    <p>Una empresa puede verse como un sistema porque tiene diferentes áreas que deben trabajar coordinadas. Cada departamento cumple una función y depende de los demás para lograr los objetivos generales.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Perfil 2 -->
-<section class="perfil-section" id="perfil2">
-    <div class="container">
-        <div class="perfil-card">
-            <div class="perfil-image">
-                <img src="{{ url_for('static', filename='images/perfil2.jpg') }}" alt="Integrante 2" onerror="this.src='https://via.placeholder.com/400x400?text=Integrante+2'">
-            </div>
-            <div class="perfil-info">
-                <h2>Nombre Integrante 2</h2>
-                <p class="perfil-title">Estudiante de Ingeniería de Sistemas</p>
-                
-                <div class="perfil-description">
-                    <h3>Sobre mí</h3>
-                    <p>
-                        Estudiante comprometido con el aprendizaje continuo y el desarrollo de soluciones tecnológicas 
-                        innovadoras. Interesado en el análisis de datos y la arquitectura de software.
-                    </p>
-                </div>
-
-                <div class="perfil-skills">
-                    <h3>Habilidades</h3>
-                    <div class="skills-list">
-                        <span class="skill-tag">Python</span>
-                        <span class="skill-tag">Java</span>
-                        <span class="skill-tag">SQL</span>
-                        <span class="skill-tag">React</span>
-                        <span class="skill-tag">Node.js</span>
-                        <span class="skill-tag">MongoDB</span>
-                    </div>
-                </div>
-
-                <div class="perfil-contact">
-                    <a href="{{ url_for('static', filename='cv/cv_integrante2.pdf') }}" class="btn btn-primary" target="_blank">
-                        📄 Ver mi CV
-                    </a>
-                    <a href="mailto:integrante2@example.com" class="btn btn-secondary">
-                        ✉️ Email
-                    </a>
-                </div>
-            </div>
+        <!-- Conceptos Clave -->
+        <div class="content-section">
+            <h2>Conceptos Clave</h2>
+            <ul class="objectives-list">
+                <li>Comprender la ingeniería como aplicación del conocimiento científico y técnico</li>
+                <li>Identificar la diferencia entre ingeniería de sistemas y otras disciplinas</li>
+                <li>Aplicar el pensamiento sistémico para resolver problemas complejos</li>
+                <li>Utilizar modelado y diagramas de flujo como herramientas de análisis</li>
+                <li>Reconocer los componentes de un sistema y sus interrelaciones</li>
+                <li>Analizar organizaciones desde una perspectiva sistémica</li>
+            </ul>
         </div>
-    </div>
-</section>
 
-<!-- Formulario de Contacto -->
-<section class="contacto-section" id="contacto">
-    <div class="container">
-        <h2 class="section-title">Formulario de Contacto</h2>
-        <p class="section-subtitle">¿Quieres contactarnos? Déjanos tu información</p>
-        
-        <div class="form-container">
-            <form action="{{ url_for('guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombre">Nombre Completo *</label>
-                        <input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Tu nombre completo">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="empresa">Empresa/Organización *</label>
-                        <input type="text" id="empresa" name="empresa" required maxlength="100" placeholder="Nombre de tu empresa">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="correo">Correo Electrónico *</label>
-                        <input type="email" id="correo" name="correo" required maxlength="100" placeholder="tu@email.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="celular">Teléfono/Celular *</label>
-                        <input type="tel" id="celular" name="celular" required maxlength="20" placeholder="3001234567">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="mensaje">Mensaje (Opcional)</label>
-                    <textarea id="mensaje" name="mensaje" rows="5" maxlength="1000" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg">
-                    Enviar Mensaje
-                </button>
-            </form>
+        <!-- Navegación entre unidades -->
+        <div class="unidad-navigation">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Volver al inicio</a>
+            <a href="{{ url_for('unidad2') }}" class="btn btn-primary">Siguiente: Unidad 2 →</a>
         </div>
     </div>
 </section>

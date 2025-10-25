@@ -1,145 +1,120 @@
 {% extends "base.html" %}
 
-{% block title %}Perfiles - Proyecto Ingeniería{% endblock %}
+{% block title %}Unidad 3 - Evolución de las TIC{% endblock %}
 
 {% block content %}
-<!-- Header de Perfiles -->
+<!-- Header de la Unidad -->
 <section class="page-header">
     <div class="container">
-        <h1>Nuestros Perfiles</h1>
-        <p>Conoce más sobre los integrantes del equipo</p>
+        <h1>Unidad 3</h1>
+        <p>Evolución de las TIC y Sistemas Informáticos</p>
     </div>
 </section>
 
-<!-- Perfil 1 -->
-<section class="perfil-section" id="perfil1">
+<!-- Contenido de la Unidad -->
+<section class="unidad-content">
     <div class="container">
-        <div class="perfil-card">
-            <div class="perfil-image">
-                <img src="{{ url_for('static', filename='images/perfil1.jpg') }}" alt="Juan José Rendón" onerror="this.src='https://via.placeholder.com/400x400?text=Juan+José+Rendón'">
-            </div>
-            <div class="perfil-info">
-                <h2>Juan José Rendón</h2>
-                <p class="perfil-title">Estudiante de Ingeniería de Sistemas</p>
+        <!-- Introducción -->
+        <div class="content-section">
+            <h2>Introducción</h2>
+            <p>
+                Esta unidad nos lleva a través de la evolución tecnológica de las últimas décadas, 
+                desde los fundamentos de los sistemas computacionales hasta las tendencias más actuales 
+                como la inteligencia artificial y la transformación digital de las organizaciones.
+            </p>
+        </div>
+
+        <!-- Temas -->
+        <div class="content-section">
+            <h2>Temas Principales</h2>
+            <div class="topics-grid">
+                <div class="topic-card">
+                    <h3>3.1 Las TIC desde el punto de vista del ingeniero</h3>
+                    <p>Las Tecnologías de la Información y la Comunicación (TIC) son la base del trabajo del ingeniero de sistemas. Permiten conectar personas, procesos y datos, haciendo posible la transformación digital en todos los sectores.</p>
+                </div>
                 
-                <div class="perfil-description">
-                    <h3>Sobre mí</h3>
-                    <p>
-                        Estudiante apasionado por la tecnología, el desarrollo de software y la innovación. 
-                        Con experiencia en programación web, bases de datos y desarrollo de aplicaciones.
-                    </p>
+                <div class="topic-card">
+                    <h3>3.2 Sistemas computacionales</h3>
+                    <p>Un sistema computacional es un conjunto de hardware, software y usuarios que interactúan para procesar información. Todo debe funcionar en conjunto para lograr un resultado eficiente.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>3.3 Evolución del hardware y software</h3>
+                    <p>En las últimas dos décadas, los computadores se han vuelto más potentes, pequeños y rápidos. El software, por su parte, ha pasado de programas básicos a aplicaciones inteligentes y conectadas a la nube.</p>
+                </div>
+                
+                <div class="topic-card">
+                    <h3>3.4 Inteligencia Artificial</h3>
+                    <p>La inteligencia artificial busca que las máquinas aprendan y tomen decisiones por sí mismas. Hoy en día está presente en asistentes virtuales, filtros de redes sociales o sistemas de recomendación.</p>
                 </div>
 
-                <div class="perfil-skills">
-                    <h3>Habilidades</h3>
-                    <div class="skills-list">
-                        <span class="skill-tag">Python</span>
-                        <span class="skill-tag">JavaScript</span>
-                        <span class="skill-tag">HTML/CSS</span>
-                        <span class="skill-tag">Flask</span>
-                        <span class="skill-tag">MySQL</span>
-                        <span class="skill-tag">Git</span>
-                    </div>
-                </div>
-
-                <div class="perfil-contact">
-                    <a href="{{ url_for('static', filename='cv/cv_juan.pdf') }}" class="btn btn-primary" target="_blank">
-                        📄 Ver mi CV
-                    </a>
-                    <a href="mailto:jjrendongg@gmail.com" class="btn btn-secondary">
-                        ✉️ Email
-                    </a>
+                <div class="topic-card">
+                    <h3>3.5 Sistemas de información actuales</h3>
+                    <p>Actualmente, los sistemas de información son esenciales para cualquier organización. Permiten gestionar datos en tiempo real, mejorar decisiones y adaptarse a los cambios tecnológicos de manera más rápida.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Perfil 2 -->
-<section class="perfil-section" id="perfil2">
-    <div class="container">
-        <div class="perfil-card">
-            <div class="perfil-image">
-                <img src="{{ url_for('static', filename='images/perfil2.jpg') }}" alt="Integrante 2" onerror="this.src='https://via.placeholder.com/400x400?text=Integrante+2'">
-            </div>
-            <div class="perfil-info">
-                <h2>Nombre Integrante 2</h2>
-                <p class="perfil-title">Estudiante de Ingeniería de Sistemas</p>
-                
-                <div class="perfil-description">
-                    <h3>Sobre mí</h3>
-                    <p>
-                        Estudiante comprometido con el aprendizaje continuo y el desarrollo de soluciones tecnológicas 
-                        innovadoras. Interesado en el análisis de datos y la arquitectura de software.
-                    </p>
-                </div>
-
-                <div class="perfil-skills">
-                    <h3>Habilidades</h3>
-                    <div class="skills-list">
-                        <span class="skill-tag">Python</span>
-                        <span class="skill-tag">Java</span>
-                        <span class="skill-tag">SQL</span>
-                        <span class="skill-tag">React</span>
-                        <span class="skill-tag">Node.js</span>
-                        <span class="skill-tag">MongoDB</span>
+        <!-- Evolución Tecnológica -->
+        <div class="content-section">
+            <h2>Evolución Tecnológica (Últimas 2 Décadas)</h2>
+            <div class="resources-list">
+                <div class="resource-item">
+                    <span class="resource-icon">💾</span>
+                    <div class="resource-info">
+                        <h4>Hardware</h4>
+                        <p>Computadores más potentes, pequeños y rápidos. Procesadores multinúcleo, SSD, y dispositivos móviles de alto rendimiento.</p>
                     </div>
                 </div>
-
-                <div class="perfil-contact">
-                    <a href="{{ url_for('static', filename='cv/cv_integrante2.pdf') }}" class="btn btn-primary" target="_blank">
-                        📄 Ver mi CV
-                    </a>
-                    <a href="mailto:integrante2@example.com" class="btn btn-secondary">
-                        ✉️ Email
-                    </a>
+                <div class="resource-item">
+                    <span class="resource-icon">📱</span>
+                    <div class="resource-info">
+                        <h4>Software</h4>
+                        <p>De programas básicos a aplicaciones inteligentes. Cloud computing, apps móviles, y software como servicio (SaaS).</p>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">🤖</span>
+                    <div class="resource-info">
+                        <h4>Inteligencia Artificial</h4>
+                        <p>Machine Learning, Deep Learning, procesamiento de lenguaje natural y visión por computador.</p>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">☁️</span>
+                    <div class="resource-info">
+                        <h4>Cloud Computing</h4>
+                        <p>Almacenamiento y procesamiento en la nube. AWS, Azure, Google Cloud como plataformas dominantes.</p>
+                    </div>
+                </div>
+                <div class="resource-item">
+                    <span class="resource-icon">🌐</span>
+                    <div class="resource-info">
+                        <h4>Internet de las Cosas (IoT)</h4>
+                        <p>Dispositivos conectados que recopilan y comparten datos en tiempo real.</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- Formulario de Contacto -->
-<section class="contacto-section" id="contacto">
-    <div class="container">
-        <h2 class="section-title">Formulario de Contacto</h2>
-        <p class="section-subtitle">¿Quieres contactarnos? Déjanos tu información</p>
-        
-        <div class="form-container">
-            <form action="{{ url_for('guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nombre">Nombre Completo *</label>
-                        <input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Tu nombre completo">
-                    </div>
+        <!-- Aplicaciones de IA -->
+        <div class="content-section">
+            <h2>Aplicaciones Cotidianas de la IA</h2>
+            <ul class="objectives-list">
+                <li>Asistentes virtuales (Siri, Alexa, Google Assistant)</li>
+                <li>Sistemas de recomendación (Netflix, Spotify, YouTube)</li>
+                <li>Filtros y efectos en redes sociales</li>
+                <li>Reconocimiento facial y de voz</li>
+                <li>Traducción automática en tiempo real</li>
+                <li>Vehículos autónomos y asistentes de conducción</li>
+                <li>Diagnóstico médico asistido por IA</li>
+            </ul>
+        </div>
 
-                    <div class="form-group">
-                        <label for="empresa">Empresa/Organización *</label>
-                        <input type="text" id="empresa" name="empresa" required maxlength="100" placeholder="Nombre de tu empresa">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="correo">Correo Electrónico *</label>
-                        <input type="email" id="correo" name="correo" required maxlength="100" placeholder="tu@email.com">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="celular">Teléfono/Celular *</label>
-                        <input type="tel" id="celular" name="celular" required maxlength="20" placeholder="3001234567">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="mensaje">Mensaje (Opcional)</label>
-                    <textarea id="mensaje" name="mensaje" rows="5" maxlength="1000" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg">
-                    Enviar Mensaje
-                </button>
-            </form>
+        <!-- Navegación entre unidades -->
+        <div class="unidad-navigation">
+            <a href="{{ url_for('unidad2') }}" class="btn btn-secondary">← Anterior: Unidad 2</a>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Volver al inicio</a>
         </div>
     </div>
 </section>
