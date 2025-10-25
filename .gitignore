@@ -24,3 +24,11 @@ instance/
 .idea/
 *.swp
 *.swo
+
+# Archivos personales (CVs e imágenes de perfil)
+static/cv/
+static/images/
+
+# Mantener las carpetas vacías en el repo
+!static/cv/.gitkeep
+!static/images/.gitkeep
