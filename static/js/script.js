@@ -489,5 +489,280 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ========================================
+// SISTEMA DE PESTAÑAS
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            
+            // Remover active de todos
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Agregar active al seleccionado
+            this.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Si es la pestaña de gestionar, cargar contactos
+            if (tabName === 'gestionar') {
+                cargarContactos();
+            }
+        });
+    });
+});
+
+// ========================================
+// CRUD - CARGAR CONTACTOS
+// ========================================
+function cargarContactos() {
+    const container = document.getElementById('contactos-list');
+    container.innerHTML = '<p style="text-align: center; padding: 2rem;">Cargando...</p>';
+    
+    fetch('/api/contactos')
+        .then(response => response.json())
+        .then(data => {
+            if (data.contactos && data.contactos.length > 0) {
+                mostrarContactos(data.contactos);
+            } else {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>📭 No hay contactos registrados aún</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p style="color: var(--error-color);">❌ Error al cargar contactos</p>
+                </div>
+            `;
+        });
+}
+
+function mostrarContactos(contactos) {
+    const container = document.getElementById('contactos-list');
+    
+    let html = `
+        <table class="contactos-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Empresa</th>
+                    <th>Correo</th>
+                    <th>Celular</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    contactos.forEach(contacto => {
+        const fecha = new Date(contacto.fecha_registro).toLocaleDateString('es-CO');
+        html += `
+            <tr>
+                <td>${contacto.id}</td>
+                <td>${contacto.nombre}</td>
+                <td>${contacto.empresa}</td>
+                <td>${contacto.correo}</td>
+                <td>${contacto.celular}</td>
+                <td>${fecha}</td>
+                <td class="contacto-actions">
+                    <button class="btn-edit" onclick="editarContacto(${contacto.id})">✏️ Editar</button>
+                    <button class="btn-delete" onclick="eliminarContacto(${contacto.id})">🗑️ Eliminar</button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// ========================================
+// CRUD - ELIMINAR CONTACTO (MEJORADO)
+// ========================================
+function eliminarContacto(id) {
+    // Buscar el nombre del contacto para mostrarlo en la confirmación
+    fetch(`/api/contactos`)
+        .then(response => response.json())
+        .then(data => {
+            const contacto = data.contactos.find(c => c.id === id);
+            const nombre = contacto ? contacto.nombre : 'este contacto';
+            
+            if (confirm(`¿Estás seguro de eliminar a "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+                eliminarContactoConfirmado(id);
+            }
+        });
+}
+
+function eliminarContactoConfirmado(id) {
+    fetch(`/api/contactos/${id}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        showAlert('🗑️ Contacto eliminado exitosamente', 'success');
+        cargarContactos();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('❌ Error al eliminar contacto', 'error');
+    });
+}
+
+// ========================================
+// CRUD - EDITAR CONTACTO (COMPLETO)
+// ========================================
+let contactoActual = null;
+
+function editarContacto(id) {
+    // Buscar el contacto en la lista actual
+    fetch(`/api/contactos`)
+        .then(response => response.json())
+        .then(data => {
+            const contacto = data.contactos.find(c => c.id === id);
+            if (contacto) {
+                mostrarModalEdicion(contacto);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al cargar el contacto', 'error');
+        });
+}
+
+function mostrarModalEdicion(contacto) {
+    contactoActual = contacto;
+    
+    // Llenar el formulario con los datos actuales
+    document.getElementById('edit_id').value = contacto.id;
+    document.getElementById('edit_nombre').value = contacto.nombre;
+    document.getElementById('edit_empresa').value = contacto.empresa;
+    document.getElementById('edit_correo').value = contacto.correo;
+    document.getElementById('edit_celular').value = contacto.celular;
+    document.getElementById('edit_mensaje').value = contacto.mensaje || '';
+    
+    // Mostrar el modal
+    const modal = document.getElementById('editModal');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevenir scroll del fondo
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('editModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = ''; // Restaurar scroll
+    contactoActual = null;
+}
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('editModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModal();
+            }
+        });
+    }
+});
+
+// Cerrar modal con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModal();
+    }
+});
+
+// ========================================
+// GUARDAR CAMBIOS DEL CONTACTO
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    const editForm = document.getElementById('editForm');
+    
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('edit_id').value;
+            const datosActualizados = {
+                nombre: document.getElementById('edit_nombre').value,
+                empresa: document.getElementById('edit_empresa').value,
+                correo: document.getElementById('edit_correo').value,
+                celular: document.getElementById('edit_celular').value,
+                mensaje: document.getElementById('edit_mensaje').value
+            };
+            
+            // Mostrar indicador de carga
+            const submitBtn = editForm.querySelector('button[type="submit"]');
+            const textoOriginal = submitBtn.textContent;
+            submitBtn.textContent = 'Guardando...';
+            submitBtn.disabled = true;
+            
+            // Enviar actualización al servidor
+            fetch(`/api/contactos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datosActualizados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert('✅ Contacto actualizado exitosamente', 'success');
+                cerrarModal();
+                cargarContactos();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('❌ Error al actualizar el contacto', 'error');
+            })
+            .finally(() => {
+                submitBtn.textContent = textoOriginal;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+});
+
+// ========================================
+// VALIDACIÓN EN TIEMPO REAL EN MODAL
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    const editCorreo = document.getElementById('edit_correo');
+    const editCelular = document.getElementById('edit_celular');
+    
+    if (editCorreo) {
+        editCorreo.addEventListener('blur', function() {
+            const email = this.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.style.borderColor = '#10b981';
+            }
+        });
+    }
+    
+    if (editCelular) {
+        editCelular.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9+\s()-]/g, '');
+        });
+    }
+});
 
 console.log('✅ JavaScript cargado correctamente');

@@ -69,6 +69,74 @@ def guardar_contacto():
         print(f"Error al guardar contacto: {e}")
         flash('Error al guardar el contacto', 'error')
         return redirect(url_for('perfiles'))
+    
+# Ruta para obtener todos los contactos (API JSON)
+@app.route('/api/contactos', methods=['GET'])
+def obtener_contactos():
+    try:
+        connection = get_db_connection()
+        if connection is None:
+            return {"error": "Error de conexión"}, 500
+        
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM contactos ORDER BY fecha_registro DESC")
+            contactos = cursor.fetchall()
+        
+        connection.close()
+        return {"contactos": contactos}, 200
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}, 500
+
+# Ruta para actualizar un contacto
+@app.route('/api/contactos/<int:id>', methods=['PUT'])
+def actualizar_contacto(id):
+    try:
+        data = request.get_json()
+        connection = get_db_connection()
+        
+        if connection is None:
+            return {"error": "Error de conexión"}, 500
+        
+        with connection.cursor() as cursor:
+            sql = """UPDATE contactos 
+                     SET nombre=%s, empresa=%s, correo=%s, celular=%s, mensaje=%s 
+                     WHERE id=%s"""
+            cursor.execute(sql, (
+                data['nombre'], 
+                data['empresa'], 
+                data['correo'], 
+                data['celular'], 
+                data['mensaje'], 
+                id
+            ))
+            connection.commit()
+        
+        connection.close()
+        return {"mensaje": "Contacto actualizado"}, 200
+        
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+# Ruta para eliminar un contacto
+@app.route('/api/contactos/<int:id>', methods=['DELETE'])
+def eliminar_contacto(id):
+    try:
+        connection = get_db_connection()
+        
+        if connection is None:
+            return {"error": "Error de conexión"}, 500
+        
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM contactos WHERE id=%s", (id,))
+            connection.commit()
+        
+        connection.close()
+        return {"mensaje": "Contacto eliminado"}, 200
+        
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 # Manejador de errores 404
 @app.errorhandler(404)

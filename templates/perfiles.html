@@ -20,13 +20,13 @@
             </div>
             <div class="perfil-info">
                 <h2>Juan José Rendón Muñoz</h2>
-                <p class="perfil-title">Desarrollador Back-End Junior | Estudiante de Tecnología en Desarrollo de Software e Ingeniería de Sistemas</p>
+                <p class="perfil-title">Estudiante de Ingeniería de Sistemas</p>
                 
                 <div class="perfil-description">
                     <h3>Sobre mí</h3>
                     <p>
                         Estudiante de Tecnología en Desarrollo de Software en la Universidad Católica Luis Amigó, 
-                        actualmente cursando 6to semestre. Con conocimientos en lenguajes de programación, estándares 
+                        actualmente cursando 5to semestre. Con conocimientos en lenguajes de programación, estándares 
                         de calidad y frameworks, especializado en el desarrollo de aplicativos para web y móviles.
                     </p>
                 </div>
@@ -40,7 +40,7 @@
                         <span class="skill-tag">HTML/CSS</span>
                         <span class="skill-tag">Flask</span>
                         <span class="skill-tag">MySQL</span>
-                        <span class="skill-tag">Git/GitHub</span>
+                        <span class="skill-tag">Git</span>
                         <span class="skill-tag">Scrum</span>
                         <span class="skill-tag">Jira</span>
                     </div>
@@ -63,9 +63,6 @@
                     </a>
                     <a href="mailto:juanrojo2004@gmail.com" class="btn btn-secondary">
                         ✉️ Email
-                    </a>
-                    <a href="https://github.com/JJrendon29" class="btn btn-secondary" target="_blank">
-                        💻 GitHub
                     </a>
                 </div>
             </div>
@@ -152,46 +149,136 @@
     </div>
 </section>
 
-<!-- Formulario de Contacto -->
+<!-- Formulario de Contacto con Pestañas -->
 <section class="contacto-section" id="contacto">
     <div class="container">
-        <h2 class="section-title">Formulario de Contacto</h2>
-        <p class="section-subtitle">¿Quieres contactarnos? Déjanos tu información</p>
+        <h2 class="section-title">Sistema de Contactos</h2>
+        <p class="section-subtitle">Gestiona los contactos registrados</p>
         
-        <div class="form-container">
-            <form action="{{ url_for('guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
+        <!-- Pestañas de navegación -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="insertar">
+                    ➕ Nuevo Contacto
+                </button>
+                <button class="tab-btn" data-tab="gestionar">
+                    📋 Gestionar Contactos
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tabs-content">
+            <!-- Pestaña 1: Insertar Contacto -->
+            <div id="insertar-tab" class="tab-content active">
+                <div class="form-container">
+                    <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--text-primary);">
+                        Agregar Nuevo Contacto
+                    </h3>
+                    <form action="{{ url_for('guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nombre">Nombre Completo *</label>
+                                <input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Tu nombre completo">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="empresa">Empresa/Organización *</label>
+                                <input type="text" id="empresa" name="empresa" required maxlength="100" placeholder="Nombre de tu empresa">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="correo">Correo Electrónico *</label>
+                                <input type="email" id="correo" name="correo" required maxlength="100" placeholder="tu@email.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="celular">Teléfono/Celular *</label>
+                                <input type="tel" id="celular" name="celular" required maxlength="20" placeholder="3001234567">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje (Opcional)</label>
+                            <textarea id="mensaje" name="mensaje" rows="5" maxlength="1000" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Enviar Mensaje
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pestaña 2: Gestionar Contactos -->
+            <div id="gestionar-tab" class="tab-content">
+                <div class="crud-container">
+                    <div class="crud-header">
+                        <h3>Lista de Contactos</h3>
+                        <button id="refreshBtn" class="btn btn-secondary btn-sm">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                    
+                    <div id="contactos-list" class="contactos-table-container">
+                        <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                            Cargando contactos...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Editar Contacto -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Contacto</h3>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="editForm" class="contacto-form">
+                <input type="hidden" id="edit_id">
+
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="nombre">Nombre Completo *</label>
-                        <input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Tu nombre completo">
+                        <label for="edit_nombre">Nombre Completo *</label>
+                        <input type="text" id="edit_nombre" required maxlength="100">
                     </div>
 
                     <div class="form-group">
-                        <label for="empresa">Empresa/Organización *</label>
-                        <input type="text" id="empresa" name="empresa" required maxlength="100" placeholder="Nombre de tu empresa">
+                        <label for="edit_empresa">Empresa/Organización *</label>
+                        <input type="text" id="edit_empresa" required maxlength="100">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="correo">Correo Electrónico *</label>
-                        <input type="email" id="correo" name="correo" required maxlength="100" placeholder="tu@email.com">
+                        <label for="edit_correo">Correo Electrónico *</label>
+                        <input type="email" id="edit_correo" required maxlength="100">
                     </div>
 
                     <div class="form-group">
-                        <label for="celular">Teléfono/Celular *</label>
-                        <input type="tel" id="celular" name="celular" required maxlength="20" placeholder="3001234567">
+                        <label for="edit_celular">Teléfono/Celular *</label>
+                        <input type="tel" id="edit_celular" required maxlength="20">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="mensaje">Mensaje (Opcional)</label>
-                    <textarea id="mensaje" name="mensaje" rows="5" maxlength="1000" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
+                    <label for="edit_mensaje">Mensaje (Opcional)</label>
+                    <textarea id="edit_mensaje" rows="4" maxlength="1000"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-lg">
-                    Enviar Mensaje
-                </button>
+                <div class="form-row" style="justify-content: flex-end; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        💾 Guardar Cambios
+                    </button>
+                </div>
             </form>
         </div>
     </div>
