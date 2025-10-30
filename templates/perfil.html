@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ perfil.nombre }} - Perfil{% endblock %}
+
+{% block content %}
+<!-- Botón Volver -->
+<div class="back-button-container">
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="btn-back">
+            ← Volver al equipo
+        </a>
+    </div>
+</div>
+
+<!-- Perfil Individual -->
+<section class="perfil-individual-section">
+    <div class="container">
+        <div class="perfil-individual-card">
+            <!-- Columna Izquierda: Imagen y Links -->
+            <div class="perfil-sidebar">
+                <div class="perfil-image-large">
+                    <img src="{{ url_for('static', filename=perfil.ruta_imagen) }}" 
+                         alt="{{ perfil.nombre }}"
+                         onerror="this.src='https://via.placeholder.com/400x400?text={{ perfil.nombre[:15] }}'">
+                </div>
+                
+                <div class="perfil-links">
+                    {% if perfil.ruta_cv %}
+                    <a href="{{ url_for('static', filename=perfil.ruta_cv) }}" 
+                       class="btn btn-primary btn-block" target="_blank">
+                        📄 Descargar CV
+                    </a>
+                    {% endif %}
+                    
+                    {% if perfil.email %}
+                    <a href="mailto:{{ perfil.email }}" class="btn btn-secondary btn-block">
+                        ✉️ {{ perfil.email }}
+                    </a>
+                    {% endif %}
+                    
+                    {% if perfil.github %}
+                    <a href="{{ perfil.github }}" class="btn btn-secondary btn-block" target="_blank">
+                        💻 GitHub
+                    </a>
+                    {% endif %}
+                    
+                    {% if perfil.linkedin %}
+                    <a href="{{ perfil.linkedin }}" class="btn btn-secondary btn-block" target="_blank">
+                        💼 LinkedIn
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Columna Derecha: Información -->
+            <div class="perfil-content">
+                <!-- Header -->
+                <div class="perfil-header">
+                    <h1 class="perfil-nombre">{{ perfil.nombre }}</h1>
+                    <p class="perfil-titulo">{{ perfil.titulo }}</p>
+                </div>
+                
+                <!-- Sobre mí -->
+                {% if perfil.descripcion %}
+                <div class="perfil-section">
+                    <h2 class="section-title-small">Sobre mí</h2>
+                    <p class="perfil-descripcion">{{ perfil.descripcion }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Habilidades -->
+                {% if perfil.habilidades %}
+                <div class="perfil-section">
+                    <h2 class="section-title-small">Habilidades</h2>
+                    <div class="habilidades-grid">
+                        {% for habilidad in perfil.habilidades %}
+                        <div class="habilidad-item">
+                            <span class="habilidad-nombre">{{ habilidad.nombre }}</span>
+                            {% if habilidad.nivel %}
+                            <span class="habilidad-nivel nivel-{{ habilidad.nivel|lower }}">
+                                {{ habilidad.nivel }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Formación -->
+                {% if perfil.formacion %}
+                <div class="perfil-section">
+                    <h2 class="section-title-small">Formación Académica</h2>
+                    <div class="formacion-list">
+                        {% for item in perfil.formacion %}
+                        <div class="formacion-item">
+                            <h3 class="formacion-titulo">{{ item.titulo }}</h3>
+                            <p class="formacion-institucion">{{ item.institucion }}</p>
+                            <p class="formacion-año">{{ item.año }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Idiomas -->
+                {% if perfil.idiomas %}
+                <div class="perfil-section">
+                    <h2 class="section-title-small">Idiomas</h2>
+                    <div class="idiomas-list">
+                        {% for idioma in perfil.idiomas %}
+                        <div class="idioma-item">
+                            <span class="idioma-nombre">{{ idioma.idioma }}</span>
+                            <span class="idioma-nivel">{{ idioma.nivel }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
