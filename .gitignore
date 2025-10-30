@@ -26,8 +26,7 @@ instance/
 *.swo
 
 # Archivos personales (CVs e imágenes de perfil)
-static/cv/
-static/images/
+static/usuarios/
 
 # Mantener las carpetas vacías en el repo
 !static/cv/.gitkeep

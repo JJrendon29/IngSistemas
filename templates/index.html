@@ -1,56 +1,75 @@
 {% extends "base.html" %}
 
-{% block title %}Inicio - Proyecto Ingeniería de Sistemas{% endblock %}
+{% block title %}Nuestro Equipo - Proyecto Ingeniería{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
     <div class="hero-content">
-        <h1 class="hero-title">Proyecto Académico</h1>
-        <h2 class="hero-subtitle">Ingeniería de Sistemas</h2>
+        <h1 class="hero-title">👥 Nuestro Equipo</h1>
+        <h2 class="hero-subtitle">Conoce a los Profesionales</h2>
         <p class="hero-description">
-            Presentación de los perfiles profesionales de nuestro equipo
+            Explora los perfiles de nuestro equipo de desarrollo
         </p>
-        <div class="hero-buttons">
-            <a href="{{ url_for('perfiles') }}" class="btn btn-primary">Ver Perfiles</a>
-            <a href="{{ url_for('perfiles') }}#contacto" class="btn btn-secondary">Contactar</a>
-        </div>
     </div>
 </section>
 
-<!-- Sección de Equipo -->
-<section class="team-section">
+<!-- Grid de Perfiles (Calendario) -->
+<section class="team-grid-section">
     <div class="container">
-        <h2 class="section-title">Nuestro Equipo</h2>
-        <p class="section-subtitle">Conoce a los integrantes de este proyecto</p>
-        <div class="team-grid">
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="{{ url_for('static', filename='images/perfil1.jpg') }}" alt="Juan José Rendón Muñoz" onerror="this.src='https://via.placeholder.com/300x300?text=Juan+José'">
-                </div>
-                <h3>Juan José Rendón Muñoz</h3>
-                <p class="member-role">Desarrollador Back-End Junior | Estudiante de Tecnología en Desarrollo de Software e Ingeniería de Sistemas </p>
-                <a href="{{ url_for('perfiles') }}#perfil1" class="btn btn-sm">Ver perfil</a>
+        {% if perfiles %}
+            <div class="perfiles-grid">
+                {% for perfil in perfiles %}
+                <a href="{{ url_for('ver_perfil', slug=perfil.slug) }}" class="perfil-card-link">
+                    <div class="perfil-card-grid">
+                        <!-- Imagen del Perfil -->
+                        <div class="perfil-card-image">
+                            <img src="{{ url_for('static', filename=perfil.ruta_imagen) }}" 
+                                 alt="{{ perfil.nombre }}"
+                                 onerror="this.src='https://via.placeholder.com/300x300?text={{ perfil.nombre[:10] }}'">
+                        </div>
+                        
+                        <!-- Información del Perfil -->
+                        <div class="perfil-card-info">
+                            <h3 class="perfil-card-nombre">{{ perfil.nombre }}</h3>
+                            <p class="perfil-card-titulo">{{ perfil.titulo }}</p>
+                            
+                            <!-- Habilidades destacadas (primeras 3) -->
+                            <div class="perfil-card-skills">
+                                {% for habilidad in perfil.habilidades[:3] %}
+                                <span class="skill-badge">{{ habilidad.nombre }}</span>
+                                {% endfor %}
+                                {% if perfil.habilidades|length > 3 %}
+                                <span class="skill-badge-more">+{{ perfil.habilidades|length - 3 }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Botón Ver Perfil -->
+                            <div class="perfil-card-action">
+                                <span class="btn-ver-perfil">Ver Perfil →</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
             </div>
-
-            <div class="team-member">
-                <div class="member-image">
-                    <img src="{{ url_for('static', filename='images/perfil2.jpg') }}" alt="Valentina Caro Muñoz" onerror="this.src='https://via.placeholder.com/300x300?text=Valentina+Caro'">
-                </div>
-                <h3>Valentina Caro Muñoz</h3>
-                <p class="member-role">Desarrolladora Web Full Stack</p>
-                <a href="{{ url_for('perfiles') }}#perfil2" class="btn btn-sm">Ver perfil</a>
+        {% else %}
+            <!-- Mensaje cuando no hay perfiles -->
+            <div class="empty-state">
+                <div class="empty-state-icon">👥</div>
+                <h3>No hay perfiles disponibles</h3>
+                <p>Agrega tu primer perfil en la carpeta <code>static/usuarios/</code></p>
             </div>
-        </div>
+        {% endif %}
     </div>
 </section>
 
-<!-- Sección de Contacto -->
+<!-- Call to Action -->
 <section class="cta-section">
     <div class="container">
         <h2>¿Quieres contactarnos?</h2>
         <p>Deja tu información y nos pondremos en contacto contigo</p>
-        <a href="{{ url_for('perfiles') }}#contacto" class="btn btn-primary btn-lg">Contactar</a>
+        <a href="{{ url_for('contacto') }}" class="btn btn-primary btn-lg">Ir a Contacto</a>
     </div>
 </section>
 {% endblock %}

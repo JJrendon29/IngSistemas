@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from datetime import datetime
 from config import Config
 from db_connection import get_db_connection
+from utils import obtener_todos_perfiles, obtener_perfil_por_slug
 
 # Crear la aplicación Flask
 app = Flask(__name__)
@@ -9,17 +10,39 @@ app = Flask(__name__)
 # Cargar configuración desde config.py
 app.config.from_object(Config)
 
-# Ruta principal
+# ========================================
+# RUTAS DE PERFILES
+# ========================================
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Página principal con grid/calendario de usuarios"""
+    perfiles = obtener_todos_perfiles()
+    return render_template('index.html', perfiles=perfiles)
 
-# Ruta de perfiles
-@app.route('/perfiles')
-def perfiles():
-    return render_template('perfiles.html')
+@app.route('/perfil/<slug>')
+def ver_perfil(slug):
+    """Ver perfil individual de un usuario"""
+    perfil = obtener_perfil_por_slug(slug)
+    
+    if perfil is None:
+        abort(404)
+    
+    return render_template('perfil.html', perfil=perfil)
 
-# Ruta para procesar el formulario de contacto
+# ========================================
+# RUTA DE CONTACTO
+# ========================================
+
+@app.route('/contacto')
+def contacto():
+    """Página de contacto"""
+    return render_template('contacto.html')
+
+# ========================================
+# RUTAS DE API - CONTACTOS
+# ========================================
+
 @app.route('/guardar_contacto', methods=['POST'])
 def guardar_contacto():
     try:
@@ -33,13 +56,13 @@ def guardar_contacto():
         # Validar que los campos requeridos no estén vacíos
         if not all([nombre, empresa, correo, celular]):
             flash('Por favor completa todos los campos obligatorios', 'error')
-            return redirect(url_for('perfiles'))
+            return redirect(url_for('contacto'))
         
-        # Conectar a la base de datos usando db_connection.py
+        # Conectar a la base de datos
         connection = get_db_connection()
         if connection is None:
             flash('Error al conectar con la base de datos', 'error')
-            return redirect(url_for('perfiles'))
+            return redirect(url_for('contacto'))
         
         # Insertar el contacto en la base de datos
         with connection.cursor() as cursor:
@@ -50,16 +73,16 @@ def guardar_contacto():
         
         connection.close()
         flash('¡Contacto guardado exitosamente!', 'success')
-        return redirect(url_for('perfiles'))
+        return redirect(url_for('contacto'))
         
     except Exception as e:
         print(f"Error al guardar contacto: {e}")
         flash('Error al guardar el contacto', 'error')
-        return redirect(url_for('perfiles'))
-    
-# Ruta para obtener todos los contactos (API JSON)
+        return redirect(url_for('contacto'))
+
 @app.route('/api/contactos', methods=['GET'])
 def obtener_contactos():
+    """API para obtener todos los contactos"""
     try:
         connection = get_db_connection()
         if connection is None:
@@ -76,9 +99,9 @@ def obtener_contactos():
         print(f"Error: {e}")
         return {"error": str(e)}, 500
 
-# Ruta para actualizar un contacto
 @app.route('/api/contactos/<int:id>', methods=['PUT'])
 def actualizar_contacto(id):
+    """API para actualizar un contacto"""
     try:
         data = request.get_json()
         connection = get_db_connection()
@@ -106,9 +129,9 @@ def actualizar_contacto(id):
     except Exception as e:
         return {"error": str(e)}, 500
 
-# Ruta para eliminar un contacto
 @app.route('/api/contactos/<int:id>', methods=['DELETE'])
 def eliminar_contacto(id):
+    """API para eliminar un contacto"""
     try:
         connection = get_db_connection()
         
@@ -125,15 +148,21 @@ def eliminar_contacto(id):
     except Exception as e:
         return {"error": str(e)}, 500
 
-# Manejador de errores 404
+# ========================================
+# MANEJADORES DE ERRORES
+# ========================================
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
-# Manejador de errores 500
 @app.errorhandler(500)
 def internal_error(e):
     return "Error interno del servidor", 500
+
+# ========================================
+# EJECUTAR APLICACIÓN
+# ========================================
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

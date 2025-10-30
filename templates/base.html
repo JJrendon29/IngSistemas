@@ -12,7 +12,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="{{ url_for('index') }}">Proyecto ING</a>
+                <a href="{{ url_for('index') }}">👥 Equipo</a>
             </div>
             
             <!-- Menú de hamburguesa para móvil -->
@@ -27,17 +27,8 @@
                     <a href="{{ url_for('index') }}" class="nav-link">Inicio</a>
                 </li>
                 
-                <!-- Menú de Perfiles -->
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle">Perfiles</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('perfiles') }}#perfil1">Juan José Rendón Muñoz</a></li>
-                        <li><a href="{{ url_for('perfiles') }}#perfil2">Valentina Caro Muñoz</a></li>
-                    </ul>
-                </li>
-                
                 <li class="nav-item">
-                    <a href="{{ url_for('perfiles') }}" class="nav-link">Contacto</a>
+                    <a href="{{ url_for('contacto') }}" class="nav-link">Contacto</a>
                 </li>
             </ul>
         </div>
