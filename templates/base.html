@@ -23,14 +23,8 @@
             </button>
             
             <ul class="nav-menu" id="navMenu">
-                <!-- Menú de Unidades -->
-                <li class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle">Unidades</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{{ url_for('unidad1') }}">Unidad 1</a></li>
-                        <li><a href="{{ url_for('unidad2') }}">Unidad 2</a></li>
-                        <li><a href="{{ url_for('unidad3') }}">Unidad 3</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a href="{{ url_for('index') }}" class="nav-link">Inicio</a>
                 </li>
                 
                 <!-- Menú de Perfiles -->

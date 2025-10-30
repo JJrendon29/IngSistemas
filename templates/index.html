@@ -9,49 +9,11 @@
         <h1 class="hero-title">Proyecto Académico</h1>
         <h2 class="hero-subtitle">Ingeniería de Sistemas</h2>
         <p class="hero-description">
-            Presentación de las 3 unidades del semestre junto con los perfiles profesionales de nuestro equipo
+            Presentación de los perfiles profesionales de nuestro equipo
         </p>
         <div class="hero-buttons">
             <a href="{{ url_for('perfiles') }}" class="btn btn-primary">Ver Perfiles</a>
-            <a href="#unidades" class="btn btn-secondary">Ver Unidades</a>
-        </div>
-    </div>
-</section>
-
-<!-- Sección de Unidades -->
-<section class="unidades-section" id="unidades">
-    <div class="container">
-        <h2 class="section-title">Unidades del Semestre</h2>
-        <div class="unidades-grid">
-            <!-- Unidad 1 -->
-            <div class="unidad-card">
-                <div class="unidad-number">01</div>
-                <h3 class="unidad-title">Unidad 1</h3>
-                <p class="unidad-description">
-                    Fundamentos y el Pensamiento Sistémico
-                </p>
-                <a href="{{ url_for('unidad1') }}" class="btn btn-outline">Ver más</a>
-            </div>
-
-            <!-- Unidad 2 -->
-            <div class="unidad-card">
-                <div class="unidad-number">02</div>
-                <h3 class="unidad-title">Unidad 2</h3>
-                <p class="unidad-description">
-                    El Ingeniero de Sistemas en Contexto Empresarial y Social
-                </p>
-                <a href="{{ url_for('unidad2') }}" class="btn btn-outline">Ver más</a>
-            </div>
-
-            <!-- Unidad 3 -->
-            <div class="unidad-card">
-                <div class="unidad-number">03</div>
-                <h3 class="unidad-title">Unidad 3</h3>
-                <p class="unidad-description">
-                    Evolución de las TIC y Sistemas Informáticos
-                </p>
-                <a href="{{ url_for('unidad3') }}" class="btn btn-outline">Ver más</a>
-            </div>
+            <a href="{{ url_for('perfiles') }}#contacto" class="btn btn-secondary">Contactar</a>
         </div>
     </div>
 </section>

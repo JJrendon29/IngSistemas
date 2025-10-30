@@ -14,19 +14,6 @@ app.config.from_object(Config)
 def index():
     return render_template('index.html')
 
-# Rutas de las unidades
-@app.route('/unidad1')
-def unidad1():
-    return render_template('unidad1.html')
-
-@app.route('/unidad2')
-def unidad2():
-    return render_template('unidad2.html')
-
-@app.route('/unidad3')
-def unidad3():
-    return render_template('unidad3.html')
-
 # Ruta de perfiles
 @app.route('/perfiles')
 def perfiles():
