@@ -24,9 +24,19 @@
                     <div class="perfil-card-grid">
                         <!-- Imagen del Perfil -->
                         <div class="perfil-card-image">
-                            <img src="{{ url_for('static', filename=perfil.ruta_imagen) }}" 
-                                 alt="{{ perfil.nombre }}"
-                                 onerror="this.src='https://via.placeholder.com/300x300?text={{ perfil.nombre[:10] }}'">
+                            {% set imagen_jpg = 'usuarios/' ~ perfil.slug ~ '/perfil.jpg' %}
+                            {% set imagen_png = 'usuarios/' ~ perfil.slug ~ '/perfil.png' %}
+                            
+                            {% if existe_archivo(imagen_jpg) %}
+                                <img src="{{ url_for('static', filename=imagen_jpg) }}" 
+                                     alt="{{ perfil.nombre }}">
+                            {% elif existe_archivo(imagen_png) %}
+                                <img src="{{ url_for('static', filename=imagen_png) }}" 
+                                     alt="{{ perfil.nombre }}">
+                            {% else %}
+                                <img src="https://via.placeholder.com/300x300?text={{ perfil.nombre[:10] }}" 
+                                     alt="{{ perfil.nombre }}">
+                            {% endif %}
                         </div>
                         
                         <!-- Información del Perfil -->

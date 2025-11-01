@@ -19,14 +19,26 @@
             <!-- Columna Izquierda: Imagen y Links -->
             <div class="perfil-sidebar">
                 <div class="perfil-image-large">
-                    <img src="{{ url_for('static', filename=perfil.ruta_imagen) }}" 
-                         alt="{{ perfil.nombre }}"
-                         onerror="this.src='https://via.placeholder.com/400x400?text={{ perfil.nombre[:15] }}'">
+                    {% set imagen_jpg = 'usuarios/' ~ perfil.slug ~ '/perfil.jpg' %}
+                    {% set imagen_png = 'usuarios/' ~ perfil.slug ~ '/perfil.png' %}
+                    
+                    {% if existe_archivo(imagen_jpg) %}
+                        <img src="{{ url_for('static', filename=imagen_jpg) }}" 
+                             alt="{{ perfil.nombre }}">
+                    {% elif existe_archivo(imagen_png) %}
+                        <img src="{{ url_for('static', filename=imagen_png) }}" 
+                             alt="{{ perfil.nombre }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/400x400?text={{ perfil.nombre[:15] }}" 
+                             alt="{{ perfil.nombre }}">
+                    {% endif %}
                 </div>
                 
                 <div class="perfil-links">
-                    {% if perfil.ruta_cv %}
-                    <a href="{{ url_for('static', filename=perfil.ruta_cv) }}" 
+                    <!-- Verificar si existe CV -->
+                    {% set cv_path = 'usuarios/' ~ perfil.slug ~ '/cv.pdf' %}
+                    {% if existe_archivo(cv_path) %}
+                    <a href="{{ url_for('static', filename=cv_path) }}" 
                        class="btn btn-primary btn-block" target="_blank">
                         📄 Descargar CV
                     </a>

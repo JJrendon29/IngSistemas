@@ -3,12 +3,99 @@ from datetime import datetime
 from config import Config
 from db_connection import get_db_connection
 from utils import obtener_todos_perfiles, obtener_perfil_por_slug
+import os  # ← AGREGAR ESTA IMPORTACIÓN
 
 # Crear la aplicación Flask
 app = Flask(__name__)
 
 # Cargar configuración desde config.py
 app.config.from_object(Config)
+
+# ========================================
+# FUNCIÓN AUXILIAR PARA VERIFICAR ARCHIVOS
+# ========================================
+
+@app.context_processor
+def utility_processor():
+    """Función para verificar si existe un archivo en static"""
+    def existe_archivo(ruta_relativa):
+        ruta_completa = os.path.join(app.static_folder, ruta_relativa)
+        return os.path.exists(ruta_completa)
+    return dict(existe_archivo=existe_archivo)
+
+# ========================================
+# FUNCIONES PARA MANEJO DE ARCHIVOS
+# ========================================
+
+def guardar_archivos_perfil(perfil_slug, foto=None, cv=None):
+    """
+    Guarda los archivos de perfil con nombres estandarizados
+    
+    Args:
+        perfil_slug: Slug del perfil (ej: 'juan-jose', 'carolina', 'valentina')
+        foto: Archivo de imagen (FileStorage de Flask)
+        cv: Archivo PDF del CV (FileStorage de Flask)
+    
+    Returns:
+        dict: {'foto': bool, 'cv': bool} indicando qué se guardó
+    """
+    # Crear directorio del usuario
+    usuario_dir = os.path.join(app.static_folder, 'usuarios', perfil_slug)
+    os.makedirs(usuario_dir, exist_ok=True)
+    
+    resultado = {'foto': False, 'cv': False}
+    
+    # Guardar foto como perfil.jpg o perfil.png
+    if foto and foto.filename:
+        extension = foto.filename.rsplit('.', 1)[1].lower()
+        if extension in ['png', 'jpg', 'jpeg']:
+            foto_path = os.path.join(usuario_dir, f'perfil.{extension}')
+            foto.save(foto_path)
+            resultado['foto'] = True
+    
+    # Guardar CV como cv.pdf
+    if cv and cv.filename:
+        if cv.filename.lower().endswith('.pdf'):
+            cv_path = os.path.join(usuario_dir, 'cv.pdf')
+            cv.save(cv_path)
+            resultado['cv'] = True
+    
+    return resultado
+
+def tiene_cv(perfil_slug):
+    """Verifica si existe el CV de un perfil"""
+    cv_path = os.path.join(app.static_folder, 'usuarios', perfil_slug, 'cv.pdf')
+    return os.path.exists(cv_path)
+
+def obtener_ruta_imagen_perfil(perfil_slug):
+    """
+    Obtiene la ruta de la imagen de perfil (busca .jpg o .png)
+    Retorna la ruta relativa o None si no existe
+    """
+    usuario_dir = os.path.join(app.static_folder, 'usuarios', perfil_slug)
+    
+    # Buscar perfil.jpg
+    if os.path.exists(os.path.join(usuario_dir, 'perfil.jpg')):
+        return f'usuarios/{perfil_slug}/perfil.jpg'
+    
+    # Buscar perfil.png
+    if os.path.exists(os.path.join(usuario_dir, 'perfil.png')):
+        return f'usuarios/{perfil_slug}/perfil.png'
+    
+    # Buscar perfil.jpeg
+    if os.path.exists(os.path.join(usuario_dir, 'perfil.jpeg')):
+        return f'usuarios/{perfil_slug}/perfil.jpeg'
+    
+    return None
+
+def eliminar_archivos_perfil(perfil_slug):
+    """Elimina todos los archivos de un perfil"""
+    import shutil
+    usuario_dir = os.path.join(app.static_folder, 'usuarios', perfil_slug)
+    if os.path.exists(usuario_dir):
+        shutil.rmtree(usuario_dir)
+        return True
+    return False
 
 # ========================================
 # RUTAS DE PERFILES
@@ -29,6 +116,34 @@ def ver_perfil(slug):
         abort(404)
     
     return render_template('perfil.html', perfil=perfil)
+
+# ========================================
+# RUTA PARA SUBIR ARCHIVOS DE PERFIL
+# ========================================
+
+@app.route('/perfil/<slug>/subir', methods=['POST'])
+def subir_archivos_perfil(slug):
+    """Subir o actualizar foto y CV de un perfil"""
+    try:
+        foto = request.files.get('foto')
+        cv = request.files.get('cv')
+        
+        resultado = guardar_archivos_perfil(slug, foto, cv)
+        
+        if resultado['foto']:
+            flash('Foto de perfil actualizada correctamente', 'success')
+        if resultado['cv']:
+            flash('CV actualizado correctamente', 'success')
+        
+        if not resultado['foto'] and not resultado['cv']:
+            flash('No se subieron archivos', 'warning')
+        
+        return redirect(url_for('ver_perfil', slug=slug))
+        
+    except Exception as e:
+        print(f"Error al subir archivos: {e}")
+        flash('Error al subir los archivos', 'error')
+        return redirect(url_for('ver_perfil', slug=slug))
 
 # ========================================
 # RUTA DE CONTACTO
