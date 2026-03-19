@@ -21,6 +21,11 @@
 
                     <div class="form-row">
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('nombre', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['nombre']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="nombre">Nombre Completo *</label>
                             <input type="text" id="nombre" name="nombre" required
                                    value="{{ perfil.nombre if perfil else '' }}"
@@ -29,6 +34,11 @@
 
                         <!-- TÍTULO: select del catálogo + campo "Otro" -->
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('titulo', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['titulo']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="titulo_catalogo">Título / Perfil Profesional</label>
                             <select id="titulo_catalogo" name="titulo_catalogo"
                                     onchange="toggleTituloOtro(this.value)">
@@ -58,6 +68,11 @@
                     </div>
 
                     <div class="form-group">
+                        {% if revisiones and revisiones.get('descripcion', {}).get('estado') == 'rechazado' %}
+                        <div class="campo-rechazado-aviso">
+                            El administrador indicó: {{ revisiones['descripcion']['comentario'] or 'Corrige este campo.' }}
+                        </div>
+                        {% endif %}
                         <label for="descripcion">Sobre mí</label>
                         <textarea id="descripcion" name="descripcion" rows="4"
                                   placeholder="Cuéntanos sobre ti, tu experiencia y tus intereses...">{{ perfil.descripcion if perfil else '' }}</textarea>
@@ -69,6 +84,11 @@
                     <legend>Foto y CV</legend>
                     <div class="form-row">
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('foto', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['foto']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="foto">Foto de Perfil (JPG/PNG)</label>
                             <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png">
                             {% if perfil and perfil.foto_url %}
@@ -76,6 +96,11 @@
                             {% endif %}
                         </div>
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('cv', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['cv']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="cv">Hoja de Vida (PDF)</label>
                             <input type="file" id="cv" name="cv" accept=".pdf">
                             {% if perfil and perfil.cv_url %}
@@ -90,12 +115,22 @@
                     <legend>Contacto y Redes</legend>
                     <div class="form-row">
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('email_contacto', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['email_contacto']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="email_contacto">Email de Contacto</label>
                             <input type="email" id="email_contacto" name="email_contacto"
                                    value="{{ perfil.email_contacto if perfil else '' }}"
                                    placeholder="correo@ejemplo.com">
                         </div>
                         <div class="form-group">
+                            {% if revisiones and revisiones.get('github', {}).get('estado') == 'rechazado' %}
+                            <div class="campo-rechazado-aviso">
+                                El administrador indicó: {{ revisiones['github']['comentario'] or 'Corrige este campo.' }}
+                            </div>
+                            {% endif %}
                             <label for="github">GitHub</label>
                             <input type="url" id="github" name="github"
                                 value="{{ perfil.github if perfil else '' }}"
@@ -105,6 +140,11 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        {% if revisiones and revisiones.get('linkedin', {}).get('estado') == 'rechazado' %}
+                        <div class="campo-rechazado-aviso">
+                            El administrador indicó: {{ revisiones['linkedin']['comentario'] or 'Corrige este campo.' }}
+                        </div>
+                        {% endif %}
                         <label for="linkedin">LinkedIn</label>
                         <input type="url" id="linkedin" name="linkedin"
                             value="{{ perfil.linkedin if perfil else '' }}"
@@ -117,6 +157,11 @@
                 <!-- HABILIDADES: checkboxes agrupados por categoría -->
                 <fieldset class="form-fieldset">
                     <legend>Habilidades Técnicas</legend>
+                    {% if revisiones and revisiones.get('habilidades', {}).get('estado') == 'rechazado' %}
+                    <div class="campo-rechazado-aviso" style="margin-bottom:1rem;">
+                        El administrador indicó: {{ revisiones['habilidades']['comentario'] or 'Corrige este campo.' }}
+                    </div>
+                    {% endif %}
                     <p class="form-hint">
                         Marca las habilidades que dominas y selecciona tu nivel en cada una.
                         Estas servirán como filtros de búsqueda para las empresas.
@@ -177,6 +222,11 @@
                 <!-- FORMACIÓN ACADÉMICA (dinámico — sin cambios) -->
                 <fieldset class="form-fieldset">
                     <legend>Formación Académica</legend>
+                    {% if revisiones and revisiones.get('formacion', {}).get('estado') == 'rechazado' %}
+                    <div class="campo-rechazado-aviso" style="margin-bottom:1rem;">
+                        El administrador indicó: {{ revisiones['formacion']['comentario'] or 'Corrige este campo.' }}
+                    </div>
+                    {% endif %}
                     <div id="formacion-container">
                         {% if perfil and perfil.formacion %}
                             {% for f in perfil.formacion %}
@@ -232,6 +282,11 @@
                 <!-- IDIOMAS: select del catálogo + nivel ENUM -->
                 <fieldset class="form-fieldset">
                     <legend>Idiomas</legend>
+                    {% if revisiones and revisiones.get('idiomas', {}).get('estado') == 'rechazado' %}
+                    <div class="campo-rechazado-aviso" style="margin-bottom:1rem;">
+                        El administrador indicó: {{ revisiones['idiomas']['comentario'] or 'Corrige este campo.' }}
+                    </div>
+                    {% endif %}
                     <p class="form-hint">Agrega los idiomas que manejas y tu nivel de competencia.</p>
                     <div id="idiomas-container">
                         {% if perfil and perfil.idiomas %}
@@ -298,6 +353,24 @@
 
 {% block extra_css %}
 <style>
+/* ---- Aviso de campo rechazado por admin ---- */
+.campo-rechazado-aviso {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    border-radius: var(--border-radius);
+    padding: 0.6rem 0.9rem;
+    font-size: var(--font-size-sm);
+    color: #991b1b;
+    margin-bottom: 0.5rem;
+}
+
+body.dark-mode .campo-rechazado-aviso {
+    background-color: #2d0a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
 /* ---- Sección de habilidades por categoría ---- */
 .habilidades-categoria {
     margin-bottom: 1.5rem;

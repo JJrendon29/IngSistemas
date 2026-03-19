@@ -14,7 +14,7 @@
     <div class="container">
         {% if perfil %}
             <!-- Estado del perfil -->
-            <div class="estado-card estado-{{ perfil.estado }}">
+            <div class="estado-card {% if perfil.estado == 'en_revision' %}estado-en-revision{% else %}estado-{{ perfil.estado }}{% endif %}">
                 {% if perfil.estado == 'pendiente' %}
                     <span class="estado-icon">⏳</span>
                     <div>
@@ -33,8 +33,75 @@
                         <strong>Tu perfil fue rechazado</strong>
                         <p>Edita tu perfil y envíalo nuevamente para revisión.</p>
                     </div>
+                {% elif perfil.estado == 'en_revision' %}
+                    <span class="estado-icon">🔍</span>
+                    <div>
+                        <strong>Tu perfil está en revisión</strong>
+                        <p>Revisa los comentarios del administrador y corrige los campos indicados.</p>
+                    </div>
                 {% endif %}
             </div>
+
+            {% if perfil.estado == 'en_revision' or (revisiones and perfil.estado != 'aprobado') %}
+            <!-- Detalle de revisiones campo por campo -->
+            <div class="revision-detalle-card">
+                <h3 class="revision-detalle-titulo">Resultado de la revisión</h3>
+
+                {% if perfil.comentario_admin %}
+                <div class="comentario-admin-box">
+                    <strong>Comentario del administrador:</strong>
+                    <p>{{ perfil.comentario_admin }}</p>
+                </div>
+                {% endif %}
+
+                {% set nombres_campo = {
+                    'foto': 'Foto de perfil',
+                    'cv': 'Hoja de Vida (CV)',
+                    'nombre': 'Nombre completo',
+                    'titulo': 'Título / Perfil profesional',
+                    'descripcion': 'Descripción / Sobre mí',
+                    'habilidades': 'Habilidades técnicas',
+                    'formacion': 'Formación académica',
+                    'idiomas': 'Idiomas',
+                    'github': 'GitHub',
+                    'linkedin': 'LinkedIn',
+                    'email_contacto': 'Email de contacto'
+                } %}
+
+                {% if revisiones %}
+                <ul class="revision-lista">
+                    {% for campo, datos in revisiones.items() %}
+                    <li class="revision-item revision-item-{{ datos.estado }}">
+                        {% if datos.estado == 'aprobado' %}
+                            <span class="revision-icono">✅</span>
+                            <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
+                            <span class="revision-etiqueta etiqueta-aprobado">Aprobado</span>
+                        {% elif datos.estado == 'rechazado' %}
+                            <div class="revision-fila-principal">
+                                <span class="revision-icono">❌</span>
+                                <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
+                                <span class="revision-etiqueta etiqueta-rechazado">Requiere corrección</span>
+                            </div>
+                            {% if datos.comentario %}
+                            <p class="revision-comentario-texto">"{{ datos.comentario }}"</p>
+                            {% endif %}
+                        {% else %}
+                            <span class="revision-icono">⏳</span>
+                            <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
+                            <span class="revision-etiqueta etiqueta-pendiente">Pendiente</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                <div style="margin-top: 1.25rem;">
+                    <a href="{{ url_for('editar_mi_perfil') }}" class="btn btn-secondary">
+                        Editar y corregir mi perfil
+                    </a>
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Resumen del perfil -->
             <div class="perfil-resumen-card">
@@ -89,4 +156,165 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ---- Estado en revisión ---- */
+.estado-en-revision {
+    background-color: #fff7ed;
+    border-color: var(--secondary-color);
+    color: #9a3412;
+}
+
+/* ---- Tarjeta de detalle de revisiones ---- */
+.revision-detalle-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.revision-detalle-titulo {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* ---- Box comentario admin ---- */
+.comentario-admin-box {
+    background-color: #fff7ed;
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: #7c2d12;
+}
+
+.comentario-admin-box p {
+    margin-top: 0.3rem;
+    color: #9a3412;
+}
+
+/* ---- Lista de revisiones ---- */
+.revision-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.revision-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+}
+
+.revision-item-aprobado {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.revision-item-rechazado {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.revision-item-pendiente {
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+}
+
+.revision-icono {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.revision-campo {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.revision-etiqueta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+
+.etiqueta-aprobado {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.etiqueta-rechazado {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.etiqueta-pendiente {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.revision-comentario-texto {
+    width: 100%;
+    margin: 0.3rem 0 0 1.5rem;
+    font-style: italic;
+    color: #991b1b;
+    font-size: var(--font-size-sm);
+}
+
+/* ---- Fila de rechazo: ícono + campo + etiqueta en una línea ---- */
+.revision-item-rechazado .revision-fila-principal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode .revision-detalle-card {
+    background-color: #1e293b;
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .comentario-admin-box {
+    background-color: #2d1a0e;
+    border-color: var(--secondary-color);
+    color: #fbbf24;
+}
+
+body.dark-mode .revision-item-aprobado {
+    background-color: #052e16;
+    border-color: #166534;
+}
+
+body.dark-mode .revision-item-rechazado {
+    background-color: #2d0a0a;
+    border-color: #7f1d1d;
+}
+
+body.dark-mode .revision-item-pendiente {
+    background-color: #1c1508;
+    border-color: #92400e;
+}
+
+body.dark-mode .revision-campo {
+    color: var(--text-primary);
+}
+</style>
 {% endblock %}

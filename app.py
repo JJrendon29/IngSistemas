@@ -13,7 +13,10 @@ from models import (
     obtener_perfil_por_usuario, crear_perfil, actualizar_perfil,
     guardar_habilidades, guardar_formacion, guardar_idiomas,
     buscar_perfiles_por_habilidad, obtener_habilidades_unicas,
-    obtener_catalogo_titulos, obtener_catalogo_habilidades, obtener_catalogo_idiomas
+    obtener_catalogo_titulos, obtener_catalogo_habilidades, obtener_catalogo_idiomas,
+    obtener_revisiones_perfil, guardar_revisiones, resetear_revisiones_pendientes,
+    CAMPOS_REVISABLES,
+    _obtener_habilidades, _obtener_formacion, _obtener_idiomas
 )
 
 # ========================================
@@ -308,7 +311,8 @@ def guardar_contacto():
 @login_required
 def mi_perfil():
     perfil = obtener_perfil_por_usuario(current_user.id)
-    return render_template('mi_perfil.html', perfil=perfil)
+    revisiones = obtener_revisiones_perfil(perfil['id']) if perfil else {}
+    return render_template('mi_perfil.html', perfil=perfil, revisiones=revisiones)
 
 
 @app.route('/mi-perfil/crear', methods=['GET', 'POST'])
@@ -389,7 +393,7 @@ def crear_mi_perfil():
             flash('Error al crear el perfil', 'error')
 
     return render_template('editar_perfil.html', perfil=None, modo='crear',
-                           catalogos=catalogos)
+                           catalogos=catalogos, revisiones=None)
 
 
 @app.route('/mi-perfil/editar', methods=['GET', 'POST'])
@@ -470,11 +474,15 @@ def editar_mi_perfil():
         _guardar_formacion_desde_form(perfil['id'], request.form)
         _guardar_idiomas_desde_form(perfil['id'], request.form)
 
+        # Los campos rechazados vuelven a pendiente porque el estudiante los corrigió
+        resetear_revisiones_pendientes(perfil['id'])
+
         flash('Perfil actualizado. Está pendiente de aprobación.', 'success')
         return redirect(url_for('mi_perfil'))
 
+    revisiones = obtener_revisiones_perfil(perfil['id'])
     return render_template('editar_perfil.html', perfil=perfil, modo='editar',
-                           catalogos=catalogos)
+                           catalogos=catalogos, revisiones=revisiones)
 
 
 # ========================================
@@ -531,6 +539,56 @@ def eliminar_perfil_admin(perfil_id):
             conn.close()
 
     return redirect(url_for('admin_panel'))
+
+
+@app.route('/admin/perfil/<int:perfil_id>/revisar', methods=['GET', 'POST'])
+@admin_required
+def revisar_perfil(perfil_id):
+    # Obtener el perfil completo (con habilidades, formacion, idiomas)
+    conn = get_db_connection()
+    perfil = None
+    if conn:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM perfiles WHERE id = %s", (perfil_id,))
+                perfil = cursor.fetchone()
+                if perfil:
+                    perfil['habilidades'] = _obtener_habilidades(cursor, perfil_id)
+                    perfil['formacion'] = _obtener_formacion(cursor, perfil_id)
+                    perfil['idiomas'] = _obtener_idiomas(cursor, perfil_id)
+        finally:
+            conn.close()
+
+    if not perfil:
+        abort(404)
+
+    if request.method == 'POST':
+        revisiones_dict = {}
+        for campo in CAMPOS_REVISABLES:
+            estado = request.form.get(f'revision_estado_{campo}', '').strip()
+            comentario = request.form.get(f'revision_comentario_{campo}', '').strip()
+            # Solo guardar si se seleccionó un estado válido
+            if estado in ('aprobado', 'rechazado'):
+                revisiones_dict[campo] = {
+                    'estado': estado,
+                    'comentario': comentario
+                }
+
+        comentario_general = request.form.get('comentario_general', '').strip()
+        ok = guardar_revisiones(perfil_id, revisiones_dict, comentario_general)
+        if ok:
+            flash('Revisión guardada correctamente.', 'success')
+        else:
+            flash('Error al guardar la revisión. Revisa la consola del servidor.', 'error')
+        return redirect(url_for('admin_panel'))
+
+    revisiones = obtener_revisiones_perfil(perfil_id)
+    imagen = obtener_ruta_imagen_perfil(perfil['slug'])
+    return render_template('admin/revisar_perfil.html',
+                           perfil=perfil,
+                           revisiones=revisiones,
+                           imagen=imagen,
+                           campos_revisables=CAMPOS_REVISABLES)
 
 
 @app.route('/admin/contactos')

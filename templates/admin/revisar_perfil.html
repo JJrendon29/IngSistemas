@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+
+{% block title %}Revisar Perfil - {{ perfil.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ---- Contenedor principal de revisión ---- */
+.revisar-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--bg-light);
+}
+
+.revisar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.revisar-header h2 {
+    font-size: var(--font-size-2xl);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ---- Tarjeta de campo revisable ---- */
+.campo-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+    border-left: 4px solid #9ca3af;
+    transition: var(--transition);
+}
+
+.campo-card.estado-aprobado {
+    border-left-color: #10b981;
+}
+
+.campo-card.estado-rechazado {
+    border-left-color: #ef4444;
+}
+
+.campo-card-inner {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+}
+
+.campo-preview {
+    padding: var(--spacing-lg);
+    border-right: 1px solid var(--border-color);
+}
+
+.campo-preview h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.campo-preview-content {
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+.campo-preview-content img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
+}
+
+.campo-preview-content .foto-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.campo-preview-content .sin-dato {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: var(--font-size-sm);
+}
+
+/* ---- Panel de controles de revisión ---- */
+.campo-controles {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    background-color: var(--bg-light);
+}
+
+.revision-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.revision-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border: 2px solid var(--border-color);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.revision-radio-label:has(input:checked).opcion-aprobar {
+    background-color: #ecfdf5;
+    border-color: #10b981;
+    color: #065f46;
+}
+
+.revision-radio-label:has(input:checked).opcion-rechazar {
+    background-color: #fef2f2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.revision-radio-label input[type="radio"] {
+    accent-color: var(--primary-color);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.revision-comentario {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    resize: vertical;
+    min-height: 60px;
+    transition: var(--transition);
+}
+
+.revision-comentario:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.revision-comentario.tiene-rechazo {
+    border-color: #ef4444;
+    background-color: #fff5f5;
+}
+
+.campo-label-revision {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+/* ---- Habilidades en preview ---- */
+.hab-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin: 0.15rem;
+    background-color: #e0f2fe;
+    color: var(--primary-color);
+}
+
+.hab-preview-nivel {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+/* ---- Formacion en preview ---- */
+.formacion-preview-item {
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--secondary-color);
+    margin-bottom: 0.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.formacion-preview-item strong {
+    display: block;
+    color: var(--text-primary);
+}
+
+.formacion-preview-item span {
+    color: var(--text-secondary);
+}
+
+/* ---- Idiomas en preview ---- */
+.idioma-preview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    background-color: #f0fdf4;
+    color: #065f46;
+    margin: 0.15rem;
+}
+
+/* ---- Sección comentario general y submit ---- */
+.revision-footer {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.revision-footer h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.revision-footer textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    resize: vertical;
+    min-height: 100px;
+    transition: var(--transition);
+}
+
+.revision-footer textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.revision-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 2px solid var(--border-color);
+}
+
+/* ---- Estado badge ---- */
+.estado-actual-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+/* ---- Enlace de CV ---- */
+.cv-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: underline;
+    font-size: var(--font-size-sm);
+}
+
+.cv-link:hover {
+    color: var(--primary-dark);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .campo-card-inner {
+        grid-template-columns: 1fr;
+    }
+    .campo-preview {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .revisar-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ---- Dark mode ---- */
+body.dark-mode .campo-card {
+    background-color: #1e293b;
+}
+body.dark-mode .campo-controles {
+    background-color: #334155;
+}
+body.dark-mode .revision-radio-label {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+body.dark-mode .revision-comentario {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+body.dark-mode .revision-footer {
+    background-color: #1e293b;
+}
+body.dark-mode .revision-footer textarea {
+    background-color: #334155;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+body.dark-mode .formacion-preview-item {
+    background-color: #334155;
+}
+body.dark-mode .hab-preview-badge {
+    background-color: #1e3a5f;
+    color: var(--primary-light);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Revisar Perfil</h1>
+        <p>{{ perfil.nombre }}</p>
+    </div>
+</section>
+
+<section class="revisar-section">
+    <div class="container">
+
+        <form method="POST">
+
+            <!-- Encabezado con botón volver -->
+            <div class="revisar-header">
+                <h2>Revisión campo por campo</h2>
+                <div style="display:flex; gap:0.75rem; align-items:center;">
+                    <span class="estado-actual-badge
+                        {% if perfil.estado == 'pendiente' %}estado-badge-pendiente
+                        {% elif perfil.estado == 'aprobado' %}estado-badge-aprobado
+                        {% elif perfil.estado == 'rechazado' %}estado-badge-rechazado
+                        {% elif perfil.estado == 'en_revision' %}estado-badge-en_revision
+                        {% endif %}">
+                        Estado actual: {{ perfil.estado | replace('_', ' ') | capitalize }}
+                    </span>
+                    <a href="{{ url_for('admin_panel') }}" class="btn btn-outline btn-sm">Volver al panel</a>
+                </div>
+            </div>
+
+            <!-- ======================== FOTO ======================== -->
+            {% set rev_foto = revisiones.get('foto', {}) %}
+            <div class="campo-card {% if rev_foto.estado == 'aprobado' %}estado-aprobado{% elif rev_foto.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_foto.estado == 'aprobado' %}✅{% elif rev_foto.estado == 'rechazado' %}❌{% endif %}
+                            Foto de Perfil
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if imagen %}
+                                <img src="{{ url_for('static', filename=imagen) }}" alt="Foto de {{ perfil.nombre }}">
+                            {% else %}
+                                <div class="foto-placeholder">{{ perfil.nombre[:2]|upper }}</div>
+                                <p class="sin-dato" style="margin-top:0.5rem;">Sin foto cargada</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre la foto:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_foto" value="aprobado"
+                                    {{ 'checked' if rev_foto.estado == 'aprobado' }}>
+                                Aprobar foto
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_foto" value="rechazado"
+                                    {{ 'checked' if rev_foto.estado == 'rechazado' }}>
+                                Rechazar foto
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_foto"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_foto.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_foto.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== CV ======================== -->
+            {% set rev_cv = revisiones.get('cv', {}) %}
+            <div class="campo-card {% if rev_cv.estado == 'aprobado' %}estado-aprobado{% elif rev_cv.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_cv.estado == 'aprobado' %}✅{% elif rev_cv.estado == 'rechazado' %}❌{% endif %}
+                            Hoja de Vida (CV)
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.cv_url %}
+                                <a href="{{ url_for('static', filename=perfil.cv_url) }}"
+                                   target="_blank" class="cv-link">Ver CV (PDF)</a>
+                            {% else %}
+                                <p class="sin-dato">Sin CV cargado</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre el CV:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_cv" value="aprobado"
+                                    {{ 'checked' if rev_cv.estado == 'aprobado' }}>
+                                Aprobar CV
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_cv" value="rechazado"
+                                    {{ 'checked' if rev_cv.estado == 'rechazado' }}>
+                                Rechazar CV
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_cv"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_cv.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_cv.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== NOMBRE ======================== -->
+            {% set rev_nombre = revisiones.get('nombre', {}) %}
+            <div class="campo-card {% if rev_nombre.estado == 'aprobado' %}estado-aprobado{% elif rev_nombre.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_nombre.estado == 'aprobado' %}✅{% elif rev_nombre.estado == 'rechazado' %}❌{% endif %}
+                            Nombre Completo
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.nombre %}
+                                <strong>{{ perfil.nombre }}</strong>
+                            {% else %}
+                                <p class="sin-dato">Sin nombre</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre el nombre:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_nombre" value="aprobado"
+                                    {{ 'checked' if rev_nombre.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_nombre" value="rechazado"
+                                    {{ 'checked' if rev_nombre.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_nombre"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_nombre.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_nombre.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== TÍTULO ======================== -->
+            {% set rev_titulo = revisiones.get('titulo', {}) %}
+            <div class="campo-card {% if rev_titulo.estado == 'aprobado' %}estado-aprobado{% elif rev_titulo.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_titulo.estado == 'aprobado' %}✅{% elif rev_titulo.estado == 'rechazado' %}❌{% endif %}
+                            Título / Perfil Profesional
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.titulo_otro %}
+                                <span>{{ perfil.titulo_otro }}</span>
+                                <small class="sin-dato">(personalizado)</small>
+                            {% elif perfil.titulo %}
+                                <span>{{ perfil.titulo }}</span>
+                            {% else %}
+                                <p class="sin-dato">Sin título definido</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre el título:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_titulo" value="aprobado"
+                                    {{ 'checked' if rev_titulo.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_titulo" value="rechazado"
+                                    {{ 'checked' if rev_titulo.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_titulo"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_titulo.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_titulo.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== DESCRIPCIÓN ======================== -->
+            {% set rev_descripcion = revisiones.get('descripcion', {}) %}
+            <div class="campo-card {% if rev_descripcion.estado == 'aprobado' %}estado-aprobado{% elif rev_descripcion.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_descripcion.estado == 'aprobado' %}✅{% elif rev_descripcion.estado == 'rechazado' %}❌{% endif %}
+                            Descripción / Sobre mí
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.descripcion %}
+                                <p>{{ perfil.descripcion }}</p>
+                            {% else %}
+                                <p class="sin-dato">Sin descripción</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre la descripción:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_descripcion" value="aprobado"
+                                    {{ 'checked' if rev_descripcion.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_descripcion" value="rechazado"
+                                    {{ 'checked' if rev_descripcion.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_descripcion"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_descripcion.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_descripcion.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== HABILIDADES ======================== -->
+            {% set rev_habilidades = revisiones.get('habilidades', {}) %}
+            <div class="campo-card {% if rev_habilidades.estado == 'aprobado' %}estado-aprobado{% elif rev_habilidades.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_habilidades.estado == 'aprobado' %}✅{% elif rev_habilidades.estado == 'rechazado' %}❌{% endif %}
+                            Habilidades Técnicas
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.habilidades %}
+                                {% for hab in perfil.habilidades %}
+                                <span class="hab-preview-badge">
+                                    {{ hab.nombre }}
+                                    <span class="hab-preview-nivel">{{ hab.nivel }}</span>
+                                </span>
+                                {% endfor %}
+                            {% else %}
+                                <p class="sin-dato">Sin habilidades registradas</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre las habilidades:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_habilidades" value="aprobado"
+                                    {{ 'checked' if rev_habilidades.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_habilidades" value="rechazado"
+                                    {{ 'checked' if rev_habilidades.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_habilidades"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_habilidades.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_habilidades.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== FORMACIÓN ======================== -->
+            {% set rev_formacion = revisiones.get('formacion', {}) %}
+            <div class="campo-card {% if rev_formacion.estado == 'aprobado' %}estado-aprobado{% elif rev_formacion.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_formacion.estado == 'aprobado' %}✅{% elif rev_formacion.estado == 'rechazado' %}❌{% endif %}
+                            Formación Académica
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.formacion %}
+                                {% for f in perfil.formacion %}
+                                <div class="formacion-preview-item">
+                                    <strong>{{ f.titulo }}</strong>
+                                    <span>{{ f.institucion }}{% if f.anio %} &mdash; {{ f.anio }}{% endif %}</span>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="sin-dato">Sin formación registrada</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre la formación:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_formacion" value="aprobado"
+                                    {{ 'checked' if rev_formacion.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_formacion" value="rechazado"
+                                    {{ 'checked' if rev_formacion.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_formacion"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_formacion.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_formacion.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== IDIOMAS ======================== -->
+            {% set rev_idiomas = revisiones.get('idiomas', {}) %}
+            <div class="campo-card {% if rev_idiomas.estado == 'aprobado' %}estado-aprobado{% elif rev_idiomas.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_idiomas.estado == 'aprobado' %}✅{% elif rev_idiomas.estado == 'rechazado' %}❌{% endif %}
+                            Idiomas
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.idiomas %}
+                                {% for i in perfil.idiomas %}
+                                <span class="idioma-preview-item">
+                                    {{ i.idioma }} &mdash; {{ i.nivel }}
+                                </span>
+                                {% endfor %}
+                            {% else %}
+                                <p class="sin-dato">Sin idiomas registrados</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre los idiomas:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_idiomas" value="aprobado"
+                                    {{ 'checked' if rev_idiomas.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_idiomas" value="rechazado"
+                                    {{ 'checked' if rev_idiomas.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_idiomas"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_idiomas.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_idiomas.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== GITHUB ======================== -->
+            {% set rev_github = revisiones.get('github', {}) %}
+            <div class="campo-card {% if rev_github.estado == 'aprobado' %}estado-aprobado{% elif rev_github.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_github.estado == 'aprobado' %}✅{% elif rev_github.estado == 'rechazado' %}❌{% endif %}
+                            GitHub
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.github %}
+                                <a href="{{ perfil.github }}" target="_blank" class="cv-link">{{ perfil.github }}</a>
+                            {% else %}
+                                <p class="sin-dato">Sin enlace de GitHub</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre GitHub:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_github" value="aprobado"
+                                    {{ 'checked' if rev_github.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_github" value="rechazado"
+                                    {{ 'checked' if rev_github.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_github"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_github.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_github.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== LINKEDIN ======================== -->
+            {% set rev_linkedin = revisiones.get('linkedin', {}) %}
+            <div class="campo-card {% if rev_linkedin.estado == 'aprobado' %}estado-aprobado{% elif rev_linkedin.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_linkedin.estado == 'aprobado' %}✅{% elif rev_linkedin.estado == 'rechazado' %}❌{% endif %}
+                            LinkedIn
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.linkedin %}
+                                <a href="{{ perfil.linkedin }}" target="_blank" class="cv-link">{{ perfil.linkedin }}</a>
+                            {% else %}
+                                <p class="sin-dato">Sin enlace de LinkedIn</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre LinkedIn:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_linkedin" value="aprobado"
+                                    {{ 'checked' if rev_linkedin.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_linkedin" value="rechazado"
+                                    {{ 'checked' if rev_linkedin.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_linkedin"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_linkedin.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_linkedin.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== EMAIL CONTACTO ======================== -->
+            {% set rev_email = revisiones.get('email_contacto', {}) %}
+            <div class="campo-card {% if rev_email.estado == 'aprobado' %}estado-aprobado{% elif rev_email.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_email.estado == 'aprobado' %}✅{% elif rev_email.estado == 'rechazado' %}❌{% endif %}
+                            Email de Contacto
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.email_contacto %}
+                                <span>{{ perfil.email_contacto }}</span>
+                            {% else %}
+                                <p class="sin-dato">Sin email de contacto</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre el email:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_email_contacto" value="aprobado"
+                                    {{ 'checked' if rev_email.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_email_contacto" value="rechazado"
+                                    {{ 'checked' if rev_email.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_email_contacto"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_email.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_email.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== COMENTARIO GENERAL Y SUBMIT ======================== -->
+            <div class="revision-footer">
+                <h3>Comentario general para el estudiante</h3>
+                <textarea name="comentario_general"
+                          placeholder="Escribe aquí un comentario general sobre la revisión del perfil (opcional)...">{{ perfil.comentario_admin or '' }}</textarea>
+
+                <div class="revision-footer-actions">
+                    <a href="{{ url_for('admin_panel') }}" class="btn btn-outline">Cancelar</a>
+                    <button type="submit" class="btn btn-primary btn-lg">Guardar Revisión</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</section>
+{% endblock %}

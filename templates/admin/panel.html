@@ -2,6 +2,43 @@
 
 {% block title %}Panel de Administración{% endblock %}
 
+{% block extra_css %}
+<style>
+/* ---- Badge estado en_revision ---- */
+.estado-badge-en_revision {
+    background-color: #fff7ed;
+    color: #9a3412;
+}
+
+/* ---- Stat card en revisión ---- */
+.stat-en-revision {
+    border-color: var(--secondary-color);
+}
+
+.stat-en-revision .stat-number {
+    color: var(--secondary-color);
+}
+
+/* ---- Botón Revisar ---- */
+.btn-revisar {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-revisar:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="page-header">
     <div class="container">
@@ -23,6 +60,7 @@
             {% set pendientes = perfiles|selectattr('estado', 'equalto', 'pendiente')|list %}
             {% set aprobados = perfiles|selectattr('estado', 'equalto', 'aprobado')|list %}
             {% set rechazados = perfiles|selectattr('estado', 'equalto', 'rechazado')|list %}
+            {% set en_revision = perfiles|selectattr('estado', 'equalto', 'en_revision')|list %}
 
             <div class="stat-card stat-pendiente">
                 <span class="stat-number">{{ pendientes|length }}</span>
@@ -35,6 +73,10 @@
             <div class="stat-card stat-rechazado">
                 <span class="stat-number">{{ rechazados|length }}</span>
                 <span class="stat-label">Rechazados</span>
+            </div>
+            <div class="stat-card stat-en-revision">
+                <span class="stat-number">{{ en_revision|length }}</span>
+                <span class="stat-label">En Revisión</span>
             </div>
             <div class="stat-card">
                 <span class="stat-number">{{ perfiles|length }}</span>
@@ -69,13 +111,57 @@
                             </td>
                             <td>{{ perfil.created_at.strftime('%d/%m/%Y') if perfil.created_at else '-' }}</td>
                             <td class="admin-actions">
+                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
                                 <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
                                 </form>
                                 <form method="POST" action="{{ url_for('rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
                                 </form>
-                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}" 
+                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
+                                    <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Perfiles en revisión -->
+        {% if en_revision %}
+        <div class="admin-card" style="border-left: 4px solid var(--secondary-color);">
+            <h3 class="admin-card-title">🔍 Perfiles en Revisión (correcciones enviadas)</h3>
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Título</th>
+                            <th>Habilidades</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for perfil in en_revision %}
+                        <tr>
+                            <td><strong>{{ perfil.nombre }}</strong></td>
+                            <td>{{ perfil.titulo or '-' }}</td>
+                            <td>
+                                {% for hab in perfil.habilidades[:3] %}
+                                <span class="skill-badge">{{ hab.nombre }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="admin-actions">
+                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
+                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Aprobar todo</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
@@ -111,7 +197,7 @@
                             <td>{{ perfil.titulo or '-' }}</td>
                             <td>
                                 <span class="estado-badge estado-badge-{{ perfil.estado }}">
-                                    {{ perfil.estado|capitalize }}
+                                    {{ perfil.estado | replace('_', ' ') | capitalize }}
                                 </span>
                             </td>
                             <td>
@@ -123,6 +209,9 @@
                                 {% endif %}
                             </td>
                             <td class="admin-actions">
+                                {% if perfil.estado in ('pendiente', 'en_revision') %}
+                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
+                                {% endif %}
                                 {% if perfil.estado != 'aprobado' %}
                                 <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
@@ -133,7 +222,7 @@
                                     <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
                                 </form>
                                 {% endif %}
-                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}" 
+                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
