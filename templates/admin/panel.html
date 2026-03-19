@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Panel de Administración</h1>
+        <p>Gestiona perfiles y contactos</p>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="container">
+        <!-- Navegación admin -->
+        <div class="admin-nav">
+            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link active">Perfiles</a>
+            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link">Contactos</a>
+        </div>
+
+        <!-- Estadísticas rápidas -->
+        <div class="admin-stats">
+            {% set pendientes = perfiles|selectattr('estado', 'equalto', 'pendiente')|list %}
+            {% set aprobados = perfiles|selectattr('estado', 'equalto', 'aprobado')|list %}
+            {% set rechazados = perfiles|selectattr('estado', 'equalto', 'rechazado')|list %}
+
+            <div class="stat-card stat-pendiente">
+                <span class="stat-number">{{ pendientes|length }}</span>
+                <span class="stat-label">Pendientes</span>
+            </div>
+            <div class="stat-card stat-aprobado">
+                <span class="stat-number">{{ aprobados|length }}</span>
+                <span class="stat-label">Aprobados</span>
+            </div>
+            <div class="stat-card stat-rechazado">
+                <span class="stat-number">{{ rechazados|length }}</span>
+                <span class="stat-label">Rechazados</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ perfiles|length }}</span>
+                <span class="stat-label">Total</span>
+            </div>
+        </div>
+
+        <!-- Perfiles pendientes primero -->
+        {% if pendientes %}
+        <div class="admin-card">
+            <h3 class="admin-card-title">⏳ Perfiles Pendientes de Aprobación</h3>
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Título</th>
+                            <th>Habilidades</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for perfil in pendientes %}
+                        <tr>
+                            <td><strong>{{ perfil.nombre }}</strong></td>
+                            <td>{{ perfil.titulo or '-' }}</td>
+                            <td>
+                                {% for hab in perfil.habilidades[:3] %}
+                                <span class="skill-badge">{{ hab.nombre }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>{{ perfil.created_at.strftime('%d/%m/%Y') if perfil.created_at else '-' }}</td>
+                            <td class="admin-actions">
+                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}" 
+                                      style="display:inline;"
+                                      onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
+                                    <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Todos los perfiles -->
+        <div class="admin-card">
+            <h3 class="admin-card-title">Todos los Perfiles</h3>
+            {% if perfiles %}
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Título</th>
+                            <th>Estado</th>
+                            <th>Habilidades</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for perfil in perfiles %}
+                        <tr>
+                            <td><strong>{{ perfil.nombre }}</strong></td>
+                            <td>{{ perfil.titulo or '-' }}</td>
+                            <td>
+                                <span class="estado-badge estado-badge-{{ perfil.estado }}">
+                                    {{ perfil.estado|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                {% for hab in perfil.habilidades[:2] %}
+                                <span class="skill-badge">{{ hab.nombre }}</span>
+                                {% endfor %}
+                                {% if perfil.habilidades|length > 2 %}
+                                <span class="skill-badge-more">+{{ perfil.habilidades|length - 2 }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="admin-actions">
+                                {% if perfil.estado != 'aprobado' %}
+                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                </form>
+                                {% endif %}
+                                {% if perfil.estado != 'rechazado' %}
+                                <form method="POST" action="{{ url_for('rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
+                                </form>
+                                {% endif %}
+                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}" 
+                                      style="display:inline;"
+                                      onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
+                                    <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align:center; color: var(--text-secondary); padding: 2rem;">
+                No hay perfiles registrados aún
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Editar' if modo == 'editar' else 'Crear' }} Perfil{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>{{ 'Editar' if modo == 'editar' else 'Crear' }} Perfil</h1>
+        <p>{{ 'Actualiza tu información' if modo == 'editar' else 'Completa tu perfil de practicante' }}</p>
+    </div>
+</section>
+
+<section class="editar-perfil-section">
+    <div class="container">
+        <div class="form-container">
+            <form method="POST" enctype="multipart/form-data" class="perfil-form">
+                
+                <!-- INFORMACIÓN BÁSICA -->
+                <fieldset class="form-fieldset">
+                    <legend>Información Básica</legend>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre Completo *</label>
+                            <input type="text" id="nombre" name="nombre" required
+                                   value="{{ perfil.nombre if perfil else '' }}"
+                                   placeholder="Tu nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label for="titulo">Título / Cargo</label>
+                            <input type="text" id="titulo" name="titulo"
+                                   value="{{ perfil.titulo if perfil else '' }}"
+                                   placeholder="Ej: Desarrollador Web, Analista de Datos">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Sobre mí</label>
+                        <textarea id="descripcion" name="descripcion" rows="4"
+                                  placeholder="Cuéntanos sobre ti, tu experiencia y tus intereses...">{{ perfil.descripcion if perfil else '' }}</textarea>
+                    </div>
+                </fieldset>
+
+                <!-- ARCHIVOS -->
+                <fieldset class="form-fieldset">
+                    <legend>Foto y CV</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="foto">Foto de Perfil (JPG/PNG)</label>
+                            <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png">
+                            {% if perfil and perfil.foto_url %}
+                            <small class="form-hint">Foto actual guardada. Sube otra para reemplazar.</small>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <label for="cv">Hoja de Vida (PDF)</label>
+                            <input type="file" id="cv" name="cv" accept=".pdf">
+                            {% if perfil and perfil.cv_url %}
+                            <small class="form-hint">CV actual guardado. Sube otro para reemplazar.</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- CONTACTO Y REDES -->
+                <fieldset class="form-fieldset">
+                    <legend>Contacto y Redes</legend>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email_contacto">Email de Contacto</label>
+                            <input type="email" id="email_contacto" name="email_contacto"
+                                   value="{{ perfil.email_contacto if perfil else '' }}"
+                                   placeholder="correo@ejemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="github">GitHub</label>
+                            <input type="url" id="github" name="github"
+                                value="{{ perfil.github if perfil else '' }}"
+                                placeholder="https://github.com/tu-usuario"
+                                pattern="https?://(www\.)?github\.com/[a-zA-Z0-9_-]+/?"
+                                title="Debe ser una URL de GitHub válida">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn</label>
+                        <input type="url" id="linkedin" name="linkedin"
+                            value="{{ perfil.linkedin if perfil else '' }}"
+                            placeholder="https://linkedin.com/in/tu-perfil"
+                            pattern="https?://(www\.)?linkedin\.com/in/[a-zA-Z0-9_-]+/?"
+                            title="Debe ser una URL de LinkedIn válida">
+                    </div>
+                </fieldset>
+
+                <!-- HABILIDADES (dinámico) -->
+                <fieldset class="form-fieldset">
+                    <legend>Habilidades</legend>
+                    <p class="form-hint">Agrega tus habilidades técnicas y blandas. Estas servirán como filtros de búsqueda.</p>
+                    <div id="habilidades-container">
+                        {% if perfil and perfil.habilidades %}
+                            {% for hab in perfil.habilidades %}
+                            <div class="dynamic-row">
+                                <input type="text" name="hab_nombre_{{ loop.index0 }}" 
+                                       value="{{ hab.nombre }}" placeholder="Ej: Python, React, MySQL">
+                                <select name="hab_nivel_{{ loop.index0 }}">
+                                    <option value="basico" {{ 'selected' if hab.nivel == 'basico' }}>Básico</option>
+                                    <option value="intermedio" {{ 'selected' if hab.nivel == 'intermedio' }}>Intermedio</option>
+                                    <option value="avanzado" {{ 'selected' if hab.nivel == 'avanzado' }}>Avanzado</option>
+                                </select>
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="dynamic-row">
+                                <input type="text" name="hab_nombre_0" placeholder="Ej: Python, React, MySQL">
+                                <select name="hab_nivel_0">
+                                    <option value="basico">Básico</option>
+                                    <option value="intermedio" selected>Intermedio</option>
+                                    <option value="avanzado">Avanzado</option>
+                                </select>
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline" 
+                            onclick="agregarHabilidad()">+ Agregar habilidad</button>
+                </fieldset>
+
+                <!-- FORMACIÓN ACADÉMICA (dinámico) -->
+                <fieldset class="form-fieldset">
+                    <legend>Formación Académica</legend>
+                    <div id="formacion-container">
+                        {% if perfil and perfil.formacion %}
+                            {% for f in perfil.formacion %}
+                            <div class="dynamic-block">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" name="form_titulo_{{ loop.index0 }}" 
+                                               value="{{ f.titulo }}" placeholder="Título obtenido">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="form_institucion_{{ loop.index0 }}" 
+                                               value="{{ f.institucion }}" placeholder="Institución">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" name="form_anio_{{ loop.index0 }}" 
+                                               value="{{ f.anio }}" placeholder="Año (ej: 2020 - 2024)">
+                                    </div>
+                                    <div class="form-group" style="display:flex;align-items:end;">
+                                        <button type="button" class="btn btn-sm btn-delete" 
+                                                onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="dynamic-block">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" name="form_titulo_0" placeholder="Título obtenido">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" name="form_institucion_0" placeholder="Institución">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <input type="text" name="form_anio_0" placeholder="Año (ej: 2020 - 2024)">
+                                    </div>
+                                    <div class="form-group" style="display:flex;align-items:end;">
+                                        <button type="button" class="btn btn-sm btn-delete" 
+                                                onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline" 
+                            onclick="agregarFormacion()">+ Agregar formación</button>
+                </fieldset>
+
+                <!-- IDIOMAS (dinámico) -->
+                <fieldset class="form-fieldset">
+                    <legend>Idiomas</legend>
+                    <div id="idiomas-container">
+                        {% if perfil and perfil.idiomas %}
+                            {% for i in perfil.idiomas %}
+                            <div class="dynamic-row">
+                                <input type="text" name="idioma_nombre_{{ loop.index0 }}" 
+                                       value="{{ i.idioma }}" placeholder="Idioma">
+                                <input type="text" name="idioma_nivel_{{ loop.index0 }}" 
+                                       value="{{ i.nivel }}" placeholder="Nivel (ej: Nativo, B2, Intermedio)">
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="dynamic-row">
+                                <input type="text" name="idioma_nombre_0" placeholder="Idioma">
+                                <input type="text" name="idioma_nivel_0" placeholder="Nivel (ej: Nativo, B2)">
+                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline" 
+                            onclick="agregarIdioma()">+ Agregar idioma</button>
+                </fieldset>
+
+                <!-- SUBMIT -->
+                <div class="form-actions">
+                    <a href="{{ url_for('mi_perfil') }}" class="btn btn-outline">Cancelar</a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        {{ 'Guardar Cambios' if modo == 'editar' else 'Crear Perfil' }}
+                    </button>
+                </div>
+
+                {% if modo == 'editar' %}
+                <p class="form-hint" style="text-align:center; margin-top:1rem;">
+                    Al guardar cambios, tu perfil volverá a estado <strong>pendiente</strong> hasta que un administrador lo apruebe.
+                </p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let habCount = {{ (perfil.habilidades|length) if perfil and perfil.habilidades else 1 }};
+let formCount = {{ (perfil.formacion|length) if perfil and perfil.formacion else 1 }};
+let idiomaCount = {{ (perfil.idiomas|length) if perfil and perfil.idiomas else 1 }};
+
+function agregarHabilidad() {
+    const container = document.getElementById('habilidades-container');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row';
+    div.innerHTML = `
+        <input type="text" name="hab_nombre_${habCount}" placeholder="Ej: Python, React, MySQL">
+        <select name="hab_nivel_${habCount}">
+            <option value="basico">Básico</option>
+            <option value="intermedio" selected>Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+        </select>
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(div);
+    habCount++;
+}
+
+function agregarFormacion() {
+    const container = document.getElementById('formacion-container');
+    const div = document.createElement('div');
+    div.className = 'dynamic-block';
+    div.innerHTML = `
+        <div class="form-row">
+            <div class="form-group">
+                <input type="text" name="form_titulo_${formCount}" placeholder="Título obtenido">
+            </div>
+            <div class="form-group">
+                <input type="text" name="form_institucion_${formCount}" placeholder="Institución">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <input type="text" name="form_anio_${formCount}" placeholder="Año (ej: 2020 - 2024)">
+            </div>
+            <div class="form-group" style="display:flex;align-items:end;">
+                <button type="button" class="btn btn-sm btn-delete" 
+                        onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+    formCount++;
+}
+
+function agregarIdioma() {
+    const container = document.getElementById('idiomas-container');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row';
+    div.innerHTML = `
+        <input type="text" name="idioma_nombre_${idiomaCount}" placeholder="Idioma">
+        <input type="text" name="idioma_nivel_${idiomaCount}" placeholder="Nivel (ej: Nativo, B2)">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(div);
+    idiomaCount++;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">📝</div>
+                <h1>Crear Cuenta</h1>
+                <p>Solo correos <strong>@amigo.edu.co</strong></p>
+            </div>
+
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="email">Correo Institucional</label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="tu.nombre@amigo.edu.co"
+                           pattern=".+@amigo\.edu\.co$"
+                           title="Debe ser un correo @amigo.edu.co">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required
+                           minlength="8" placeholder="Mínimo 8 caracteres"
+                           oninput="validarPassword(this.value)">
+                    <small id="password-hints" class="form-hint"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirm">Confirmar Contraseña</label>
+                    <input type="password" id="password_confirm" name="password_confirm" required
+                        minlength="8" placeholder="Repite tu contraseña">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Crear Cuenta
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión</a></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% block extra_js %}
+<script>
+function validarPassword(valor) {
+    const hints = document.getElementById('password-hints');
+    const reglas = [
+        { test: valor.length >= 8, texto: '8+ caracteres' },
+        { test: /[A-Z]/.test(valor), texto: 'Mayúscula' },
+        { test: /[a-z]/.test(valor), texto: 'Minúscula' },
+        { test: /[0-9]/.test(valor), texto: 'Número' },
+        { test: /[!@#$%^&*(),.?":{}|<>]/.test(valor), texto: 'Especial (!@#$...)' }
+    ];
+
+    hints.innerHTML = reglas.map(r =>
+        `<span style="color: ${r.test ? '#10b981' : '#ef4444'}; margin-right: 8px;">
+            ${r.test ? '✓' : '✗'} ${r.texto}
+        </span>`
+    ).join('');
+}
+</script>
+{% endblock %}

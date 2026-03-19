@@ -9,7 +9,7 @@ DB_CONFIG = {
     'user': os.environ.get('MYSQL_USER'),
     'password': os.environ.get('MYSQL_PASSWORD'),
     'database': os.environ.get('MYSQL_DB'),
-    'port': int(os.environ.get('MYSQL_PORT')),
+    'port': int(os.environ.get('MYSQL_PORT', 3306)),
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
 }

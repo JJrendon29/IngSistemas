@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Mi Perfil</h1>
+        <p>Gestiona tu información de practicante</p>
+    </div>
+</section>
+
+<section class="mi-perfil-section">
+    <div class="container">
+        {% if perfil %}
+            <!-- Estado del perfil -->
+            <div class="estado-card estado-{{ perfil.estado }}">
+                {% if perfil.estado == 'pendiente' %}
+                    <span class="estado-icon">⏳</span>
+                    <div>
+                        <strong>Tu perfil está pendiente de aprobación</strong>
+                        <p>Un administrador revisará tu perfil pronto.</p>
+                    </div>
+                {% elif perfil.estado == 'aprobado' %}
+                    <span class="estado-icon">✅</span>
+                    <div>
+                        <strong>Tu perfil está aprobado y visible</strong>
+                        <p>Las empresas pueden ver tu perfil en la página principal.</p>
+                    </div>
+                {% elif perfil.estado == 'rechazado' %}
+                    <span class="estado-icon">❌</span>
+                    <div>
+                        <strong>Tu perfil fue rechazado</strong>
+                        <p>Edita tu perfil y envíalo nuevamente para revisión.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Resumen del perfil -->
+            <div class="perfil-resumen-card">
+                <div class="perfil-resumen-header">
+                    <div class="perfil-resumen-foto">
+                        {% set imagen_jpg = 'usuarios/' ~ perfil.slug ~ '/perfil.jpg' %}
+                        {% set imagen_png = 'usuarios/' ~ perfil.slug ~ '/perfil.png' %}
+                        {% if perfil.foto_url and existe_archivo(perfil.foto_url) %}
+                            <img src="{{ url_for('static', filename=perfil.foto_url) }}" alt="{{ perfil.nombre }}">
+                        {% elif existe_archivo(imagen_jpg) %}
+                            <img src="{{ url_for('static', filename=imagen_jpg) }}" alt="{{ perfil.nombre }}">
+                        {% elif existe_archivo(imagen_png) %}
+                            <img src="{{ url_for('static', filename=imagen_png) }}" alt="{{ perfil.nombre }}">
+                        {% else %}
+                            <div class="perfil-placeholder">
+                                <span>{{ perfil.nombre[:2]|upper }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="perfil-resumen-info">
+                        <h2>{{ perfil.nombre }}</h2>
+                        <p class="perfil-titulo">{{ perfil.titulo or 'Sin título' }}</p>
+                        {% if perfil.habilidades %}
+                        <div class="perfil-card-skills" style="margin-top: 0.5rem;">
+                            {% for hab in perfil.habilidades[:5] %}
+                            <span class="skill-badge">{{ hab.nombre }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="perfil-resumen-actions">
+                    <a href="{{ url_for('editar_mi_perfil') }}" class="btn btn-primary">Editar Perfil</a>
+                    {% if perfil.estado == 'aprobado' %}
+                    <a href="{{ url_for('ver_perfil', slug=perfil.slug) }}" class="btn btn-outline" target="_blank">
+                        Ver como público
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% else %}
+            <!-- No tiene perfil aún -->
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>Aún no tienes un perfil</h3>
+                <p>Crea tu perfil de practicante para que las empresas puedan conocerte</p>
+                <a href="{{ url_for('crear_mi_perfil') }}" class="btn btn-primary btn-lg" style="margin-top: 1rem;">
+                    Crear mi Perfil
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

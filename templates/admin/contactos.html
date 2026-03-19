@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Contactos - Admin{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Contactos Recibidos</h1>
+        <p>Mensajes del formulario de contacto</p>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="container">
+        <div class="admin-nav">
+            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link active">Contactos</a>
+        </div>
+
+        <div class="admin-card">
+            <h3 class="admin-card-title">{{ contactos|length }} contacto{{ 's' if contactos|length != 1 }}</h3>
+            
+            {% if contactos %}
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Empresa</th>
+                            <th>Correo</th>
+                            <th>Celular</th>
+                            <th>Mensaje</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in contactos %}
+                        <tr>
+                            <td><strong>{{ c.nombre }}</strong></td>
+                            <td>{{ c.empresa }}</td>
+                            <td><a href="mailto:{{ c.correo }}">{{ c.correo }}</a></td>
+                            <td>{{ c.celular }}</td>
+                            <td class="mensaje-cell">{{ c.mensaje[:80] }}{{ '...' if c.mensaje and c.mensaje|length > 80 }}</td>
+                            <td>{{ c.fecha_registro.strftime('%d/%m/%Y %H:%M') if c.fecha_registro else '-' }}</td>
+                            <td>
+                                <form method="POST" action="{{ url_for('eliminar_contacto', id=c.id) }}"
+                                      onsubmit="return confirm('¿Eliminar este contacto?')">
+                                    <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align:center; color: var(--text-secondary); padding: 2rem;">
+                No hay contactos recibidos aún
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

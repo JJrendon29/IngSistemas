@@ -3,50 +3,48 @@
 {% block title %}{{ perfil.nombre }} - Perfil{% endblock %}
 
 {% block content %}
-<!-- Botón Volver -->
 <div class="back-button-container">
     <div class="container">
-        <a href="{{ url_for('index') }}" class="btn-back">
-            ← Volver al equipo
-        </a>
+        <a href="{{ url_for('index') }}" class="btn-back">← Volver al equipo</a>
     </div>
 </div>
 
-<!-- Perfil Individual -->
 <section class="perfil-individual-section">
     <div class="container">
         <div class="perfil-individual-card">
-            <!-- Columna Izquierda: Imagen y Links -->
+            <!-- Sidebar -->
             <div class="perfil-sidebar">
                 <div class="perfil-image-large">
-                    {% set imagen_jpg = 'usuarios/' ~ perfil.slug ~ '/perfil.jpg' %}
-                    {% set imagen_png = 'usuarios/' ~ perfil.slug ~ '/perfil.png' %}
-                    
-                    {% if existe_archivo(imagen_jpg) %}
-                        <img src="{{ url_for('static', filename=imagen_jpg) }}" 
+                    {% if perfil._imagen_disco %}
+                        <img src="{{ url_for('static', filename=perfil._imagen_disco) }}" 
                              alt="{{ perfil.nombre }}">
-                    {% elif existe_archivo(imagen_png) %}
-                        <img src="{{ url_for('static', filename=imagen_png) }}" 
+                    {% elif perfil.foto_url and existe_archivo(perfil.foto_url) %}
+                        <img src="{{ url_for('static', filename=perfil.foto_url) }}" 
                              alt="{{ perfil.nombre }}">
                     {% else %}
-                        <img src="https://via.placeholder.com/400x400?text={{ perfil.nombre[:15] }}" 
-                             alt="{{ perfil.nombre }}">
+                        <div class="perfil-placeholder-large">
+                            <span>{{ perfil.nombre[:2]|upper }}</span>
+                        </div>
                     {% endif %}
                 </div>
                 
                 <div class="perfil-links">
-                    <!-- Verificar si existe CV -->
                     {% set cv_path = 'usuarios/' ~ perfil.slug ~ '/cv.pdf' %}
-                    {% if existe_archivo(cv_path) %}
+                    {% if perfil.cv_url and existe_archivo(perfil.cv_url) %}
+                    <a href="{{ url_for('static', filename=perfil.cv_url) }}" 
+                       class="btn btn-primary btn-block" target="_blank">
+                        📄 Descargar CV
+                    </a>
+                    {% elif existe_archivo(cv_path) %}
                     <a href="{{ url_for('static', filename=cv_path) }}" 
                        class="btn btn-primary btn-block" target="_blank">
                         📄 Descargar CV
                     </a>
                     {% endif %}
                     
-                    {% if perfil.email %}
-                    <a href="mailto:{{ perfil.email }}" class="btn btn-secondary btn-block">
-                        ✉️ {{ perfil.email }}
+                    {% if perfil.email_contacto or perfil.get('email') %}
+                    <a href="mailto:{{ perfil.email_contacto or perfil.email }}" class="btn btn-secondary btn-block">
+                        ✉️ {{ perfil.email_contacto or perfil.email }}
                     </a>
                     {% endif %}
                     
@@ -64,15 +62,13 @@
                 </div>
             </div>
             
-            <!-- Columna Derecha: Información -->
+            <!-- Content -->
             <div class="perfil-content">
-                <!-- Header -->
                 <div class="perfil-header">
                     <h1 class="perfil-nombre">{{ perfil.nombre }}</h1>
-                    <p class="perfil-titulo">{{ perfil.titulo }}</p>
+                    <p class="perfil-titulo">{{ perfil.titulo or 'Practicante' }}</p>
                 </div>
                 
-                <!-- Sobre mí -->
                 {% if perfil.descripcion %}
                 <div class="perfil-section">
                     <h2 class="section-title-small">Sobre mí</h2>
@@ -80,7 +76,6 @@
                 </div>
                 {% endif %}
                 
-                <!-- Habilidades -->
                 {% if perfil.habilidades %}
                 <div class="perfil-section">
                     <h2 class="section-title-small">Habilidades</h2>
@@ -90,7 +85,7 @@
                             <span class="habilidad-nombre">{{ habilidad.nombre }}</span>
                             {% if habilidad.nivel %}
                             <span class="habilidad-nivel nivel-{{ habilidad.nivel|lower }}">
-                                {{ habilidad.nivel }}
+                                {{ habilidad.nivel|capitalize }}
                             </span>
                             {% endif %}
                         </div>
@@ -99,7 +94,6 @@
                 </div>
                 {% endif %}
                 
-                <!-- Formación -->
                 {% if perfil.formacion %}
                 <div class="perfil-section">
                     <h2 class="section-title-small">Formación Académica</h2>
@@ -108,14 +102,13 @@
                         <div class="formacion-item">
                             <h3 class="formacion-titulo">{{ item.titulo }}</h3>
                             <p class="formacion-institucion">{{ item.institucion }}</p>
-                            <p class="formacion-año">{{ item.año }}</p>
+                            <p class="formacion-año">{{ item.anio }}</p>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
                 {% endif %}
                 
-                <!-- Idiomas -->
                 {% if perfil.idiomas %}
                 <div class="perfil-section">
                     <h2 class="section-title-small">Idiomas</h2>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Proyecto Ingeniería de Sistemas{% endblock %}</title>
+    <title>{% block title %}Practicantes - Universidad Católica Luis Amigó{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -12,10 +12,11 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="https://www.funlam.edu.co/themes/uluisamigo/img/Logo-UcatolicaLuisAmigo.png"> </img>
+                <a href="{{ url_for('index') }}">
+                    <img src="https://www.funlam.edu.co/themes/uluisamigo/img/Logo-UcatolicaLuisAmigo.png" alt="UCatólica Luis Amigó">
+                </a>
             </div>
             
-            <!-- Menú de hamburguesa para móvil -->
             <button class="nav-toggle" id="navToggle">
                 <span></span>
                 <span></span>
@@ -26,10 +27,30 @@
                 <li class="nav-item">
                     <a href="{{ url_for('index') }}" class="nav-link">Inicio</a>
                 </li>
-                
                 <li class="nav-item">
                     <a href="{{ url_for('contacto') }}" class="nav-link">Contacto</a>
                 </li>
+
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('mi_perfil') }}" class="nav-link">Mi Perfil</a>
+                    </li>
+                    {% if current_user.es_admin() %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_panel') }}" class="nav-link nav-link-admin">Admin</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="nav-link nav-link-logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('login') }}" class="nav-link">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('registro') }}" class="nav-link nav-link-registro">Registrarse</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
@@ -56,7 +77,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <p>&copy; 2025 Proyecto Ingeniería de Sistemas. Todos los derechos reservados.</p>
+            <p>&copy; 2025 Practicantes - Ingeniería de Sistemas</p>
             <p>Universidad Católica Luis Amigó - Medellín, Colombia</p>
         </div>
     </footer>

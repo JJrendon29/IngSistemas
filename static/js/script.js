@@ -8,12 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (navToggle && navMenu) {
         navToggle.addEventListener('click', function() {
             navMenu.classList.toggle('active');
-            
-            // Animar el ícono de hamburguesa
             navToggle.classList.toggle('active');
         });
         
-        // Cerrar menú al hacer clic en un enlace
         const navLinks = navMenu.querySelectorAll('a');
         navLinks.forEach(link => {
             link.addEventListener('click', function() {
@@ -22,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Cerrar menú al hacer clic fuera
         document.addEventListener('click', function(event) {
             const isClickInsideNav = navMenu.contains(event.target);
             const isClickOnToggle = navToggle.contains(event.target);
@@ -45,50 +41,37 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const alert = this.parentElement;
             alert.style.animation = 'slideOut 0.3s ease';
-            
-            setTimeout(() => {
-                alert.remove();
-            }, 300);
+            setTimeout(() => alert.remove(), 300);
         });
     });
     
-    // Auto cerrar alertas después de 5 segundos
+    // Auto cerrar después de 5 segundos
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {
         setTimeout(() => {
             alert.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => {
-                alert.remove();
-            }, 300);
+            setTimeout(() => alert.remove(), 300);
         }, 5000);
     });
 });
 
-// Animación de salida para alertas
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
     }
 `;
 document.head.appendChild(style);
 
 // ========================================
-// VALIDACIÓN DE FORMULARIO
+// VALIDACIÓN DE FORMULARIO DE CONTACTO
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     const contactoForm = document.getElementById('contactoForm');
     
     if (contactoForm) {
         contactoForm.addEventListener('submit', function(e) {
-            // Validar campos antes de enviar
             const nombre = document.getElementById('nombre').value.trim();
             const empresa = document.getElementById('empresa').value.trim();
             const correo = document.getElementById('correo').value.trim();
@@ -100,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Validar formato de email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(correo)) {
                 e.preventDefault();
@@ -108,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Validar teléfono (solo números)
             const phoneRegex = /^[0-9+\s()-]+$/;
             if (!phoneRegex.test(celular)) {
                 e.preventDefault();
@@ -116,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Mostrar mensaje de carga
             const submitBtn = contactoForm.querySelector('button[type="submit"]');
             submitBtn.textContent = 'Enviando...';
             submitBtn.disabled = true;
@@ -128,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // FUNCIÓN PARA MOSTRAR ALERTAS
 // ========================================
 function showAlert(message, type = 'success') {
-    // Crear contenedor de alertas si no existe
     let flashContainer = document.querySelector('.flash-messages');
     if (!flashContainer) {
         flashContainer = document.createElement('div');
@@ -136,7 +115,6 @@ function showAlert(message, type = 'success') {
         document.body.appendChild(flashContainer);
     }
     
-    // Crear alerta
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
     alert.innerHTML = `
@@ -146,77 +124,17 @@ function showAlert(message, type = 'success') {
     
     flashContainer.appendChild(alert);
     
-    // Agregar evento de cierre
     const closeBtn = alert.querySelector('.close-alert');
     closeBtn.addEventListener('click', function() {
         alert.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => alert.remove(), 300);
     });
     
-    // Auto cerrar después de 5 segundos
     setTimeout(() => {
         alert.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => alert.remove(), 300);
     }, 5000);
 }
-
-// ========================================
-// SMOOTH SCROLL PARA ANCLAS
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    const links = document.querySelectorAll('a[href^="#"]');
-    
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            const href = this.getAttribute('href');
-            
-            // Ignorar # solo
-            if (href === '#') return;
-            
-            const target = document.querySelector(href);
-            if (target) {
-                e.preventDefault();
-                
-                const offsetTop = target.offsetTop - 80; // 80px para el navbar
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-});
-
-// ========================================
-// ANIMACIONES AL HACER SCROLL
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-    
-    // Elementos a animar
-    const animatedElements = document.querySelectorAll(
-        '.unidad-card, .team-member, .perfil-card, .topic-card, .resource-item'
-    );
-    
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-});
 
 // ========================================
 // VALIDACIÓN EN TIEMPO REAL
@@ -232,90 +150,21 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (email && !emailRegex.test(email)) {
                 this.style.borderColor = '#ef4444';
-                showFieldError(this, 'Correo electrónico inválido');
-            } else {
+            } else if (email) {
                 this.style.borderColor = '#10b981';
-                removeFieldError(this);
             }
         });
     }
     
     if (phoneInput) {
         phoneInput.addEventListener('input', function() {
-            // Permitir solo números, +, espacios, paréntesis y guiones
             this.value = this.value.replace(/[^0-9+\s()-]/g, '');
         });
-        
-        phoneInput.addEventListener('blur', function() {
-            const phone = this.value.trim();
-            
-            if (phone.length < 7) {
-                this.style.borderColor = '#ef4444';
-                showFieldError(this, 'Número de teléfono muy corto');
-            } else {
-                this.style.borderColor = '#10b981';
-                removeFieldError(this);
-            }
-        });
-    }
-});
-
-function showFieldError(input, message) {
-    removeFieldError(input);
-    
-    const error = document.createElement('span');
-    error.className = 'field-error';
-    error.style.color = '#ef4444';
-    error.style.fontSize = '0.875rem';
-    error.style.marginTop = '0.25rem';
-    error.textContent = message;
-    
-    input.parentElement.appendChild(error);
-}
-
-function removeFieldError(input) {
-    const error = input.parentElement.querySelector('.field-error');
-    if (error) {
-        error.remove();
-    }
-}
-
-// ========================================
-// CONTADOR DE CARACTERES PARA TEXTAREA
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    const textarea = document.getElementById('mensaje');
-    
-    if (textarea) {
-        const maxLength = textarea.getAttribute('maxlength') || 1000;
-        
-        // Crear contador
-        const counter = document.createElement('div');
-        counter.className = 'char-counter';
-        counter.style.textAlign = 'right';
-        counter.style.fontSize = '0.875rem';
-        counter.style.color = '#64748b';
-        counter.style.marginTop = '0.25rem';
-        counter.textContent = `0 / ${maxLength}`;
-        
-        textarea.parentElement.appendChild(counter);
-        
-        // Actualizar contador
-        textarea.addEventListener('input', function() {
-            const length = this.value.length;
-            counter.textContent = `${length} / ${maxLength}`;
-            
-            if (length >= maxLength * 0.9) {
-                counter.style.color = '#ef4444';
-            } else {
-                counter.style.color = '#64748b';
-            }
-        });
     }
 });
 
 // ========================================
-// PREVENIR ENVÍO DUPLICADO DEL FORMULARIO
+// PREVENIR ENVÍO DUPLICADO
 // ========================================
 let formSubmitting = false;
 
@@ -328,39 +177,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 return false;
             }
-            
             formSubmitting = true;
-            
-            // Restablecer después de 3 segundos (por si hay error)
-            setTimeout(() => {
-                formSubmitting = false;
-            }, 3000);
+            setTimeout(() => { formSubmitting = false; }, 3000);
         });
     });
 });
 
 // ========================================
-// DESTACAR SECCIÓN ACTIVA EN NAVBAR
+// SCROLL TO TOP
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    const currentPath = window.location.pathname;
-    const navLinks = document.querySelectorAll('.nav-link, .dropdown-menu a');
-    
-    navLinks.forEach(link => {
-        const href = link.getAttribute('href');
-        
-        if (href && currentPath.includes(href) && href !== '/') {
-            link.style.color = '#3b82f6';
-            link.style.fontWeight = '600';
-        }
-    });
-});
-
-// ========================================
-// SCROLL TO TOP BUTTON (OPCIONAL)
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Crear botón
     const scrollTopBtn = document.createElement('button');
     scrollTopBtn.innerHTML = '↑';
     scrollTopBtn.className = 'scroll-to-top';
@@ -371,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #2563eb;
+        background-color: var(--primary-color, #007b99);
         color: white;
         border: none;
         font-size: 1.5rem;
@@ -385,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.body.appendChild(scrollTopBtn);
     
-    // Mostrar/ocultar botón según scroll
     window.addEventListener('scroll', function() {
         if (window.scrollY > 300) {
             scrollTopBtn.style.opacity = '1';
@@ -396,68 +221,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Scroll al hacer clic
     scrollTopBtn.addEventListener('click', function() {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
-    
-    // Hover effect
-    scrollTopBtn.addEventListener('mouseenter', function() {
-        this.style.backgroundColor = '#1e40af';
-        this.style.transform = 'scale(1.1)';
-    });
-    
-    scrollTopBtn.addEventListener('mouseleave', function() {
-        this.style.backgroundColor = '#2563eb';
-        this.style.transform = 'scale(1)';
-    });
-});
-
-// ========================================
-// LAZY LOADING PARA IMÁGENES
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img[data-src]');
-    
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-                observer.unobserve(img);
-            }
-        });
-    });
-    
-    images.forEach(img => imageObserver.observe(img));
-});
-
-// ========================================
-// MANEJO DE ERRORES DE IMÁGENES
-// ========================================
-document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img');
-    
-    images.forEach(img => {
-        img.addEventListener('error', function() {
-            // Si la imagen no carga, usar placeholder
-            if (!this.src.includes('placeholder')) {
-                const alt = this.alt || 'Imagen no disponible';
-                this.src = `https://via.placeholder.com/400x400?text=${encodeURIComponent(alt)}`;
-            }
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
 
 // ========================================
 // MODO OSCURO
 // ========================================
-// Descomenta esto si quieres agregar modo oscuro
-
 document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.createElement('button');
     darkModeToggle.innerHTML = '🌓';
@@ -469,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         height: 40px;
         border-radius: 50%;
         background-color: white;
-        border: 2px solid #2563eb;
+        border: 2px solid var(--primary-color, #007b99);
         font-size: 1.2rem;
         cursor: pointer;
         z-index: 999;
@@ -483,7 +254,6 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
     });
     
-    // Cargar preferencia guardada
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
