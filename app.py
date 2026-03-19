@@ -12,7 +12,8 @@ from models import (
     Usuario, obtener_todos_perfiles, obtener_perfil_por_slug,
     obtener_perfil_por_usuario, crear_perfil, actualizar_perfil,
     guardar_habilidades, guardar_formacion, guardar_idiomas,
-    buscar_perfiles_por_habilidad, obtener_habilidades_unicas
+    buscar_perfiles_por_habilidad, obtener_habilidades_unicas,
+    obtener_catalogo_titulos, obtener_catalogo_habilidades, obtener_catalogo_idiomas
 )
 
 # ========================================
@@ -318,11 +319,18 @@ def crear_mi_perfil():
     if perfil_existente:
         return redirect(url_for('editar_mi_perfil'))
 
+    catalogos = {
+        'titulos': obtener_catalogo_titulos(),
+        'habilidades': obtener_catalogo_habilidades(),
+        'idiomas': obtener_catalogo_idiomas()
+    }
+
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         if not nombre:
             flash('El nombre es obligatorio', 'error')
-            return render_template('editar_perfil.html', perfil=None, modo='crear')
+            return render_template('editar_perfil.html', perfil=None, modo='crear',
+                                   catalogos=catalogos)
 
         slug = generar_slug(nombre)
 
@@ -333,17 +341,29 @@ def crear_mi_perfil():
         if errores_url:
             for error in errores_url:
                 flash(error, 'error')
-            return render_template('editar_perfil.html', perfil=None, modo='crear')
+            return render_template('editar_perfil.html', perfil=None, modo='crear',
+                                   catalogos=catalogos)
+
+        # Procesar título: puede ser ID del catálogo o "otro"
+        titulo_sel = request.form.get('titulo_catalogo', '').strip()
+        titulo_otro = request.form.get('titulo_otro', '').strip()
+        if titulo_sel == 'otro':
+            titulo_final = titulo_otro
+            titulo_otro_guardar = titulo_otro
+        else:
+            titulo_final = titulo_sel  # Se guarda el id como referencia textual
+            titulo_otro_guardar = ''
 
         perfil_id = crear_perfil(
             usuario_id=current_user.id,
             nombre=nombre,
             slug=slug,
-            titulo=request.form.get('titulo', '').strip(),
+            titulo=titulo_final,
+            titulo_otro=titulo_otro_guardar,
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
-            github=request.form.get('github', '').strip(),
-            linkedin=request.form.get('linkedin', '').strip()
+            github=github,
+            linkedin=linkedin
         )
 
         if perfil_id:
@@ -359,7 +379,6 @@ def crear_mi_perfil():
                 if ruta:
                     actualizar_perfil(perfil_id, cv_url=ruta, estado='pendiente')
 
-            # Guardar habilidades
             _guardar_habilidades_desde_form(perfil_id, request.form)
             _guardar_formacion_desde_form(perfil_id, request.form)
             _guardar_idiomas_desde_form(perfil_id, request.form)
@@ -369,7 +388,8 @@ def crear_mi_perfil():
         else:
             flash('Error al crear el perfil', 'error')
 
-    return render_template('editar_perfil.html', perfil=None, modo='crear')
+    return render_template('editar_perfil.html', perfil=None, modo='crear',
+                           catalogos=catalogos)
 
 
 @app.route('/mi-perfil/editar', methods=['GET', 'POST'])
@@ -379,11 +399,18 @@ def editar_mi_perfil():
     if not perfil:
         return redirect(url_for('crear_mi_perfil'))
 
+    catalogos = {
+        'titulos': obtener_catalogo_titulos(),
+        'habilidades': obtener_catalogo_habilidades(),
+        'idiomas': obtener_catalogo_idiomas()
+    }
+
     if request.method == 'POST':
         nombre = request.form.get('nombre', '').strip()
         if not nombre:
             flash('El nombre es obligatorio', 'error')
-            return render_template('editar_perfil.html', perfil=perfil, modo='editar')
+            return render_template('editar_perfil.html', perfil=perfil, modo='editar',
+                                   catalogos=catalogos)
 
         nuevo_slug = generar_slug(nombre)
 
@@ -401,17 +428,29 @@ def editar_mi_perfil():
         if errores_url:
             for error in errores_url:
                 flash(error, 'error')
-            return render_template('editar_perfil.html', perfil=perfil, modo='editar')
+            return render_template('editar_perfil.html', perfil=perfil, modo='editar',
+                                   catalogos=catalogos)
+
+        # Procesar título: puede ser ID del catálogo o "otro"
+        titulo_sel = request.form.get('titulo_catalogo', '').strip()
+        titulo_otro = request.form.get('titulo_otro', '').strip()
+        if titulo_sel == 'otro':
+            titulo_final = titulo_otro
+            titulo_otro_guardar = titulo_otro
+        else:
+            titulo_final = titulo_sel
+            titulo_otro_guardar = ''
 
         actualizar_perfil(
             perfil['id'],
             nombre=nombre,
             slug=nuevo_slug,
-            titulo=request.form.get('titulo', '').strip(),
+            titulo=titulo_final,
+            titulo_otro=titulo_otro_guardar,
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
-            github=request.form.get('github', '').strip(),
-            linkedin=request.form.get('linkedin', '').strip()
+            github=github,
+            linkedin=linkedin
         )
 
         # Archivos
@@ -434,7 +473,8 @@ def editar_mi_perfil():
         flash('Perfil actualizado. Está pendiente de aprobación.', 'success')
         return redirect(url_for('mi_perfil'))
 
-    return render_template('editar_perfil.html', perfil=perfil, modo='editar')
+    return render_template('editar_perfil.html', perfil=perfil, modo='editar',
+                           catalogos=catalogos)
 
 
 # ========================================
@@ -531,24 +571,23 @@ def eliminar_contacto(id):
 # ========================================
 
 def _guardar_habilidades_desde_form(perfil_id, form):
-    """Parsea habilidades del formulario dinámico"""
+    """
+    Parsea habilidades del formulario con checkboxes de catálogo.
+    Los checkboxes envían catalogo_ids[] con los IDs seleccionados.
+    El nivel de cada uno viene en hab_nivel_<catalogo_id>.
+    """
+    niveles_validos = {'basico', 'intermedio', 'avanzado'}
+    catalogo_ids = form.getlist('catalogo_ids[]')
     habilidades = []
-    i = 0
-    while True:
-        nombre = form.get(f'hab_nombre_{i}', '').strip()
-        if nombre == '' and i > 0:
-            # Verificar si hay más
-            next_nombre = form.get(f'hab_nombre_{i+1}', '').strip()
-            if not next_nombre:
-                break
-            i += 1
+    for cid in catalogo_ids:
+        try:
+            cid_int = int(cid)
+        except (ValueError, TypeError):
             continue
-        if nombre:
-            nivel = form.get(f'hab_nivel_{i}', 'intermedio')
-            habilidades.append({'nombre': nombre, 'nivel': nivel})
-        i += 1
-        if i > 50:  # Safety limit
-            break
+        nivel = form.get(f'hab_nivel_{cid_int}', 'intermedio').strip()
+        if nivel not in niveles_validos:
+            nivel = 'intermedio'
+        habilidades.append({'catalogo_id': cid_int, 'nivel': nivel})
     guardar_habilidades(perfil_id, habilidades)
 
 
@@ -577,25 +616,32 @@ def _guardar_formacion_desde_form(perfil_id, form):
 
 
 def _guardar_idiomas_desde_form(perfil_id, form):
-    """Parsea idiomas del formulario dinámico"""
+    """
+    Parsea idiomas del formulario dinámico con catálogo.
+    Cada fila envía idioma_catalogo_id_<i> y idioma_nivel_<i>.
+    Itera hasta que no encuentre ninguna clave más en el form.
+    """
+    niveles_validos = {'A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Nativo'}
     idiomas_list = []
-    i = 0
-    while True:
-        idioma = form.get(f'idioma_nombre_{i}', '').strip()
-        if idioma == '' and i > 0:
-            next_idioma = form.get(f'idioma_nombre_{i+1}', '').strip()
-            if not next_idioma:
-                break
-            i += 1
+    # Recopilar todos los índices presentes en el form
+    indices = set()
+    for key in form.keys():
+        if key.startswith('idioma_catalogo_id_'):
+            try:
+                indices.add(int(key.replace('idioma_catalogo_id_', '')))
+            except ValueError:
+                pass
+    for i in sorted(indices):
+        cid = form.get(f'idioma_catalogo_id_{i}', '').strip()
+        nivel = form.get(f'idioma_nivel_{i}', '').strip()
+        if not cid:
             continue
-        if idioma:
-            idiomas_list.append({
-                'idioma': idioma,
-                'nivel': form.get(f'idioma_nivel_{i}', '').strip()
-            })
-        i += 1
-        if i > 20:
-            break
+        try:
+            cid_int = int(cid)
+        except (ValueError, TypeError):
+            continue
+        if nivel in niveles_validos:
+            idiomas_list.append({'catalogo_id': cid_int, 'nivel': nivel})
     guardar_idiomas(perfil_id, idiomas_list)
 
 

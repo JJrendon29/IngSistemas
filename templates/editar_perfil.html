@@ -14,11 +14,11 @@
     <div class="container">
         <div class="form-container">
             <form method="POST" enctype="multipart/form-data" class="perfil-form">
-                
+
                 <!-- INFORMACIÓN BÁSICA -->
                 <fieldset class="form-fieldset">
                     <legend>Información Básica</legend>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre Completo *</label>
@@ -26,12 +26,35 @@
                                    value="{{ perfil.nombre if perfil else '' }}"
                                    placeholder="Tu nombre completo">
                         </div>
+
+                        <!-- TÍTULO: select del catálogo + campo "Otro" -->
                         <div class="form-group">
-                            <label for="titulo">Título / Cargo</label>
-                            <input type="text" id="titulo" name="titulo"
-                                   value="{{ perfil.titulo if perfil else '' }}"
-                                   placeholder="Ej: Desarrollador Web, Analista de Datos">
+                            <label for="titulo_catalogo">Título / Perfil Profesional</label>
+                            <select id="titulo_catalogo" name="titulo_catalogo"
+                                    onchange="toggleTituloOtro(this.value)">
+                                <option value="">-- Selecciona tu título --</option>
+                                {% for t in catalogos.titulos %}
+                                    <option value="{{ t.nombre }}"
+                                        {% if perfil and perfil.titulo == t.nombre and not perfil.get('titulo_otro') %}selected{% endif %}>
+                                        {{ t.nombre }}
+                                    </option>
+                                {% endfor %}
+                                <option value="otro"
+                                    {% if perfil and perfil.get('titulo_otro') %}selected{% endif %}>
+                                    Otro
+                                </option>
+                            </select>
                         </div>
+                    </div>
+
+                    <!-- Campo "Otro" título (se muestra solo si elige Otro) -->
+                    <div class="form-group" id="titulo-otro-container"
+                         style="{{ '' if (perfil and perfil.get('titulo_otro')) else 'display:none;' }}">
+                        <label for="titulo_otro">Especifica tu título / Perfil Profesionsal</label>
+                        <input type="text" id="titulo_otro" name="titulo_otro"
+                               value="{{ perfil.titulo_otro if perfil else '' }}"
+                               placeholder="Describe tu perfil profesional"
+                               maxlength="200">
                     </div>
 
                     <div class="form-group">
@@ -91,41 +114,67 @@
                     </div>
                 </fieldset>
 
-                <!-- HABILIDADES (dinámico) -->
+                <!-- HABILIDADES: checkboxes agrupados por categoría -->
                 <fieldset class="form-fieldset">
-                    <legend>Habilidades</legend>
-                    <p class="form-hint">Agrega tus habilidades técnicas y blandas. Estas servirán como filtros de búsqueda.</p>
-                    <div id="habilidades-container">
-                        {% if perfil and perfil.habilidades %}
-                            {% for hab in perfil.habilidades %}
-                            <div class="dynamic-row">
-                                <input type="text" name="hab_nombre_{{ loop.index0 }}" 
-                                       value="{{ hab.nombre }}" placeholder="Ej: Python, React, MySQL">
-                                <select name="hab_nivel_{{ loop.index0 }}">
-                                    <option value="basico" {{ 'selected' if hab.nivel == 'basico' }}>Básico</option>
-                                    <option value="intermedio" {{ 'selected' if hab.nivel == 'intermedio' }}>Intermedio</option>
-                                    <option value="avanzado" {{ 'selected' if hab.nivel == 'avanzado' }}>Avanzado</option>
-                                </select>
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                    <legend>Habilidades Técnicas</legend>
+                    <p class="form-hint">
+                        Marca las habilidades que dominas y selecciona tu nivel en cada una.
+                        Estas servirán como filtros de búsqueda para las empresas.
+                    </p>
+
+                    {# Construir set de catalogo_ids ya guardados para preselección #}
+                    {% set habs_guardadas = {} %}
+                    {% if perfil and perfil.habilidades %}
+                        {% for h in perfil.habilidades %}
+                            {% if habs_guardadas.update({h.catalogo_id: h.nivel}) %}{% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% set categorias_labels = {
+                        'lenguaje':    'Lenguajes de Programación',
+                        'framework':   'Frameworks y Librerías',
+                        'base_datos':  'Bases de Datos',
+                        'herramienta': 'Herramientas y DevOps'
+                    } %}
+
+                    {% for cat_key, cat_label in categorias_labels.items() %}
+                        {% if catalogos.habilidades[cat_key] %}
+                        <div class="habilidades-categoria">
+                            <h4 class="categoria-titulo">{{ cat_label }}</h4>
+                            <div class="habilidades-checkboxes">
+                                {% for hab in catalogos.habilidades[cat_key] %}
+                                {% set esta_marcada = hab.id in habs_guardadas %}
+                                {% set nivel_guardado = habs_guardadas.get(hab.id, 'intermedio') %}
+                                <div class="hab-checkbox-row {{ 'activa' if esta_marcada else '' }}"
+                                     id="hab-row-{{ hab.id }}">
+                                    <label class="hab-checkbox-label">
+                                        <input type="checkbox"
+                                               name="catalogo_ids[]"
+                                               value="{{ hab.id }}"
+                                               {{ 'checked' if esta_marcada else '' }}
+                                               onchange="toggleNivelHabilidad(this, {{ hab.id }})">
+                                        <span class="hab-nombre">{{ hab.nombre }}</span>
+                                    </label>
+                                    <select name="hab_nivel_{{ hab.id }}"
+                                            id="hab-nivel-{{ hab.id }}"
+                                            class="hab-nivel-select"
+                                            {{ '' if esta_marcada else 'disabled' }}>
+                                        <option value="basico"
+                                            {{ 'selected' if nivel_guardado == 'basico' }}>Básico</option>
+                                        <option value="intermedio"
+                                            {{ 'selected' if nivel_guardado == 'intermedio' or not esta_marcada }}>Intermedio</option>
+                                        <option value="avanzado"
+                                            {{ 'selected' if nivel_guardado == 'avanzado' }}>Avanzado</option>
+                                    </select>
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="dynamic-row">
-                                <input type="text" name="hab_nombre_0" placeholder="Ej: Python, React, MySQL">
-                                <select name="hab_nivel_0">
-                                    <option value="basico">Básico</option>
-                                    <option value="intermedio" selected>Intermedio</option>
-                                    <option value="avanzado">Avanzado</option>
-                                </select>
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
-                            </div>
+                        </div>
                         {% endif %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline" 
-                            onclick="agregarHabilidad()">+ Agregar habilidad</button>
+                    {% endfor %}
                 </fieldset>
 
-                <!-- FORMACIÓN ACADÉMICA (dinámico) -->
+                <!-- FORMACIÓN ACADÉMICA (dinámico — sin cambios) -->
                 <fieldset class="form-fieldset">
                     <legend>Formación Académica</legend>
                     <div id="formacion-container">
@@ -134,21 +183,21 @@
                             <div class="dynamic-block">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <input type="text" name="form_titulo_{{ loop.index0 }}" 
+                                        <input type="text" name="form_titulo_{{ loop.index0 }}"
                                                value="{{ f.titulo }}" placeholder="Título obtenido">
                                     </div>
                                     <div class="form-group">
-                                        <input type="text" name="form_institucion_{{ loop.index0 }}" 
+                                        <input type="text" name="form_institucion_{{ loop.index0 }}"
                                                value="{{ f.institucion }}" placeholder="Institución">
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <input type="text" name="form_anio_{{ loop.index0 }}" 
+                                        <input type="text" name="form_anio_{{ loop.index0 }}"
                                                value="{{ f.anio }}" placeholder="Año (ej: 2020 - 2024)">
                                     </div>
                                     <div class="form-group" style="display:flex;align-items:end;">
-                                        <button type="button" class="btn btn-sm btn-delete" 
+                                        <button type="button" class="btn btn-sm btn-delete"
                                                 onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
                                     </div>
                                 </div>
@@ -169,40 +218,62 @@
                                         <input type="text" name="form_anio_0" placeholder="Año (ej: 2020 - 2024)">
                                     </div>
                                     <div class="form-group" style="display:flex;align-items:end;">
-                                        <button type="button" class="btn btn-sm btn-delete" 
+                                        <button type="button" class="btn btn-sm btn-delete"
                                                 onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
                                     </div>
                                 </div>
                             </div>
                         {% endif %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline" 
+                    <button type="button" class="btn btn-sm btn-outline"
                             onclick="agregarFormacion()">+ Agregar formación</button>
                 </fieldset>
 
-                <!-- IDIOMAS (dinámico) -->
+                <!-- IDIOMAS: select del catálogo + nivel ENUM -->
                 <fieldset class="form-fieldset">
                     <legend>Idiomas</legend>
+                    <p class="form-hint">Agrega los idiomas que manejas y tu nivel de competencia.</p>
                     <div id="idiomas-container">
                         {% if perfil and perfil.idiomas %}
                             {% for i in perfil.idiomas %}
                             <div class="dynamic-row">
-                                <input type="text" name="idioma_nombre_{{ loop.index0 }}" 
-                                       value="{{ i.idioma }}" placeholder="Idioma">
-                                <input type="text" name="idioma_nivel_{{ loop.index0 }}" 
-                                       value="{{ i.nivel }}" placeholder="Nivel (ej: Nativo, B2, Intermedio)">
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                                <select name="idioma_catalogo_id_{{ loop.index0 }}"
+                                        class="idioma-select">
+                                    <option value="">-- Selecciona un idioma --</option>
+                                    {% for op in catalogos.idiomas %}
+                                        <option value="{{ op.id }}"
+                                            {{ 'selected' if op.id == i.catalogo_id }}>{{ op.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="idioma_nivel_{{ loop.index0 }}">
+                                    {% for nv in ['A1','A2','B1','B2','C1','C2','Nativo'] %}
+                                        <option value="{{ nv }}"
+                                            {{ 'selected' if i.nivel == nv }}>{{ nv }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn-remove"
+                                        onclick="this.parentElement.remove()">&#x2715;</button>
                             </div>
                             {% endfor %}
                         {% else %}
                             <div class="dynamic-row">
-                                <input type="text" name="idioma_nombre_0" placeholder="Idioma">
-                                <input type="text" name="idioma_nivel_0" placeholder="Nivel (ej: Nativo, B2)">
-                                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+                                <select name="idioma_catalogo_id_0" class="idioma-select">
+                                    <option value="">-- Selecciona un idioma --</option>
+                                    {% for op in catalogos.idiomas %}
+                                        <option value="{{ op.id }}">{{ op.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="idioma_nivel_0">
+                                    {% for nv in ['A1','A2','B1','B2','C1','C2','Nativo'] %}
+                                        <option value="{{ nv }}">{{ nv }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn-remove"
+                                        onclick="this.parentElement.remove()">&#x2715;</button>
                             </div>
                         {% endif %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline" 
+                    <button type="button" class="btn btn-sm btn-outline"
                             onclick="agregarIdioma()">+ Agregar idioma</button>
                 </fieldset>
 
@@ -225,29 +296,169 @@
 </section>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+/* ---- Sección de habilidades por categoría ---- */
+.habilidades-categoria {
+    margin-bottom: 1.5rem;
+}
+
+.categoria-titulo {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 0.4rem 0.75rem;
+    background-color: #e0f2fe;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    display: inline-block;
+}
+
+.habilidades-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem;
+}
+
+.hab-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-light);
+    transition: var(--transition);
+}
+
+.hab-checkbox-row.activa {
+    border-color: var(--primary-color);
+    background-color: #e0f2fe;
+}
+
+.hab-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    cursor: pointer;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.hab-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hab-nombre {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.hab-nivel-select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: white;
+    transition: var(--transition);
+    max-width: 110px;
+}
+
+.hab-nivel-select:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background-color: var(--bg-light);
+}
+
+.hab-nivel-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* ---- Fila de idioma con select ---- */
+.idioma-select {
+    flex: 2;
+}
+
+/* Dark mode para habilidades */
+body.dark-mode .hab-checkbox-row {
+    background-color: #334155;
+    border-color: var(--border-color);
+}
+body.dark-mode .hab-checkbox-row.activa {
+    background-color: #1e3a5f;
+    border-color: var(--primary-color);
+}
+body.dark-mode .hab-nivel-select {
+    background-color: #1e293b;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+body.dark-mode .categoria-titulo {
+    background-color: #1e3a5f;
+    color: var(--primary-light);
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
-let habCount = {{ (perfil.habilidades|length) if perfil and perfil.habilidades else 1 }};
+// ---- Catálogo de idiomas para filas dinámicas ----
+const catalogoIdiomas = [
+    {% for op in catalogos.idiomas %}
+    { id: {{ op.id }}, nombre: "{{ op.nombre | e }}" }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+const nivelesIdioma = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Nativo'];
+
 let formCount = {{ (perfil.formacion|length) if perfil and perfil.formacion else 1 }};
 let idiomaCount = {{ (perfil.idiomas|length) if perfil and perfil.idiomas else 1 }};
 
-function agregarHabilidad() {
-    const container = document.getElementById('habilidades-container');
-    const div = document.createElement('div');
-    div.className = 'dynamic-row';
-    div.innerHTML = `
-        <input type="text" name="hab_nombre_${habCount}" placeholder="Ej: Python, React, MySQL">
-        <select name="hab_nivel_${habCount}">
-            <option value="basico">Básico</option>
-            <option value="intermedio" selected>Intermedio</option>
-            <option value="avanzado">Avanzado</option>
-        </select>
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
-    `;
-    container.appendChild(div);
-    habCount++;
+// ---- Toggle campo "Otro" para título ----
+function toggleTituloOtro(valor) {
+    const contenedor = document.getElementById('titulo-otro-container');
+    const input = document.getElementById('titulo_otro');
+    if (valor === 'otro') {
+        contenedor.style.display = '';
+        input.required = true;
+    } else {
+        contenedor.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
 }
 
+// Ejecutar al cargar por si el select ya tiene "otro" seleccionado
+(function() {
+    const sel = document.getElementById('titulo_catalogo');
+    if (sel && sel.value === 'otro') {
+        document.getElementById('titulo-otro-container').style.display = '';
+        document.getElementById('titulo_otro').required = true;
+    }
+})();
+
+// ---- Toggle nivel de habilidad al marcar/desmarcar checkbox ----
+function toggleNivelHabilidad(checkbox, habId) {
+    const selectNivel = document.getElementById('hab-nivel-' + habId);
+    const row = document.getElementById('hab-row-' + habId);
+    if (checkbox.checked) {
+        selectNivel.disabled = false;
+        row.classList.add('activa');
+    } else {
+        selectNivel.disabled = true;
+        row.classList.remove('activa');
+    }
+}
+
+// ---- Agregar fila de formación ----
 function agregarFormacion() {
     const container = document.getElementById('formacion-container');
     const div = document.createElement('div');
@@ -266,7 +477,7 @@ function agregarFormacion() {
                 <input type="text" name="form_anio_${formCount}" placeholder="Año (ej: 2020 - 2024)">
             </div>
             <div class="form-group" style="display:flex;align-items:end;">
-                <button type="button" class="btn btn-sm btn-delete" 
+                <button type="button" class="btn btn-sm btn-delete"
                         onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
             </div>
         </div>
@@ -275,14 +486,30 @@ function agregarFormacion() {
     formCount++;
 }
 
+// ---- Agregar fila de idioma ----
 function agregarIdioma() {
     const container = document.getElementById('idiomas-container');
     const div = document.createElement('div');
     div.className = 'dynamic-row';
+
+    const opcionesIdioma = catalogoIdiomas.map(
+        op => `<option value="${op.id}">${op.nombre}</option>`
+    ).join('');
+
+    const opcionesNivel = nivelesIdioma.map(
+        nv => `<option value="${nv}">${nv}</option>`
+    ).join('');
+
     div.innerHTML = `
-        <input type="text" name="idioma_nombre_${idiomaCount}" placeholder="Idioma">
-        <input type="text" name="idioma_nivel_${idiomaCount}" placeholder="Nivel (ej: Nativo, B2)">
-        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕</button>
+        <select name="idioma_catalogo_id_${idiomaCount}" class="idioma-select">
+            <option value="">-- Selecciona un idioma --</option>
+            ${opcionesIdioma}
+        </select>
+        <select name="idioma_nivel_${idiomaCount}">
+            ${opcionesNivel}
+        </select>
+        <button type="button" class="btn-remove"
+                onclick="this.parentElement.remove()">&#x2715;</button>
     `;
     container.appendChild(div);
     idiomaCount++;

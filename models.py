@@ -92,6 +92,65 @@ class Usuario(UserMixin):
 
 
 # ========================================
+# FUNCIONES DE CATÁLOGOS
+# ========================================
+
+def obtener_catalogo_titulos():
+    """Retorna lista de {id, nombre} de títulos activos"""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, nombre FROM catalogo_titulos WHERE activo = 1 ORDER BY nombre ASC"
+            )
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+def obtener_catalogo_habilidades():
+    """
+    Retorna dict agrupado por categoría con habilidades activas.
+    {'lenguaje': [...], 'framework': [...], 'base_datos': [...], 'herramienta': [...]}
+    """
+    conn = get_db_connection()
+    if not conn:
+        return {}
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                """SELECT id, nombre, categoria FROM catalogo_habilidades
+                   WHERE activo = 1 ORDER BY categoria ASC, nombre ASC"""
+            )
+            filas = cursor.fetchall()
+        resultado = {'lenguaje': [], 'framework': [], 'base_datos': [], 'herramienta': []}
+        for fila in filas:
+            cat = fila['categoria']
+            if cat in resultado:
+                resultado[cat].append({'id': fila['id'], 'nombre': fila['nombre']})
+        return resultado
+    finally:
+        conn.close()
+
+
+def obtener_catalogo_idiomas():
+    """Retorna lista de {id, nombre} de idiomas activos"""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, nombre FROM catalogo_idiomas WHERE activo = 1 ORDER BY nombre ASC"
+            )
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+# ========================================
 # FUNCIONES DE PERFILES
 # ========================================
 
@@ -168,8 +227,8 @@ def obtener_perfil_por_usuario(usuario_id):
         conn.close()
 
 
-def crear_perfil(usuario_id, nombre, slug, titulo='', descripcion='',
-                 email_contacto='', github='', linkedin=''):
+def crear_perfil(usuario_id, nombre, slug, titulo='', titulo_otro='',
+                 descripcion='', email_contacto='', github='', linkedin=''):
     """Crea un nuevo perfil (estado pendiente por defecto)"""
     conn = get_db_connection()
     if not conn:
@@ -177,10 +236,11 @@ def crear_perfil(usuario_id, nombre, slug, titulo='', descripcion='',
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                """INSERT INTO perfiles 
-                   (usuario_id, nombre, slug, titulo, descripcion, email_contacto, github, linkedin)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-                (usuario_id, nombre, slug, titulo, descripcion,
+                """INSERT INTO perfiles
+                   (usuario_id, nombre, slug, titulo, titulo_otro, descripcion,
+                    email_contacto, github, linkedin)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                (usuario_id, nombre, slug, titulo, titulo_otro, descripcion,
                  email_contacto, github, linkedin)
             )
             conn.commit()
@@ -200,7 +260,7 @@ def actualizar_perfil(perfil_id, **campos):
         return False
     try:
         campos_permitidos = [
-            'nombre', 'slug', 'titulo', 'descripcion', 'foto_url', 'cv_url',
+            'nombre', 'slug', 'titulo', 'titulo_otro', 'descripcion', 'foto_url', 'cv_url',
             'email_contacto', 'github', 'linkedin', 'estado'
         ]
         campos_sql = []
@@ -234,8 +294,8 @@ def actualizar_perfil(perfil_id, **campos):
 
 def guardar_habilidades(perfil_id, habilidades):
     """
-    Reemplaza las habilidades de un perfil.
-    habilidades: lista de dicts [{'nombre': '...', 'nivel': '...'}, ...]
+    Reemplaza las habilidades de un perfil usando catálogo.
+    habilidades: lista de dicts [{'catalogo_id': int, 'nivel': str}, ...]
     """
     conn = get_db_connection()
     if not conn:
@@ -244,10 +304,11 @@ def guardar_habilidades(perfil_id, habilidades):
         with conn.cursor() as cursor:
             cursor.execute("DELETE FROM habilidades WHERE perfil_id = %s", (perfil_id,))
             for hab in habilidades:
-                if hab.get('nombre', '').strip():
+                catalogo_id = hab.get('catalogo_id')
+                if catalogo_id:
                     cursor.execute(
-                        "INSERT INTO habilidades (perfil_id, nombre, nivel) VALUES (%s, %s, %s)",
-                        (perfil_id, hab['nombre'].strip(), hab.get('nivel', 'intermedio'))
+                        "INSERT INTO habilidades (perfil_id, catalogo_id, nivel) VALUES (%s, %s, %s)",
+                        (perfil_id, int(catalogo_id), hab.get('nivel', 'intermedio'))
                     )
             conn.commit()
         return True
@@ -286,7 +347,11 @@ def guardar_formacion(perfil_id, formaciones):
 
 
 def guardar_idiomas(perfil_id, idiomas_list):
-    """Reemplaza los idiomas de un perfil."""
+    """
+    Reemplaza los idiomas de un perfil usando catálogo.
+    idiomas_list: lista de dicts [{'catalogo_id': int, 'nivel': 'A1'|'A2'|...|'Nativo'}, ...]
+    """
+    niveles_validos = {'A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Nativo'}
     conn = get_db_connection()
     if not conn:
         return False
@@ -294,10 +359,12 @@ def guardar_idiomas(perfil_id, idiomas_list):
         with conn.cursor() as cursor:
             cursor.execute("DELETE FROM idiomas WHERE perfil_id = %s", (perfil_id,))
             for i in idiomas_list:
-                if i.get('idioma', '').strip():
+                catalogo_id = i.get('catalogo_id')
+                nivel = i.get('nivel', '').strip()
+                if catalogo_id and nivel in niveles_validos:
                     cursor.execute(
-                        "INSERT INTO idiomas (perfil_id, idioma, nivel) VALUES (%s, %s, %s)",
-                        (perfil_id, i['idioma'].strip(), i.get('nivel', '').strip())
+                        "INSERT INTO idiomas (perfil_id, catalogo_id, nivel) VALUES (%s, %s, %s)",
+                        (perfil_id, int(catalogo_id), nivel)
                     )
             conn.commit()
         return True
@@ -323,7 +390,8 @@ def buscar_perfiles_por_habilidad(habilidad):
             cursor.execute(
                 """SELECT DISTINCT p.* FROM perfiles p
                    JOIN habilidades h ON h.perfil_id = p.id
-                   WHERE h.nombre LIKE %s AND p.estado = 'aprobado'
+                   JOIN catalogo_habilidades ch ON ch.id = h.catalogo_id
+                   WHERE ch.nombre LIKE %s AND p.estado = 'aprobado'
                    ORDER BY p.nombre ASC""",
                 (f'%{habilidad}%',)
             )
@@ -345,10 +413,11 @@ def obtener_habilidades_unicas():
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                """SELECT DISTINCT h.nombre FROM habilidades h
+                """SELECT DISTINCT ch.nombre FROM habilidades h
                    JOIN perfiles p ON p.id = h.perfil_id
+                   JOIN catalogo_habilidades ch ON ch.id = h.catalogo_id
                    WHERE p.estado = 'aprobado'
-                   ORDER BY h.nombre ASC"""
+                   ORDER BY ch.nombre ASC"""
             )
             return [row['nombre'] for row in cursor.fetchall()]
     finally:
@@ -361,7 +430,12 @@ def obtener_habilidades_unicas():
 
 def _obtener_habilidades(cursor, perfil_id):
     cursor.execute(
-        "SELECT nombre, nivel FROM habilidades WHERE perfil_id = %s", (perfil_id,)
+        """SELECT h.id, ch.nombre, h.nivel, ch.categoria, h.catalogo_id
+           FROM habilidades h
+           JOIN catalogo_habilidades ch ON ch.id = h.catalogo_id
+           WHERE h.perfil_id = %s
+           ORDER BY ch.categoria ASC, ch.nombre ASC""",
+        (perfil_id,)
     )
     return cursor.fetchall()
 
@@ -376,6 +450,11 @@ def _obtener_formacion(cursor, perfil_id):
 
 def _obtener_idiomas(cursor, perfil_id):
     cursor.execute(
-        "SELECT idioma, nivel FROM idiomas WHERE perfil_id = %s", (perfil_id,)
+        """SELECT i.id, ci.nombre AS idioma, i.nivel, i.catalogo_id
+           FROM idiomas i
+           JOIN catalogo_idiomas ci ON ci.id = i.catalogo_id
+           WHERE i.perfil_id = %s
+           ORDER BY ci.nombre ASC""",
+        (perfil_id,)
     )
     return cursor.fetchall()
