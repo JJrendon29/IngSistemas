@@ -441,17 +441,31 @@ def ver_perfil(slug):
 
 @app.route('/contacto')
 def contacto():
-    return render_template('contacto.html')
+    perfiles_aprobados = []
+    conn = get_db_connection()
+    if conn:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "SELECT id, nombre, titulo FROM perfiles WHERE estado = 'aprobado' ORDER BY nombre ASC"
+                )
+                perfiles_aprobados = cursor.fetchall()
+        except Exception as e:
+            print(f"Error al obtener perfiles aprobados: {e}")
+        finally:
+            conn.close()
+    return render_template('contacto.html', perfiles_aprobados=perfiles_aprobados)
 
 
 @app.route('/guardar_contacto', methods=['POST'])
 def guardar_contacto():
     try:
-        nombre = request.form.get('nombre')
-        empresa = request.form.get('empresa')
-        correo = request.form.get('correo')
-        celular = request.form.get('celular')
-        mensaje = request.form.get('mensaje', '')
+        nombre = request.form.get('nombre', '').strip()
+        empresa = request.form.get('empresa', '').strip()
+        correo = request.form.get('correo', '').strip()
+        celular = request.form.get('celular', '').strip()
+        mensaje = request.form.get('mensaje', '').strip()
+        practicantes_ids = request.form.getlist('practicantes_ids[]')
 
         if not all([nombre, empresa, correo, celular]):
             flash('Por favor completa todos los campos obligatorios', 'error')
@@ -462,14 +476,29 @@ def guardar_contacto():
             flash('Error al conectar con la base de datos', 'error')
             return redirect(url_for('contacto'))
 
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """INSERT INTO contactos (nombre, empresa, correo, celular, mensaje, fecha_registro) 
-                   VALUES (%s, %s, %s, %s, %s, %s)""",
-                (nombre, empresa, correo, celular, mensaje, datetime.now())
-            )
-            conn.commit()
-        conn.close()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO contactos (nombre, empresa, correo, celular, mensaje, fecha_registro)
+                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    (nombre, empresa, correo, celular, mensaje, datetime.now())
+                )
+                contacto_id = cursor.lastrowid
+
+                # Guardar practicantes de interés si los hay
+                for pid in practicantes_ids:
+                    try:
+                        pid_int = int(pid)
+                    except (ValueError, TypeError):
+                        continue
+                    cursor.execute(
+                        "INSERT INTO contacto_practicantes (contacto_id, perfil_id) VALUES (%s, %s)",
+                        (contacto_id, pid_int)
+                    )
+
+                conn.commit()
+        finally:
+            conn.close()
 
         flash('¡Mensaje enviado exitosamente!', 'success')
         return redirect(url_for('contacto'))
@@ -833,19 +862,80 @@ def revisar_perfil(perfil_id):
 @app.route('/admin/contactos')
 @admin_required
 def admin_contactos():
+    # Leer filtros del query string
+    filtro_estado = request.args.get('estado', '').strip()
+    filtro_busqueda = request.args.get('busqueda', '').strip()
+    filtro_desde = request.args.get('desde', '').strip()
+    filtro_hasta = request.args.get('hasta', '').strip()
+
+    estados_validos = {'nuevo', 'contactado', 'en_proceso', 'cerrado'}
+
     conn = get_db_connection()
     contactos = []
+    total_sin_filtro = 0
     if conn:
         try:
             with conn.cursor() as cursor:
+                # Contar total sin filtros
+                cursor.execute("SELECT COUNT(*) AS total FROM contactos")
+                total_sin_filtro = cursor.fetchone()['total']
+
+                # Construir query con filtros dinámicos
+                condiciones = []
+                params = []
+
+                if filtro_estado and filtro_estado in estados_validos:
+                    condiciones.append("estado_contacto = %s")
+                    params.append(filtro_estado)
+
+                if filtro_busqueda:
+                    condiciones.append("(nombre LIKE %s OR empresa LIKE %s)")
+                    params.append(f'%{filtro_busqueda}%')
+                    params.append(f'%{filtro_busqueda}%')
+
+                if filtro_desde:
+                    condiciones.append("DATE(fecha_registro) >= %s")
+                    params.append(filtro_desde)
+
+                if filtro_hasta:
+                    condiciones.append("DATE(fecha_registro) <= %s")
+                    params.append(filtro_hasta)
+
+                where = ("WHERE " + " AND ".join(condiciones)) if condiciones else ""
                 cursor.execute(
-                    "SELECT * FROM contactos ORDER BY fecha_registro DESC"
+                    f"SELECT * FROM contactos {where} ORDER BY fecha_registro DESC",
+                    params
                 )
                 contactos = cursor.fetchall()
+
+                # Para cada contacto obtener los practicantes vinculados
+                for c in contactos:
+                    cursor.execute(
+                        """SELECT p.nombre, p.titulo
+                           FROM contacto_practicantes cp
+                           JOIN perfiles p ON p.id = cp.perfil_id
+                           WHERE cp.contacto_id = %s
+                           ORDER BY p.nombre ASC""",
+                        (c['id'],)
+                    )
+                    c['practicantes'] = cursor.fetchall()
+
         finally:
             conn.close()
 
-    return render_template('admin/contactos.html', contactos=contactos)
+    filtros = {
+        'estado': filtro_estado,
+        'busqueda': filtro_busqueda,
+        'desde': filtro_desde,
+        'hasta': filtro_hasta,
+    }
+
+    return render_template(
+        'admin/contactos.html',
+        contactos=contactos,
+        total_sin_filtro=total_sin_filtro,
+        filtros=filtros
+    )
 
 
 @app.route('/admin/contactos/<int:id>/eliminar', methods=['POST'])
@@ -863,23 +953,127 @@ def eliminar_contacto(id):
     return redirect(url_for('admin_contactos'))
 
 
+@app.route('/admin/contactos/<int:id>/estado', methods=['POST'])
+@admin_required
+def actualizar_estado_contacto(id):
+    estados_validos = {'nuevo', 'contactado', 'en_proceso', 'cerrado'}
+    nuevo_estado = request.form.get('nuevo_estado', '').strip()
+
+    if nuevo_estado not in estados_validos:
+        flash('Estado no válido', 'error')
+        return redirect(url_for('admin_contactos'))
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE contactos SET estado_contacto = %s WHERE id = %s",
+                    (nuevo_estado, id)
+                )
+                conn.commit()
+            flash('Estado actualizado', 'success')
+        except Exception as e:
+            print(f"Error al actualizar estado: {e}")
+            conn.rollback()
+            flash('Error al actualizar el estado', 'error')
+        finally:
+            conn.close()
+
+    # Preservar filtros del referrer
+    referrer = request.referrer or ''
+    from urllib.parse import urlparse, parse_qs, urlencode
+    parsed = urlparse(referrer)
+    qs = parsed.query
+    return redirect(url_for('admin_contactos') + (('?' + qs) if qs else ''))
+
+
+@app.route('/admin/contactos/<int:id>/notas', methods=['POST'])
+@admin_required
+def actualizar_notas_contacto(id):
+    notas = request.form.get('notas', '').strip()
+
+    conn = get_db_connection()
+    if conn:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE contactos SET notas_admin = %s WHERE id = %s",
+                    (notas, id)
+                )
+                conn.commit()
+            flash('Notas guardadas', 'success')
+        except Exception as e:
+            print(f"Error al guardar notas: {e}")
+            conn.rollback()
+            flash('Error al guardar las notas', 'error')
+        finally:
+            conn.close()
+
+    return redirect(url_for('admin_contactos'))
+
+
 @app.route('/admin/contactos/exportar')
 @admin_required
 def exportar_contactos():
+    # Usar los mismos filtros que la vista principal
+    filtro_estado = request.args.get('estado', '').strip()
+    filtro_busqueda = request.args.get('busqueda', '').strip()
+    filtro_desde = request.args.get('desde', '').strip()
+    filtro_hasta = request.args.get('hasta', '').strip()
+
+    estados_validos = {'nuevo', 'contactado', 'en_proceso', 'cerrado'}
+
     conn = get_db_connection()
     contactos = []
     if conn:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM contactos ORDER BY fecha_registro DESC")
+                condiciones = []
+                params = []
+
+                if filtro_estado and filtro_estado in estados_validos:
+                    condiciones.append("estado_contacto = %s")
+                    params.append(filtro_estado)
+
+                if filtro_busqueda:
+                    condiciones.append("(nombre LIKE %s OR empresa LIKE %s)")
+                    params.append(f'%{filtro_busqueda}%')
+                    params.append(f'%{filtro_busqueda}%')
+
+                if filtro_desde:
+                    condiciones.append("DATE(fecha_registro) >= %s")
+                    params.append(filtro_desde)
+
+                if filtro_hasta:
+                    condiciones.append("DATE(fecha_registro) <= %s")
+                    params.append(filtro_hasta)
+
+                where = ("WHERE " + " AND ".join(condiciones)) if condiciones else ""
+                cursor.execute(
+                    f"SELECT * FROM contactos {where} ORDER BY fecha_registro DESC",
+                    params
+                )
                 contactos = cursor.fetchall()
+
+                # Obtener practicantes vinculados para cada contacto
+                for c in contactos:
+                    cursor.execute(
+                        """SELECT p.nombre FROM contacto_practicantes cp
+                           JOIN perfiles p ON p.id = cp.perfil_id
+                           WHERE cp.contacto_id = %s ORDER BY p.nombre ASC""",
+                        (c['id'],)
+                    )
+                    rows = cursor.fetchall()
+                    c['_practicantes_str'] = ', '.join(r['nombre'] for r in rows)
+
         finally:
             conn.close()
 
     output = io.StringIO()
     output.write('\ufeff')  # BOM para compatibilidad con Excel
     writer = csv.writer(output, quoting=csv.QUOTE_ALL)
-    writer.writerow(['Nombre', 'Empresa', 'Correo', 'Celular', 'Mensaje', 'Fecha'])
+    writer.writerow(['Nombre', 'Empresa', 'Correo', 'Celular', 'Mensaje', 'Estado', 'Notas', 'Practicantes de interés', 'Fecha'])
     for c in contactos:
         fecha = c['fecha_registro'].strftime('%d/%m/%Y %H:%M') if c.get('fecha_registro') else ''
         writer.writerow([
@@ -888,6 +1082,9 @@ def exportar_contactos():
             c.get('correo', ''),
             c.get('celular', ''),
             c.get('mensaje', ''),
+            c.get('estado_contacto', 'nuevo'),
+            c.get('notas_admin', ''),
+            c.get('_practicantes_str', ''),
             fecha
         ])
 

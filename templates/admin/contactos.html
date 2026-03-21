@@ -18,14 +18,61 @@
             <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
         </div>
 
+        <!-- Barra de filtros -->
+        <div class="filtros-card">
+            <form method="GET" action="{{ url_for('admin_contactos') }}" class="filtros-form">
+                <div class="filtros-row">
+                    <div class="filtro-group">
+                        <label for="f-estado">Estado</label>
+                        <select id="f-estado" name="estado" class="filtro-select">
+                            <option value="">Todos</option>
+                            <option value="nuevo"       {% if filtros.estado == 'nuevo' %}selected{% endif %}>Nuevo</option>
+                            <option value="contactado"  {% if filtros.estado == 'contactado' %}selected{% endif %}>Contactado</option>
+                            <option value="en_proceso"  {% if filtros.estado == 'en_proceso' %}selected{% endif %}>En proceso</option>
+                            <option value="cerrado"     {% if filtros.estado == 'cerrado' %}selected{% endif %}>Cerrado</option>
+                        </select>
+                    </div>
+                    <div class="filtro-group filtro-busqueda">
+                        <label for="f-busqueda">Búsqueda</label>
+                        <input type="text" id="f-busqueda" name="busqueda"
+                               value="{{ filtros.busqueda }}"
+                               placeholder="Buscar por nombre o empresa..."
+                               class="filtro-input">
+                    </div>
+                    <div class="filtro-group">
+                        <label for="f-desde">Desde</label>
+                        <input type="date" id="f-desde" name="desde"
+                               value="{{ filtros.desde }}" class="filtro-input">
+                    </div>
+                    <div class="filtro-group">
+                        <label for="f-hasta">Hasta</label>
+                        <input type="date" id="f-hasta" name="hasta"
+                               value="{{ filtros.hasta }}" class="filtro-input">
+                    </div>
+                    <div class="filtro-actions">
+                        <button type="submit" class="btn-filtrar">Filtrar</button>
+                        <a href="{{ url_for('admin_contactos') }}" class="btn-limpiar">Limpiar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="admin-card">
             <div class="admin-card-header">
-                <h3 class="admin-card-title">{{ contactos|length }} contacto{{ 's' if contactos|length != 1 }}</h3>
-                <a href="{{ url_for('exportar_contactos') }}" class="btn-exportar-csv">
+                <h3 class="admin-card-title">
+                    Mostrando {{ contactos|length }} de {{ total_sin_filtro }} contacto{{ 's' if total_sin_filtro != 1 }}
+                </h3>
+                {% set qs_exportar = [] %}
+                {% if filtros.estado %}{% set _ = qs_exportar.append('estado=' ~ filtros.estado) %}{% endif %}
+                {% if filtros.busqueda %}{% set _ = qs_exportar.append('busqueda=' ~ filtros.busqueda) %}{% endif %}
+                {% if filtros.desde %}{% set _ = qs_exportar.append('desde=' ~ filtros.desde) %}{% endif %}
+                {% if filtros.hasta %}{% set _ = qs_exportar.append('hasta=' ~ filtros.hasta) %}{% endif %}
+                <a href="{{ url_for('exportar_contactos') }}{% if qs_exportar %}?{{ qs_exportar|join('&') }}{% endif %}"
+                   class="btn-exportar-csv">
                     &#8595; Exportar CSV
                 </a>
             </div>
-            
+
             {% if contactos %}
             <div class="admin-table-container">
                 <table class="admin-table">
@@ -36,6 +83,9 @@
                             <th>Correo</th>
                             <th>Celular</th>
                             <th>Mensaje</th>
+                            <th>Estado</th>
+                            <th>Notas</th>
+                            <th>Interesado en</th>
                             <th>Fecha</th>
                             <th>Acciones</th>
                         </tr>
@@ -48,7 +98,52 @@
                             <td><a href="mailto:{{ c.correo }}">{{ c.correo }}</a></td>
                             <td>{{ c.celular }}</td>
                             <td class="mensaje-cell">{{ c.mensaje[:80] }}{{ '...' if c.mensaje and c.mensaje|length > 80 }}</td>
+
+                            <!-- Columna Estado: select inline -->
+                            <td>
+                                <form method="POST"
+                                      action="{{ url_for('actualizar_estado_contacto', id=c.id) }}"
+                                      class="form-estado-inline">
+                                    <select name="nuevo_estado"
+                                            class="estado-select estado-{{ c.estado_contacto or 'nuevo' }}"
+                                            onchange="this.form.submit()">
+                                        <option value="nuevo"      {% if (c.estado_contacto or 'nuevo') == 'nuevo' %}selected{% endif %}>Nuevo</option>
+                                        <option value="contactado" {% if c.estado_contacto == 'contactado' %}selected{% endif %}>Contactado</option>
+                                        <option value="en_proceso" {% if c.estado_contacto == 'en_proceso' %}selected{% endif %}>En proceso</option>
+                                        <option value="cerrado"    {% if c.estado_contacto == 'cerrado' %}selected{% endif %}>Cerrado</option>
+                                    </select>
+                                </form>
+                            </td>
+
+                            <!-- Columna Notas: preview + botón modal -->
+                            <td class="notas-cell">
+                                <span class="notas-preview">
+                                    {% if c.notas_admin %}
+                                        {{ c.notas_admin[:50] }}{{ '...' if c.notas_admin|length > 50 }}
+                                    {% else %}
+                                        <em class="sin-notas">—</em>
+                                    {% endif %}
+                                </span>
+                                <button type="button"
+                                        class="btn-editar-notas"
+                                        onclick="abrirModalNotas({{ c.id }}, {{ c.notas_admin|tojson if c.notas_admin else '\"\"' }})">
+                                    Editar
+                                </button>
+                            </td>
+
+                            <!-- Columna Practicantes de interés -->
+                            <td class="practicantes-cell">
+                                {% if c.practicantes %}
+                                    {% for p in c.practicantes %}
+                                    <span class="badge-practicante">{{ p.nombre }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="sin-practicantes">—</span>
+                                {% endif %}
+                            </td>
+
                             <td>{{ c.fecha_registro.strftime('%d/%m/%Y %H:%M') if c.fecha_registro else '-' }}</td>
+
                             <td>
                                 <form method="POST" action="{{ url_for('eliminar_contacto', id=c.id) }}"
                                       onsubmit="return confirm('¿Eliminar este contacto?')">
@@ -62,10 +157,301 @@
             </div>
             {% else %}
             <p style="text-align:center; color: var(--text-secondary); padding: 2rem;">
-                No hay contactos recibidos aún
+                No hay contactos que coincidan con los filtros aplicados
             </p>
             {% endif %}
         </div>
     </div>
 </section>
+
+<!-- Modal de notas -->
+<div id="modal-notas" class="modal-overlay" style="display:none;" onclick="cerrarModalNotas(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Notas del contacto</h4>
+            <button type="button" class="modal-cerrar" onclick="cerrarModalNotas()">&times;</button>
+        </div>
+        <form id="form-notas" method="POST" action="">
+            <div class="modal-body">
+                <textarea id="modal-notas-textarea"
+                          name="notas"
+                          rows="6"
+                          class="modal-textarea"
+                          placeholder="Escribe notas internas sobre este contacto..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-limpiar" onclick="cerrarModalNotas()">Cancelar</button>
+                <button type="submit" class="btn-filtrar">Guardar notas</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ---- Filtros ---- */
+.filtros-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+}
+.filtros-form { width: 100%; }
+.filtros-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 120px;
+}
+.filtro-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.filtro-busqueda { flex: 1 1 200px; }
+.filtro-select,
+.filtro-input {
+    height: 36px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 0 0.6rem;
+    font-size: 0.88rem;
+    color: #2d3748;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.filtro-select:focus,
+.filtro-input:focus {
+    border-color: #007b99;
+    box-shadow: 0 0 0 2px rgba(0,123,153,0.15);
+}
+.filtro-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+.btn-filtrar {
+    background: #007b99;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    height: 36px;
+}
+.btn-filtrar:hover { background: #005f78; }
+.btn-limpiar {
+    background: #f1f5f9;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 0.45rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    transition: background 0.2s;
+}
+.btn-limpiar:hover { background: #e2e8f0; }
+
+/* ---- Badges de estado (select inline) ---- */
+.form-estado-inline { margin: 0; }
+.estado-select {
+    border: none;
+    border-radius: 12px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+}
+.estado-nuevo      { background: #e0f2fe; color: #0c447c; }
+.estado-contactado { background: #d1fae5; color: #065f46; }
+.estado-en_proceso { background: #fef3c7; color: #92400e; }
+.estado-cerrado    { background: #f3f4f6; color: #374151; }
+
+/* ---- Notas ---- */
+.notas-cell { max-width: 160px; }
+.notas-preview {
+    display: block;
+    font-size: 0.82rem;
+    color: #4a5568;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+.sin-notas { color: #a0aec0; font-style: italic; }
+.btn-editar-notas {
+    background: none;
+    border: 1px solid #007b99;
+    color: #007b99;
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-editar-notas:hover {
+    background: #007b99;
+    color: #fff;
+}
+
+/* ---- Practicantes ---- */
+.practicantes-cell { max-width: 180px; }
+.badge-practicante {
+    display: inline-block;
+    background: rgba(243,146,0,0.12);
+    color: #7a4800;
+    border-radius: 10px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0.1rem 0.1rem 0.1rem 0;
+    white-space: nowrap;
+}
+.sin-practicantes { color: #a0aec0; }
+
+/* ---- Modal ---- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+}
+.modal-box {
+    background: #fff;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+.modal-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #2d3748;
+}
+.modal-cerrar {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #718096;
+    cursor: pointer;
+    line-height: 1;
+}
+.modal-cerrar:hover { color: #2d3748; }
+.modal-body { padding: 1.25rem; }
+.modal-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.modal-textarea:focus {
+    border-color: #007b99;
+    box-shadow: 0 0 0 2px rgba(0,123,153,0.15);
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem 1.25rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .filtros-row { flex-direction: column; }
+    .filtro-group { min-width: unset; width: 100%; }
+    .filtro-busqueda { flex: unset; width: 100%; }
+    .filtro-actions { width: 100%; justify-content: flex-start; }
+}
+</style>
+
+<script>
+function abrirModalNotas(contactoId, notasActuales) {
+    var modal = document.getElementById('modal-notas');
+    var form = document.getElementById('form-notas');
+    var textarea = document.getElementById('modal-notas-textarea');
+
+    form.action = '/admin/contactos/' + contactoId + '/notas';
+    textarea.value = notasActuales || '';
+    modal.style.display = 'flex';
+    textarea.focus();
+}
+
+function cerrarModalNotas(e) {
+    if (e && e.target !== document.getElementById('modal-notas')) return;
+    document.getElementById('modal-notas').style.display = 'none';
+}
+
+// Actualizar color del select de estado al cambiar
+document.addEventListener('DOMContentLoaded', function () {
+    var selects = document.querySelectorAll('.estado-select');
+    selects.forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            sel.className = 'estado-select estado-' + sel.value;
+        });
+    });
+});
+// Validación de rango de fechas en filtros
+(function() {
+    var desde = document.getElementById('f-desde');
+    var hasta = document.getElementById('f-hasta');
+    
+    if (desde && hasta) {
+        desde.addEventListener('change', function() {
+            hasta.min = this.value;
+            if (hasta.value && hasta.value < this.value) {
+                hasta.value = this.value;
+            }
+        });
+        
+        hasta.addEventListener('change', function() {
+            desde.max = this.value;
+            if (desde.value && desde.value > this.value) {
+                desde.value = this.value;
+            }
+        });
+        
+        // Aplicar al cargar si ya hay valores
+        if (desde.value) hasta.min = desde.value;
+        if (hasta.value) desde.max = hasta.value;
+    }
+})();
+</script>
 {% endblock %}
