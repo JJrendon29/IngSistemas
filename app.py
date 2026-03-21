@@ -16,7 +16,8 @@ from models import (
     Usuario, obtener_todos_perfiles, obtener_perfil_por_slug,
     obtener_perfil_por_usuario, crear_perfil, actualizar_perfil,
     guardar_habilidades, guardar_formacion, guardar_idiomas,
-    buscar_perfiles_por_habilidad, obtener_habilidades_unicas,
+    buscar_perfiles_por_habilidad, buscar_perfiles,
+    obtener_habilidades_unicas, obtener_titulos_unicos, obtener_idiomas_unicos,
     obtener_catalogo_titulos, obtener_catalogo_habilidades, obtener_catalogo_idiomas,
     obtener_revisiones_perfil, guardar_revisiones, resetear_revisiones_pendientes,
     CAMPOS_REVISABLES,
@@ -405,7 +406,9 @@ PER_PAGE = 12
 
 @app.route('/')
 def index():
-    busqueda = request.args.get('habilidad', '').strip()
+    filtro_habilidad = request.args.get('habilidad', '').strip()
+    filtro_titulo = request.args.get('titulo', '').strip()
+    filtro_idioma = request.args.get('idioma', '').strip()
     try:
         page = int(request.args.get('page', 1))
         if page < 1:
@@ -413,20 +416,36 @@ def index():
     except (ValueError, TypeError):
         page = 1
 
-    if busqueda:
-        perfiles, total = buscar_perfiles_por_habilidad(busqueda, page=page, per_page=PER_PAGE)
+    hay_filtros = bool(filtro_titulo or filtro_habilidad or filtro_idioma)
+
+    if hay_filtros:
+        perfiles, total = buscar_perfiles(
+            titulo=filtro_titulo,
+            habilidad=filtro_habilidad,
+            idioma=filtro_idioma,
+            page=page,
+            per_page=PER_PAGE
+        )
     else:
         perfiles, total = obtener_todos_perfiles(solo_aprobados=True, page=page, per_page=PER_PAGE)
 
     total_pages = math.ceil(total / PER_PAGE) if total > 0 else 1
 
     habilidades_disponibles = obtener_habilidades_unicas()
+    titulos = obtener_titulos_unicos()
+    idiomas = obtener_idiomas_unicos()
+
     return render_template('index.html',
                            perfiles=perfiles,
                            habilidades_disponibles=habilidades_disponibles,
-                           busqueda=busqueda,
+                           titulos=titulos,
+                           idiomas=idiomas,
+                           filtro_habilidad=filtro_habilidad,
+                           filtro_titulo=filtro_titulo,
+                           filtro_idioma=filtro_idioma,
                            page=page,
-                           total_pages=total_pages)
+                           total_pages=total_pages,
+                           total=total)
 
 
 @app.route('/perfil/<slug>')

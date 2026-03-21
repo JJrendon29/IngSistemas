@@ -353,7 +353,7 @@ img {
 }
 
 .filtro-form {
-    max-width: 700px;
+    max-width: 900px;
     margin: 0 auto;
 }
 
@@ -374,6 +374,25 @@ img {
 }
 
 .filtro-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.filtro-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    background-color: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 200px;
+}
+
+.filtro-select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
@@ -1686,8 +1705,17 @@ body.dark-mode .form-fieldset {
     .filtro-group {
         flex-direction: column;
     }
-    
+
     .filtro-group .btn {
+        width: 100%;
+    }
+
+    .filtro-select {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .filtro-input {
         width: 100%;
     }
     

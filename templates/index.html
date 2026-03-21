@@ -14,12 +14,18 @@
     </div>
 </section>
 
-<!-- Filtro de búsqueda por habilidad -->
+<!-- Filtro de búsqueda -->
 <section class="filtro-section">
     <div class="container">
         <form method="GET" action="{{ url_for('index') }}" class="filtro-form">
             <div class="filtro-group">
-                <input type="text" name="habilidad" value="{{ busqueda }}"
+                <select name="titulo" class="filtro-select">
+                    <option value="">Todos los títulos</option>
+                    {% for t in titulos %}
+                    <option value="{{ t }}" {{ 'selected' if filtro_titulo == t }}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="habilidad" value="{{ filtro_habilidad }}"
                        placeholder="Buscar por habilidad (ej: Python, React, MySQL...)"
                        class="filtro-input" list="habilidades-list" autocomplete="off">
                 <datalist id="habilidades-list">
@@ -27,17 +33,28 @@
                     <option value="{{ hab }}">
                     {% endfor %}
                 </datalist>
+                <select name="idioma" class="filtro-select">
+                    <option value="">Todos los idiomas</option>
+                    {% for idioma in idiomas %}
+                    <option value="{{ idioma }}" {{ 'selected' if filtro_idioma == idioma }}>{{ idioma }}</option>
+                    {% endfor %}
+                </select>
                 <button type="submit" class="btn btn-primary">Buscar</button>
-                {% if busqueda %}
+                {% if filtro_titulo or filtro_habilidad or filtro_idioma %}
                 <a href="{{ url_for('index') }}" class="btn btn-outline">Limpiar</a>
                 {% endif %}
             </div>
         </form>
-        {% if busqueda %}
         <p class="filtro-resultado">
-            Mostrando {{ perfiles|length }} perfil{{ 'es' if perfiles|length != 1 }} con "<strong>{{ busqueda }}</strong>"
+            Mostrando <strong>{{ total }}</strong> perfil{{ 'es' if total != 1 }}
+            {% if filtro_titulo or filtro_habilidad or filtro_idioma %}
+                {% set partes = [] %}
+                {% if filtro_titulo %}{% set _ = partes.append('título <strong>' ~ filtro_titulo ~ '</strong>') %}{% endif %}
+                {% if filtro_habilidad %}{% set _ = partes.append('habilidad <strong>' ~ filtro_habilidad ~ '</strong>') %}{% endif %}
+                {% if filtro_idioma %}{% set _ = partes.append('idioma <strong>' ~ filtro_idioma ~ '</strong>') %}{% endif %}
+                con {{ partes | join(' y ') }}
+            {% endif %}
         </p>
-        {% endif %}
     </div>
 </section>
 
@@ -94,9 +111,9 @@
         {% else %}
             <div class="empty-state">
                 <div class="empty-state-icon">👥</div>
-                {% if busqueda %}
-                    <h3>No se encontraron perfiles con esa habilidad</h3>
-                    <p>Intenta con otro término de búsqueda</p>
+                {% if filtro_titulo or filtro_habilidad or filtro_idioma %}
+                    <h3>No se encontraron perfiles con ese filtro</h3>
+                    <p>Intenta con otro título, habilidad o idioma</p>
                 {% else %}
                     <h3>No hay perfiles disponibles aún</h3>
                     <p>Los perfiles aparecerán aquí una vez sean aprobados</p>
@@ -107,19 +124,19 @@
         {% if total_pages > 1 %}
         <div class="paginacion">
             {% if page > 1 %}
-            <a href="{{ url_for('index', page=page-1, habilidad=busqueda if busqueda else '') }}"
+            <a href="{{ url_for('index', page=page-1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn">&#8592; Anterior</a>
             {% else %}
             <span class="paginacion-btn paginacion-btn--disabled">&#8592; Anterior</span>
             {% endif %}
 
             {% for p in range(1, total_pages + 1) %}
-            <a href="{{ url_for('index', page=p, habilidad=busqueda if busqueda else '') }}"
+            <a href="{{ url_for('index', page=p, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn {{ 'paginacion-btn--activo' if p == page }}">{{ p }}</a>
             {% endfor %}
 
             {% if page < total_pages %}
-            <a href="{{ url_for('index', page=page+1, habilidad=busqueda if busqueda else '') }}"
+            <a href="{{ url_for('index', page=page+1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn">Siguiente &#8594;</a>
             {% else %}
             <span class="paginacion-btn paginacion-btn--disabled">Siguiente &#8594;</span>
