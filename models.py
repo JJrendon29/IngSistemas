@@ -92,6 +92,50 @@ class Usuario(UserMixin):
 
 
 # ========================================
+# FUNCIONES DE USUARIOS (ADMIN)
+# ========================================
+
+def obtener_todos_usuarios():
+    """Retorna lista de usuarios con id, email, rol, activo, created_at (sin password_hash)"""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, email, rol, activo, created_at FROM usuarios ORDER BY created_at DESC"
+            )
+            return cursor.fetchall()
+    finally:
+        conn.close()
+
+
+def resetear_password(user_id, nueva_password):
+    """Hashea nueva_password con bcrypt y la actualiza en BD para el usuario dado."""
+    conn = get_db_connection()
+    if not conn:
+        return False
+    try:
+        nuevo_hash = bcrypt.hashpw(
+            nueva_password.encode('utf-8'),
+            bcrypt.gensalt()
+        ).decode('utf-8')
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE usuarios SET password_hash = %s WHERE id = %s",
+                (nuevo_hash, user_id)
+            )
+            conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error al resetear password: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+# ========================================
 # FUNCIONES DE CATÁLOGOS
 # ========================================
 
@@ -154,19 +198,35 @@ def obtener_catalogo_idiomas():
 # FUNCIONES DE PERFILES
 # ========================================
 
-def obtener_todos_perfiles(solo_aprobados=True):
-    """Obtiene todos los perfiles (opcionalmente solo los aprobados)"""
+def obtener_todos_perfiles(solo_aprobados=True, page=1, per_page=None):
+    """
+    Obtiene perfiles (opcionalmente solo los aprobados).
+    Si se pasa per_page, aplica paginación y retorna (perfiles, total).
+    Sin per_page, retorna la lista completa (comportamiento original).
+    """
     conn = get_db_connection()
     if not conn:
-        return []
+        return ([], 0) if per_page else []
     try:
         with conn.cursor() as cursor:
-            if solo_aprobados:
+            condicion = "WHERE estado = 'aprobado'" if solo_aprobados else ""
+
+            if per_page:
+                # Contar total
+                cursor.execute(f"SELECT COUNT(*) AS total FROM perfiles {condicion}")
+                total = cursor.fetchone()['total']
+
+                # Obtener página
+                offset = (page - 1) * per_page
                 cursor.execute(
-                    "SELECT * FROM perfiles WHERE estado = 'aprobado' ORDER BY nombre ASC"
+                    f"SELECT * FROM perfiles {condicion} ORDER BY nombre ASC LIMIT %s OFFSET %s",
+                    (per_page, offset)
                 )
             else:
-                cursor.execute("SELECT * FROM perfiles ORDER BY nombre ASC")
+                cursor.execute(
+                    f"SELECT * FROM perfiles {condicion} ORDER BY nombre ASC"
+                )
+
             perfiles = cursor.fetchall()
 
             for perfil in perfiles:
@@ -174,6 +234,8 @@ def obtener_todos_perfiles(solo_aprobados=True):
                 perfil['formacion'] = _obtener_formacion(cursor, perfil['id'])
                 perfil['idiomas'] = _obtener_idiomas(cursor, perfil['id'])
 
+        if per_page:
+            return (perfiles, total)
         return perfiles
     finally:
         conn.close()
@@ -386,26 +448,48 @@ def guardar_idiomas(perfil_id, idiomas_list):
 # FUNCIONES DE BÚSQUEDA
 # ========================================
 
-def buscar_perfiles_por_habilidad(habilidad):
-    """Busca perfiles aprobados que tengan una habilidad específica"""
+def buscar_perfiles_por_habilidad(habilidad, page=1, per_page=None):
+    """
+    Busca perfiles aprobados que tengan una habilidad específica.
+    Si se pasa per_page, aplica paginación y retorna (perfiles, total).
+    Sin per_page, retorna la lista completa (comportamiento original).
+    """
     conn = get_db_connection()
     if not conn:
-        return []
+        return ([], 0) if per_page else []
     try:
         with conn.cursor() as cursor:
-            cursor.execute(
-                """SELECT DISTINCT p.* FROM perfiles p
+            base_query = """FROM perfiles p
                    JOIN habilidades h ON h.perfil_id = p.id
                    JOIN catalogo_habilidades ch ON ch.id = h.catalogo_id
-                   WHERE ch.nombre LIKE %s AND p.estado = 'aprobado'
-                   ORDER BY p.nombre ASC""",
-                (f'%{habilidad}%',)
-            )
+                   WHERE ch.nombre LIKE %s AND p.estado = 'aprobado'"""
+
+            if per_page:
+                cursor.execute(
+                    f"SELECT COUNT(DISTINCT p.id) AS total {base_query}",
+                    (f'%{habilidad}%',)
+                )
+                total = cursor.fetchone()['total']
+
+                offset = (page - 1) * per_page
+                cursor.execute(
+                    f"SELECT DISTINCT p.* {base_query} ORDER BY p.nombre ASC LIMIT %s OFFSET %s",
+                    (f'%{habilidad}%', per_page, offset)
+                )
+            else:
+                cursor.execute(
+                    f"SELECT DISTINCT p.* {base_query} ORDER BY p.nombre ASC",
+                    (f'%{habilidad}%',)
+                )
+
             perfiles = cursor.fetchall()
             for perfil in perfiles:
                 perfil['habilidades'] = _obtener_habilidades(cursor, perfil['id'])
                 perfil['formacion'] = _obtener_formacion(cursor, perfil['id'])
                 perfil['idiomas'] = _obtener_idiomas(cursor, perfil['id'])
+
+        if per_page:
+            return (perfiles, total)
         return perfiles
     finally:
         conn.close()

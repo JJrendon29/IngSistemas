@@ -103,6 +103,29 @@
                 {% endif %}
             </div>
         {% endif %}
+
+        {% if total_pages > 1 %}
+        <div class="paginacion">
+            {% if page > 1 %}
+            <a href="{{ url_for('index', page=page-1, habilidad=busqueda if busqueda else '') }}"
+               class="paginacion-btn">&#8592; Anterior</a>
+            {% else %}
+            <span class="paginacion-btn paginacion-btn--disabled">&#8592; Anterior</span>
+            {% endif %}
+
+            {% for p in range(1, total_pages + 1) %}
+            <a href="{{ url_for('index', page=p, habilidad=busqueda if busqueda else '') }}"
+               class="paginacion-btn {{ 'paginacion-btn--activo' if p == page }}">{{ p }}</a>
+            {% endfor %}
+
+            {% if page < total_pages %}
+            <a href="{{ url_for('index', page=page+1, habilidad=busqueda if busqueda else '') }}"
+               class="paginacion-btn">Siguiente &#8594;</a>
+            {% else %}
+            <span class="paginacion-btn paginacion-btn--disabled">Siguiente &#8594;</span>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </section>
 

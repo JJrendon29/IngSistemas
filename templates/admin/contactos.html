@@ -15,10 +15,16 @@
         <div class="admin-nav">
             <a href="{{ url_for('admin_panel') }}" class="admin-nav-link">Perfiles</a>
             <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link active">Contactos</a>
+            <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
         </div>
 
         <div class="admin-card">
-            <h3 class="admin-card-title">{{ contactos|length }} contacto{{ 's' if contactos|length != 1 }}</h3>
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">{{ contactos|length }} contacto{{ 's' if contactos|length != 1 }}</h3>
+                <a href="{{ url_for('exportar_contactos') }}" class="btn-exportar-csv">
+                    &#8595; Exportar CSV
+                </a>
+            </div>
             
             {% if contactos %}
             <div class="admin-table-container">

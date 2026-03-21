@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort, session
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, session, Response
+import csv
+import io
+import math
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
 from functools import wraps
@@ -17,7 +20,8 @@ from models import (
     obtener_catalogo_titulos, obtener_catalogo_habilidades, obtener_catalogo_idiomas,
     obtener_revisiones_perfil, guardar_revisiones, resetear_revisiones_pendientes,
     CAMPOS_REVISABLES,
-    _obtener_habilidades, _obtener_formacion, _obtener_idiomas
+    _obtener_habilidades, _obtener_formacion, _obtener_idiomas,
+    obtener_todos_usuarios, resetear_password
 )
 
 # ========================================
@@ -396,19 +400,33 @@ def api_instituciones():
 # RUTAS: PÁGINAS PÚBLICAS
 # ========================================
 
+PER_PAGE = 12
+
+
 @app.route('/')
 def index():
     busqueda = request.args.get('habilidad', '').strip()
+    try:
+        page = int(request.args.get('page', 1))
+        if page < 1:
+            page = 1
+    except (ValueError, TypeError):
+        page = 1
+
     if busqueda:
-        perfiles = buscar_perfiles_por_habilidad(busqueda)
+        perfiles, total = buscar_perfiles_por_habilidad(busqueda, page=page, per_page=PER_PAGE)
     else:
-        perfiles = obtener_todos_perfiles(solo_aprobados=True)
+        perfiles, total = obtener_todos_perfiles(solo_aprobados=True, page=page, per_page=PER_PAGE)
+
+    total_pages = math.ceil(total / PER_PAGE) if total > 0 else 1
 
     habilidades_disponibles = obtener_habilidades_unicas()
     return render_template('index.html',
                            perfiles=perfiles,
                            habilidades_disponibles=habilidades_disponibles,
-                           busqueda=busqueda)
+                           busqueda=busqueda,
+                           page=page,
+                           total_pages=total_pages)
 
 
 @app.route('/perfil/<slug>')
@@ -843,6 +861,74 @@ def eliminar_contacto(id):
         finally:
             conn.close()
     return redirect(url_for('admin_contactos'))
+
+
+@app.route('/admin/contactos/exportar')
+@admin_required
+def exportar_contactos():
+    conn = get_db_connection()
+    contactos = []
+    if conn:
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM contactos ORDER BY fecha_registro DESC")
+                contactos = cursor.fetchall()
+        finally:
+            conn.close()
+
+    output = io.StringIO()
+    output.write('\ufeff')  # BOM para compatibilidad con Excel
+    writer = csv.writer(output, quoting=csv.QUOTE_ALL)
+    writer.writerow(['Nombre', 'Empresa', 'Correo', 'Celular', 'Mensaje', 'Fecha'])
+    for c in contactos:
+        fecha = c['fecha_registro'].strftime('%d/%m/%Y %H:%M') if c.get('fecha_registro') else ''
+        writer.writerow([
+            c.get('nombre', ''),
+            c.get('empresa', ''),
+            c.get('correo', ''),
+            c.get('celular', ''),
+            c.get('mensaje', ''),
+            fecha
+        ])
+
+    from datetime import date
+    nombre_archivo = f"contactos_{date.today().isoformat()}.csv"
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{nombre_archivo}"'}
+    )
+
+
+@app.route('/admin/usuarios')
+@admin_required
+def admin_usuarios():
+    usuarios = obtener_todos_usuarios()
+    return render_template('admin/usuarios.html', usuarios=usuarios)
+
+
+@app.route('/admin/usuarios/<int:user_id>/resetear-password', methods=['POST'])
+@admin_required
+def resetear_password_usuario(user_id):
+    nueva_password = request.form.get('nueva_password', '').strip()
+
+    # Validación backend
+    if len(nueva_password) < 8:
+        flash('La contraseña debe tener al menos 8 caracteres.', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    # Obtener email para el mensaje de éxito
+    usuario = Usuario.obtener_por_id(user_id)
+    if not usuario:
+        flash('Usuario no encontrado.', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    ok = resetear_password(user_id, nueva_password)
+    if ok:
+        flash(f'Contraseña restablecida para {usuario.email}.', 'success')
+    else:
+        flash('Error al restablecer la contraseña.', 'error')
+    return redirect(url_for('admin_usuarios'))
 
 
 # ========================================

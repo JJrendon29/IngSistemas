@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-reset-form {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-reset-input {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    width: 160px;
+}
+
+.admin-reset-input:focus {
+    outline: none;
+    border-color: #007b99;
+}
+
+.badge-rol {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-rol--admin {
+    background-color: #f39200;
+    color: white;
+}
+
+.badge-rol--estudiante {
+    background-color: #e8f4f8;
+    color: #007b99;
+}
+
+.badge-activo {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-activo--si {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-activo--no {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Gestión de Usuarios</h1>
+        <p>Administra cuentas y restablece contraseñas</p>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="container">
+        <div class="admin-nav">
+            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link">Contactos</a>
+            <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link active">Usuarios</a>
+        </div>
+
+        <div class="admin-card">
+            <h3 class="admin-card-title">{{ usuarios|length }} usuario{{ 's' if usuarios|length != 1 }}</h3>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div style="margin-bottom: 1rem;">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" style="padding: 0.75rem 1rem; border-radius: var(--border-radius); margin-bottom: 0.5rem;
+                    background-color: {{ '#d1fae5' if category == 'success' else '#fee2e2' }};
+                    color: {{ '#065f46' if category == 'success' else '#991b1b' }};
+                    border-left: 4px solid {{ '#10b981' if category == 'success' else '#ef4444' }};">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% if usuarios %}
+            <div class="admin-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Fecha registro</th>
+                            <th>Restablecer contraseña</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td><strong>{{ u.email }}</strong></td>
+                            <td>
+                                <span class="badge-rol badge-rol--{{ u.rol }}">
+                                    {{ u.rol }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-activo {{ 'badge-activo--si' if u.activo else 'badge-activo--no' }}">
+                                    {{ 'Activo' if u.activo else 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td>{{ u.created_at.strftime('%d/%m/%Y') if u.created_at else '-' }}</td>
+                            <td>
+                                <form method="POST"
+                                      action="{{ url_for('resetear_password_usuario', user_id=u.id) }}"
+                                      class="admin-reset-form"
+                                      onsubmit="return confirm('¿Restablecer la contraseña de {{ u.email }}?')">
+                                    <input type="password"
+                                           name="nueva_password"
+                                           class="admin-reset-input"
+                                           placeholder="Nueva contraseña"
+                                           minlength="8"
+                                           required>
+                                    <button type="submit" class="btn btn-sm btn-primary">Resetear</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align:center; color: var(--text-secondary); padding: 2rem;">
+                No hay usuarios registrados.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
