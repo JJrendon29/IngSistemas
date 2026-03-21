@@ -1,0 +1,615 @@
+/* ========================================
+   PERFIL.CSS - UNIVERSIDAD CATÓLICA LUIS AMIGÓ
+   Estilos de perfil.html, mi_perfil.html y editar_perfil.html
+   ======================================== */
+
+/* ========================================
+   ESTADOS DEL PERFIL (mi_perfil)
+   ======================================== */
+
+/* Estado en revisión */
+.estado-en-revision {
+    background-color: #fff7ed;
+    border-color: var(--secondary-color);
+    color: #9a3412;
+}
+
+/* ========================================
+   TARJETA DE DETALLE DE REVISIONES
+   ======================================== */
+.revision-detalle-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    border-left: 4px solid var(--primary-color);
+}
+
+.revision-detalle-titulo {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* ========================================
+   BOX COMENTARIO ADMIN
+   ======================================== */
+.comentario-admin-box {
+    background-color: #fff7ed;
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: #7c2d12;
+}
+
+.comentario-admin-box p {
+    margin-top: 0.3rem;
+    color: #9a3412;
+}
+
+/* ========================================
+   LISTA DE REVISIONES POR CAMPO
+   ======================================== */
+.revision-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.revision-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+}
+
+.revision-item-aprobado {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.revision-item-rechazado {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.revision-item-pendiente {
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+}
+
+.revision-icono {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.revision-campo {
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.revision-etiqueta {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+
+.etiqueta-aprobado {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.etiqueta-rechazado {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.etiqueta-pendiente {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.revision-comentario-texto {
+    width: 100%;
+    margin: 0.3rem 0 0 1.5rem;
+    font-style: italic;
+    color: #991b1b;
+    font-size: var(--font-size-sm);
+}
+
+/* Fila de rechazo: ícono + campo + etiqueta en una línea */
+.revision-item-rechazado .revision-fila-principal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* ========================================
+   REDES SOCIALES EN RESUMEN DE PERFIL
+   ======================================== */
+.redes-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.red-resumen-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.red-resumen-link:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   BADGES DE VERIFICACIÓN
+   ======================================== */
+.badge-verificado-resumen {
+    display: inline-flex;
+    align-items: center;
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.badge-verificado-resumen::before {
+    content: '\2713\00a0';
+}
+
+/* Badge verificado en vista pública de perfil */
+.badge-verificado-perfil {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background-color: var(--secondary-color);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+
+.badge-verificado-perfil::before {
+    content: '\2713';
+}
+
+/* Badges en editar_perfil */
+.badge-verificado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 20px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.badge-verificado::before {
+    content: '\2713';
+    font-weight: 700;
+}
+
+.badge-sin-verificar {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* ========================================
+   RED SOCIAL VERIFICADA
+   ======================================== */
+.red-social-verificada {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--border-radius);
+    margin-top: 0.25rem;
+}
+
+.red-social-link {
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    word-break: break-all;
+    font-weight: 600;
+}
+
+.red-social-link:hover {
+    text-decoration: underline;
+}
+
+/* ========================================
+   BOTÓN GITHUB
+   ======================================== */
+.btn-github {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #24292e;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.55rem 1.1rem;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-github:hover {
+    background-color: #1b1f23;
+    color: #ffffff;
+}
+
+/* ========================================
+   AVISO DE CAMPO RECHAZADO (editar)
+   ======================================== */
+.campo-rechazado-aviso {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--error-color);
+    border-radius: var(--border-radius);
+    padding: 0.6rem 0.9rem;
+    font-size: var(--font-size-sm);
+    color: #991b1b;
+    margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   SECCIÓN DE HABILIDADES POR CATEGORÍA
+   ======================================== */
+.habilidades-categoria {
+    margin-bottom: 1.5rem;
+}
+
+.categoria-titulo {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    color: var(--primary-color);
+    padding: 0.4rem 0.75rem;
+    background-color: #e0f2fe;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    display: inline-block;
+}
+
+.habilidades-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem;
+}
+
+.hab-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--bg-light);
+    transition: var(--transition);
+}
+
+.hab-checkbox-row.activa {
+    border-color: var(--primary-color);
+    background-color: #e0f2fe;
+}
+
+.hab-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    cursor: pointer;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.hab-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hab-nombre {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.hab-nivel-select {
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: white;
+    transition: var(--transition);
+    max-width: 110px;
+}
+
+.hab-nivel-select:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background-color: var(--bg-light);
+}
+
+.hab-nivel-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* ========================================
+   FILA DE IDIOMA CON SELECT
+   ======================================== */
+.idioma-select {
+    flex: 2;
+}
+
+/* ========================================
+   FORMACIÓN: FILA DE AÑOS
+   ======================================== */
+.formacion-anios-row {
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.form-select-anio {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.form-select-anio:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.form-label-sm {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+}
+
+.formacion-encurso-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.encurso-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.55rem 0.1rem;
+    margin-bottom: 0;
+}
+
+.encurso-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.presente-texto {
+    display: inline-block;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--primary-color);
+    padding: 0.55rem 0.1rem;
+}
+
+/* ========================================
+   AUTOCOMPLETADO DE INSTITUCIONES
+   ======================================== */
+.institucion-wrapper {
+    position: relative;
+}
+
+.institucion-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.institucion-dropdown li {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.institucion-dropdown li:hover,
+.institucion-dropdown li.activo {
+    background-color: #e0f2fe;
+    color: var(--primary-color);
+}
+
+.institucion-dropdown li.sin-resultados {
+    color: var(--text-secondary);
+    font-style: italic;
+    cursor: default;
+}
+
+.institucion-dropdown li.sin-resultados:hover {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   DARK MODE PERFIL
+   ======================================== */
+body.dark-mode .badge-verificado-resumen {
+    background-color: #052e16;
+    color: #6ee7b7;
+    border-color: #166534;
+}
+
+body.dark-mode .badge-verificado-perfil {
+    background-color: var(--secondary-dark);
+}
+
+body.dark-mode .revision-detalle-card {
+    background-color: #1e293b;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--primary-color);
+}
+
+body.dark-mode .comentario-admin-box {
+    background-color: #2d1a0e;
+    border-color: var(--secondary-color);
+    color: #fbbf24;
+}
+
+body.dark-mode .revision-item-aprobado {
+    background-color: #052e16;
+    border-color: #166534;
+}
+
+body.dark-mode .revision-item-rechazado {
+    background-color: #2d0a0a;
+    border-color: #7f1d1d;
+}
+
+body.dark-mode .revision-item-pendiente {
+    background-color: #1c1508;
+    border-color: #92400e;
+}
+
+body.dark-mode .revision-campo {
+    color: var(--text-primary);
+}
+
+body.dark-mode .red-social-verificada {
+    background-color: #052e16;
+    border-color: #166534;
+}
+
+body.dark-mode .badge-verificado {
+    background-color: #052e16;
+    color: #6ee7b7;
+    border-color: #166534;
+}
+
+body.dark-mode .badge-sin-verificar {
+    background-color: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
+
+body.dark-mode .campo-rechazado-aviso {
+    background-color: #2d0a0a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+body.dark-mode .form-select-anio {
+    background-color: #1e293b;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .hab-checkbox-row {
+    background-color: #334155;
+    border-color: var(--border-color);
+}
+
+body.dark-mode .hab-checkbox-row.activa {
+    background-color: #1e3a5f;
+    border-color: var(--primary-color);
+}
+
+body.dark-mode .hab-nivel-select {
+    background-color: #1e293b;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .categoria-titulo {
+    background-color: #1e3a5f;
+    color: var(--primary-light);
+}
+
+body.dark-mode .institucion-dropdown {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+}
+
+body.dark-mode .institucion-dropdown li:hover,
+body.dark-mode .institucion-dropdown li.activo {
+    background-color: #1e3a5f;
+}

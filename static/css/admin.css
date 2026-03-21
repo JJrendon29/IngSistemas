@@ -1,0 +1,1037 @@
+/* ========================================
+   ADMIN.CSS - UNIVERSIDAD CATÓLICA LUIS AMIGÓ
+   Estilos exclusivos del panel de administración
+   ======================================== */
+
+/* ========================================
+   SECCIÓN Y NAVEGACIÓN ADMIN
+   ======================================== */
+.admin-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--bg-light);
+}
+
+.admin-nav {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0;
+}
+
+.admin-nav-link {
+    padding: 0.65rem 1.5rem;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: white;
+    border: 2px solid var(--border-color);
+    border-bottom: none;
+    transition: var(--transition);
+    position: relative;
+    bottom: -2px;
+    font-family: var(--font-family-heading);
+    letter-spacing: 0.03em;
+}
+
+.admin-nav-link:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.admin-nav-link.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* ========================================
+   ESTADÍSTICAS (STAT CARDS)
+   ======================================== */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card .stat-number {
+    display: block;
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-card .stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-pendiente {
+    border-color: var(--warning-color);
+    background: linear-gradient(135deg, #fffbeb 0%, white 100%);
+}
+
+.stat-pendiente .stat-number {
+    color: var(--warning-color);
+}
+
+.stat-aprobado {
+    border-color: var(--success-color);
+    background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
+}
+
+.stat-aprobado .stat-number {
+    color: var(--success-color);
+}
+
+.stat-rechazado {
+    border-color: var(--error-color);
+    background: linear-gradient(135deg, #fef2f2 0%, white 100%);
+}
+
+.stat-rechazado .stat-number {
+    color: var(--error-color);
+}
+
+/* Badge estado en_revision */
+.estado-badge-en_revision {
+    background-color: #fff7ed;
+    color: #9a3412;
+}
+
+/* Stat card en revisión */
+.stat-en-revision {
+    border-color: var(--secondary-color);
+    background: linear-gradient(135deg, #fff7ed 0%, white 100%);
+}
+
+.stat-en-revision .stat-number {
+    color: var(--secondary-color);
+}
+
+/* ========================================
+   TARJETA DE ADMINISTRACIÓN
+   ======================================== */
+.admin-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-card-title {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+/* Encabezado de tarjeta con título + acción alineada a la derecha */
+.admin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.admin-card-header .admin-card-title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* ========================================
+   TABLAS DE ADMINISTRACIÓN
+   ======================================== */
+.admin-table-container {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table thead {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+}
+
+.admin-table th {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    font-family: var(--font-family-heading);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+}
+
+.admin-table tbody tr:hover {
+    background-color: var(--bg-light);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ========================================
+   BADGES DE ESTADO DE PERFIL
+   ======================================== */
+.estado-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.estado-badge-pendiente {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.estado-badge-aprobado {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.estado-badge-rechazado {
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+/* ========================================
+   BOTÓN REVISAR Y VARIANTES SM
+   ======================================== */
+.btn-revisar {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-revisar:hover {
+    background-color: var(--primary-dark);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ========================================
+   EXPORTAR CSV
+   ======================================== */
+.btn-exportar-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.45rem 1rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 2rem;
+    color: var(--primary-color);
+    background-color: white;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-exportar-csv:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* ========================================
+   TABLA CONTACTOS - CELDA MENSAJE
+   ======================================== */
+.mensaje-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ========================================
+   FILTROS DE CONTACTOS
+   ======================================== */
+.filtros-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.filtros-form { width: 100%; }
+
+.filtros-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.filtro-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 120px;
+}
+
+.filtro-group label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filtro-busqueda { flex: 1 1 200px; }
+
+.filtro-select,
+.filtro-input {
+    height: 36px;
+    border: 1px solid #cbd5e0;
+    border-radius: var(--border-radius);
+    padding: 0 0.6rem;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: var(--font-family);
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0,123,153,0.15);
+}
+
+.filtro-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.btn-filtrar {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.45rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    height: 36px;
+    font-family: var(--font-family);
+}
+
+.btn-filtrar:hover { background: var(--primary-dark); }
+
+.btn-limpiar {
+    background: #f1f5f9;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+    border-radius: var(--border-radius);
+    padding: 0.45rem 1rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    transition: background 0.2s;
+    font-family: var(--font-family);
+}
+
+.btn-limpiar:hover { background: #e2e8f0; }
+
+/* ========================================
+   BADGES DE ESTADO DE CONTACTO (select inline)
+   ======================================== */
+.form-estado-inline { margin: 0; }
+
+.estado-select {
+    border: none;
+    border-radius: 12px;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+}
+
+.estado-nuevo      { background: #e0f2fe; color: #0c447c; }
+.estado-contactado { background: #d1fae5; color: #065f46; }
+.estado-en_proceso { background: #fef3c7; color: #92400e; }
+.estado-cerrado    { background: #f3f4f6; color: #374151; }
+
+/* ========================================
+   NOTAS DE CONTACTOS
+   ======================================== */
+.notas-cell { max-width: 160px; }
+
+.notas-preview {
+    display: block;
+    font-size: 0.82rem;
+    color: #4a5568;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.sin-notas { color: #a0aec0; font-style: italic; }
+
+.btn-editar-notas {
+    background: none;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-editar-notas:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+/* ========================================
+   PRACTICANTES DE INTERÉS EN CONTACTOS
+   ======================================== */
+.practicantes-cell { max-width: 180px; }
+
+.badge-practicante {
+    display: inline-block;
+    background: rgba(243,146,0,0.12);
+    color: #7a4800;
+    border-radius: 10px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0.1rem 0.1rem 0.1rem 0;
+    white-space: nowrap;
+}
+
+.sin-practicantes { color: #a0aec0; }
+
+/* ========================================
+   MODAL DE NOTAS
+   ======================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: var(--border-radius-lg);
+    width: 90%;
+    max-width: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    overflow: hidden;
+    border-top: 4px solid var(--primary-color);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h4 {
+    margin: 0;
+    font-family: var(--font-family-heading);
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.modal-cerrar {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: #718096;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-cerrar:hover { color: var(--error-color); }
+
+.modal-body { padding: 1.25rem; }
+
+.modal-textarea {
+    width: 100%;
+    border: 1px solid #cbd5e0;
+    border-radius: var(--border-radius);
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    font-family: var(--font-family);
+}
+
+.modal-textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0,123,153,0.15);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem 1.25rem;
+}
+
+/* ========================================
+   GESTIÓN DE USUARIOS
+   ======================================== */
+.admin-reset-form {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-reset-input {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    width: 160px;
+    font-family: var(--font-family);
+}
+
+.admin-reset-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0,123,153,0.15);
+}
+
+.badge-rol {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-rol--admin {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.badge-rol--estudiante {
+    background-color: #e8f4f8;
+    color: var(--primary-color);
+}
+
+.badge-activo {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-activo--si {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badge-activo--no {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* ========================================
+   REVISIÓN DE PERFILES
+   ======================================== */
+.revisar-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--bg-light);
+}
+
+.revisar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.revisar-header h2 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-2xl);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* Tarjeta de campo revisable */
+.campo-card {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
+    overflow: hidden;
+    border-left: 4px solid #9ca3af;
+    transition: var(--transition);
+}
+
+.campo-card.estado-aprobado {
+    border-left-color: var(--success-color);
+}
+
+.campo-card.estado-rechazado {
+    border-left-color: var(--error-color);
+}
+
+.campo-card-inner {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 0;
+}
+
+.campo-preview {
+    padding: var(--spacing-lg);
+    border-right: 1px solid var(--border-color);
+}
+
+.campo-preview h4 {
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.campo-preview-content {
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+}
+
+.campo-preview-content img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--border-color);
+}
+
+.campo-preview-content .foto-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.campo-preview-content .sin-dato {
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: var(--font-size-sm);
+}
+
+/* Panel de controles de revisión */
+.campo-controles {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    background-color: var(--bg-light);
+}
+
+.revision-radios {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.revision-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border: 2px solid var(--border-color);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.revision-radio-label:has(input:checked).opcion-aprobar {
+    background-color: #ecfdf5;
+    border-color: var(--success-color);
+    color: #065f46;
+}
+
+.revision-radio-label:has(input:checked).opcion-rechazar {
+    background-color: #fef2f2;
+    border-color: var(--error-color);
+    color: #991b1b;
+}
+
+.revision-radio-label input[type="radio"] {
+    accent-color: var(--primary-color);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.revision-comentario {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    resize: vertical;
+    min-height: 60px;
+    transition: var(--transition);
+}
+
+.revision-comentario:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.revision-comentario.tiene-rechazo {
+    border-color: var(--error-color);
+    background-color: #fff5f5;
+}
+
+.campo-label-revision {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+/* Habilidades en preview de revisión */
+.hab-preview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin: 0.15rem;
+    background-color: #e0f2fe;
+    color: var(--primary-color);
+}
+
+.hab-preview-nivel {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+/* Formación en preview de revisión */
+.formacion-preview-item {
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bg-light);
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--secondary-color);
+    margin-bottom: 0.5rem;
+    font-size: var(--font-size-sm);
+}
+
+.formacion-preview-item strong {
+    display: block;
+    color: var(--text-primary);
+}
+
+.formacion-preview-item span {
+    color: var(--text-secondary);
+}
+
+/* Idiomas en preview de revisión */
+.idioma-preview-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    background-color: #f0fdf4;
+    color: #065f46;
+    margin: 0.15rem;
+}
+
+/* Sección comentario general y submit en revisión */
+.revision-footer {
+    background-color: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
+}
+
+.revision-footer h3 {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.revision-footer textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    resize: vertical;
+    min-height: 100px;
+    transition: var(--transition);
+}
+
+.revision-footer textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.revision-footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 2px solid var(--border-color);
+}
+
+/* Estado badge en revisión */
+.estado-actual-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+/* Enlace de CV en revisión */
+.cv-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: underline;
+    font-size: var(--font-size-sm);
+}
+
+.cv-link:hover {
+    color: var(--primary-dark);
+}
+
+/* ========================================
+   RESPONSIVE ADMIN
+   ======================================== */
+@media (max-width: 768px) {
+    .filtros-row { flex-direction: column; }
+    .filtro-group { min-width: unset; width: 100%; }
+    .filtro-busqueda { flex: unset; width: 100%; }
+    .filtro-actions { width: 100%; justify-content: flex-start; }
+
+    .campo-card-inner {
+        grid-template-columns: 1fr;
+    }
+    .campo-preview {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .revisar-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-nav {
+        flex-wrap: wrap;
+        border-bottom: none;
+    }
+
+    .admin-nav-link {
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+        bottom: 0;
+    }
+
+    .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   DARK MODE ADMIN
+   ======================================== */
+body.dark-mode .admin-nav-link {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+body.dark-mode .admin-nav-link.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+body.dark-mode .stat-card {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+    background-image: none;
+}
+
+body.dark-mode .admin-card {
+    background-color: #1e293b;
+}
+
+body.dark-mode .campo-card {
+    background-color: #1e293b;
+}
+
+body.dark-mode .campo-controles {
+    background-color: #334155;
+}
+
+body.dark-mode .revision-radio-label {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+
+body.dark-mode .revision-comentario {
+    background-color: #1e293b;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+
+body.dark-mode .revision-footer {
+    background-color: #1e293b;
+}
+
+body.dark-mode .revision-footer textarea {
+    background-color: #334155;
+    border-color: #475569;
+    color: var(--text-primary);
+}
+
+body.dark-mode .formacion-preview-item {
+    background-color: #334155;
+}
+
+body.dark-mode .hab-preview-badge {
+    background-color: #1e3a5f;
+    color: var(--primary-light);
+}
+
+body.dark-mode .filtros-card {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+}
+
+body.dark-mode .filtro-select,
+body.dark-mode .filtro-input {
+    background-color: #334155;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .modal-box {
+    background-color: #1e293b;
+    border-top-color: var(--secondary-color);
+}
+
+body.dark-mode .modal-textarea {
+    background-color: #334155;
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .btn-limpiar {
+    background: #334155;
+    color: var(--text-secondary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .btn-limpiar:hover {
+    background: #475569;
+}

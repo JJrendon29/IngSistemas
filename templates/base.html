@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Practicantes - Universidad Católica Luis Amigó{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Josefin+Sans:wght@400;600;700&display=swap">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -16,13 +19,13 @@
                     <img src="https://www.funlam.edu.co/themes/uluisamigo/img/Logo-UcatolicaLuisAmigo.png" alt="UCatólica Luis Amigó">
                 </a>
             </div>
-            
+
             <button class="nav-toggle" id="navToggle">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            
+
             <ul class="nav-menu" id="navMenu">
                 <li class="nav-item">
                     <a href="{{ url_for('index') }}" class="nav-link">Inicio</a>
@@ -77,12 +80,61 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <p>&copy; 2025 Practicantes - Ingeniería de Sistemas</p>
-            <p>Universidad Católica Luis Amigó - Medellín, Colombia</p>
+            <div class="footer-grid">
+                <!-- Columna 1: Logo + Lema -->
+                <div class="footer-col-logo">
+                    <img src="https://www.funlam.edu.co/themes/uluisamigo/img/Logo-UcatolicaLuisAmigo.png"
+                         alt="Universidad Católica Luis Amigó">
+                    <p class="footer-lema">
+                        Formación humana y profesional al servicio del desarrollo y la transformación social
+                    </p>
+                </div>
+
+                <!-- Columna 2: Contacto -->
+                <div class="footer-col">
+                    <p class="footer-col-titulo">Contacto</p>
+                    <div class="footer-contacto-item">
+                        Transversal 51 A No. 67 B 90 &mdash; Medellín, Colombia
+                    </div>
+                    <div class="footer-contacto-item">
+                        57 (4) 4487666 &ndash; Ext. 9739
+                    </div>
+                    <div class="footer-contacto-item">
+                        <a href="mailto:ucatolicaluisamigo@amigo.edu.co">ucatolicaluisamigo@amigo.edu.co</a>
+                    </div>
+                    <div class="footer-contacto-item">
+                        <a href="https://www.ucatolicaluisamigo.edu.co" target="_blank">www.ucatolicaluisamigo.edu.co</a>
+                    </div>
+                </div>
+
+                <!-- Columna 3: Sedes -->
+                <div class="footer-col">
+                    <p class="footer-col-titulo">Sedes</p>
+                    <ul class="footer-sedes-list">
+                        <li class="sede-principal">Medellín (Sede principal)</li>
+                        <li>Apartadó</li>
+                        <li>Bogotá</li>
+                        <li>Manizales</li>
+                        <li>Montería</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="footer-container">
+            <p class="footer-copyright">
+                &copy; <span id="footer-year"></span> Practicantes &mdash; Ingeniería de Sistemas &mdash; Universidad Católica Luis Amigó
+            </p>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Año dinámico en footer
+        document.getElementById('footer-year').textContent = new Date().getFullYear();
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

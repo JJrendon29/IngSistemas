@@ -3,65 +3,7 @@
 {% block title %}Usuarios - Admin{% endblock %}
 
 {% block extra_css %}
-<style>
-.admin-reset-form {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.admin-reset-input {
-    padding: 0.35rem 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    width: 160px;
-}
-
-.admin-reset-input:focus {
-    outline: none;
-    border-color: #007b99;
-}
-
-.badge-rol {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.badge-rol--admin {
-    background-color: #f39200;
-    color: white;
-}
-
-.badge-rol--estudiante {
-    background-color: #e8f4f8;
-    color: #007b99;
-}
-
-.badge-activo {
-    display: inline-block;
-    padding: 0.2rem 0.55rem;
-    border-radius: 2rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.badge-activo--si {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.badge-activo--no {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
 
 {% block content %}
