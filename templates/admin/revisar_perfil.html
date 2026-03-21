@@ -634,7 +634,17 @@ body.dark-mode .hab-preview-badge {
                                 {% for f in perfil.formacion %}
                                 <div class="formacion-preview-item">
                                     <strong>{{ f.titulo }}</strong>
-                                    <span>{{ f.institucion }}{% if f.anio %} &mdash; {{ f.anio }}{% endif %}</span>
+                                    <span>{{ f.institucion }}
+                                        {% if f.en_curso %}
+                                            &mdash; {{ f.anio_inicio }} - Presente
+                                        {% elif f.anio_fin %}
+                                            &mdash; {{ f.anio_inicio }} - {{ f.anio_fin }}
+                                        {% elif f.anio_inicio %}
+                                            &mdash; {{ f.anio_inicio }}
+                                        {% elif f.anio %}
+                                            &mdash; {{ f.anio }}
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 {% endfor %}
                             {% else %}

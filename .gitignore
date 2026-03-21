@@ -30,3 +30,6 @@ static/usuarios/
 
 # Mantener estructura
 !static/usuarios/.gitkeep
+
+#agente de claude
+.claude/

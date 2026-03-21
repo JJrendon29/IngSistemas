@@ -51,12 +51,18 @@
                     {% if perfil.github %}
                     <a href="{{ perfil.github }}" class="btn btn-secondary btn-block" target="_blank">
                         💻 GitHub
+                        {% if perfil.github_verificado %}
+                        <span class="badge-verificado-perfil">Verificado</span>
+                        {% endif %}
                     </a>
                     {% endif %}
-                    
+
                     {% if perfil.linkedin %}
                     <a href="{{ perfil.linkedin }}" class="btn btn-secondary btn-block" target="_blank">
                         💼 LinkedIn
+                        {% if perfil.linkedin_verificado %}
+                        <span class="badge-verificado-perfil">Verificado</span>
+                        {% endif %}
                     </a>
                     {% endif %}
                 </div>
@@ -102,7 +108,17 @@
                         <div class="formacion-item">
                             <h3 class="formacion-titulo">{{ item.titulo }}</h3>
                             <p class="formacion-institucion">{{ item.institucion }}</p>
-                            <p class="formacion-año">{{ item.anio }}</p>
+                            <p class="formacion-año">
+                                {% if item.en_curso %}
+                                    {{ item.anio_inicio }} - Presente
+                                {% elif item.anio_fin %}
+                                    {{ item.anio_inicio }} - {{ item.anio_fin }}
+                                {% elif item.anio_inicio %}
+                                    {{ item.anio_inicio }}
+                                {% elif item.anio %}
+                                    {{ item.anio }}
+                                {% endif %}
+                            </p>
                         </div>
                         {% endfor %}
                     </div>
@@ -126,4 +142,27 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ---- Badge verificado en vista pública de perfil ---- */
+.badge-verificado-perfil {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background-color: #10b981;
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}
+
+.badge-verificado-perfil::before {
+    content: '\2713';
+}
+</style>
 {% endblock %}

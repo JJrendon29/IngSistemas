@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, abort, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
 from functools import wraps
 import os
 import re
 import shutil
+import requests
 
 from config import Config
 from db_connection import get_db_connection
@@ -234,6 +235,164 @@ def logout():
 
 
 # ========================================
+# RUTAS: GITHUB OAUTH
+# ========================================
+
+@app.route('/auth/github')
+@login_required
+def auth_github():
+    client_id = app.config.get('GITHUB_CLIENT_ID', '')
+    if not client_id:
+        flash('La integración con GitHub no está configurada.', 'error')
+        return redirect(url_for('editar_mi_perfil'))
+
+    # Si el usuario ya tiene GitHub vinculado (modo "Cambiar cuenta"),
+    # limpiar sesión y BD antes de iniciar el flujo OAuth de nuevo
+    perfil = obtener_perfil_por_usuario(current_user.id)
+    if perfil and perfil.get('github_verificado'):
+        session.pop('github_url', None)
+        session.pop('github_verificado', None)
+        actualizar_perfil(
+            perfil['id'],
+            github='',
+            github_verificado=False,
+            estado=perfil['estado']
+        )
+
+    redirect_uri = 'http://localhost:5000/auth/github/callback'
+    github_url = (
+        f'https://github.com/login/oauth/authorize'
+        f'?client_id={client_id}'
+        f'&redirect_uri={redirect_uri}'
+        f'&scope=read:user'
+        f'&allow_signup=false'
+    )
+    return redirect(github_url)
+
+
+@app.route('/auth/github/callback')
+@login_required
+def auth_github_callback():
+    code = request.args.get('code', '').strip()
+    if not code:
+        flash('Error al conectar con GitHub: no se recibió código de autorización.', 'error')
+        return redirect(url_for('editar_mi_perfil'))
+
+    client_id = app.config.get('GITHUB_CLIENT_ID', '')
+    client_secret = app.config.get('GITHUB_CLIENT_SECRET', '')
+
+    try:
+        # Intercambiar código por access token
+        token_resp = requests.post(
+            'https://github.com/login/oauth/access_token',
+            json={
+                'client_id': client_id,
+                'client_secret': client_secret,
+                'code': code,
+            },
+            headers={'Accept': 'application/json'},
+            timeout=10
+        )
+        token_data = token_resp.json()
+        access_token = token_data.get('access_token', '')
+        if not access_token:
+            flash('Error al obtener el token de GitHub. Intenta de nuevo.', 'error')
+            return redirect(url_for('editar_mi_perfil'))
+
+        # Obtener datos del usuario de GitHub
+        user_resp = requests.get(
+            'https://api.github.com/user',
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Accept': 'application/json',
+            },
+            timeout=10
+        )
+        user_data = user_resp.json()
+        html_url = user_data.get('html_url', '')
+        if not html_url:
+            flash('No se pudo obtener la URL de tu perfil de GitHub.', 'error')
+            return redirect(url_for('editar_mi_perfil'))
+
+        # Guardar en sesión: el perfil aún puede no existir (flujo de creación)
+        session['github_url'] = html_url
+        session['github_verificado'] = True
+
+        flash('GitHub vinculado correctamente. Guarda el formulario para confirmar los cambios.', 'success')
+
+        perfil = obtener_perfil_por_usuario(current_user.id)
+        if perfil:
+            return redirect(url_for('editar_mi_perfil'))
+        return redirect(url_for('crear_mi_perfil'))
+
+    except requests.exceptions.Timeout:
+        flash('Tiempo de espera agotado al conectar con GitHub. Intenta de nuevo.', 'error')
+        return redirect(url_for('editar_mi_perfil'))
+    except Exception as e:
+        print(f"Error en GitHub OAuth callback: {e}")
+        flash('Error al verificar GitHub. Intenta de nuevo.', 'error')
+        return redirect(url_for('editar_mi_perfil'))
+
+
+# ========================================
+# HELPERS: VERIFICACIÓN DE REDES SOCIALES
+# ========================================
+
+def verificar_linkedin(url):
+    """
+    Verifica que la URL de LinkedIn sea accesible.
+    Retorna True si responde con código 200, False en cualquier otro caso.
+    """
+    try:
+        resp = requests.head(url, allow_redirects=True, timeout=5)
+        return resp.status_code == 200
+    except Exception:
+        return False
+
+
+# ========================================
+# RUTAS: API PÚBLICA
+# ========================================
+
+@app.route('/api/instituciones')
+def api_instituciones():
+    """
+    Consulta la API de Datos Abiertos Colombia para autocompletar nombres de colegios.
+    Recibe: ?q=<texto>
+    Retorna: JSON con lista de nombres de establecimientos educativos.
+    """
+    from flask import jsonify
+    q = request.args.get('q', '').strip()
+    if len(q) < 2:
+        return jsonify([])
+
+    try:
+        url = 'https://www.datos.gov.co/resource/upkm-vdjb.json'
+        params = {
+            '$where': f"upper(nombreestablecimiento) like upper('%{q}%')",
+            '$limit': 15,
+            '$select': 'nombreestablecimiento,nombremunicipio,nombredepartamento',
+            '$order': 'nombreestablecimiento'
+        }
+        resp = requests.get(url, params=params, timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        # Extraer nombres únicos, eliminar None y valores vacíos
+        nombres = list({
+            item['nombreestablecimiento'].strip()
+            for item in data
+            if item.get('nombreestablecimiento', '').strip()
+        })
+        nombres.sort()
+        return jsonify(nombres)
+    except requests.exceptions.Timeout:
+        return jsonify([])
+    except Exception as e:
+        print(f"Error consultando API de instituciones: {e}")
+        return jsonify([])
+
+
+# ========================================
 # RUTAS: PÁGINAS PÚBLICAS
 # ========================================
 
@@ -334,19 +493,31 @@ def crear_mi_perfil():
         if not nombre:
             flash('El nombre es obligatorio', 'error')
             return render_template('editar_perfil.html', perfil=None, modo='crear',
-                                   catalogos=catalogos)
+                                   catalogos=catalogos,
+                                   github_session=session.get('github_url', ''),
+                                   github_verificado_session=session.get('github_verificado', False))
 
         slug = generar_slug(nombre)
 
-        github = request.form.get('github', '').strip()
+        # GitHub solo se asigna vía OAuth; no se lee del formulario
         linkedin = request.form.get('linkedin', '').strip()
 
-        errores_url = validar_urls_perfil(github, linkedin)
+        errores_url = validar_urls_perfil('', linkedin)
         if errores_url:
             for error in errores_url:
                 flash(error, 'error')
             return render_template('editar_perfil.html', perfil=None, modo='crear',
-                                   catalogos=catalogos)
+                                   catalogos=catalogos,
+                                   github_session=session.get('github_url', ''),
+                                   github_verificado_session=session.get('github_verificado', False))
+
+        # Verificar LinkedIn si se proporcionó URL
+        linkedin_verificado = False
+        if linkedin:
+            if verificar_linkedin(linkedin):
+                linkedin_verificado = True
+            else:
+                flash('No se pudo verificar la URL de LinkedIn (el perfil puede ser privado o la URL incorrecta). Se guardará sin verificar.', 'warning')
 
         # Procesar título: puede ser ID del catálogo o "otro"
         titulo_sel = request.form.get('titulo_catalogo', '').strip()
@@ -358,6 +529,9 @@ def crear_mi_perfil():
             titulo_final = titulo_sel  # Se guarda el id como referencia textual
             titulo_otro_guardar = ''
 
+        # Recuperar GitHub de sesión si el usuario lo vinculó antes de guardar
+        github_desde_sesion = session.get('github_url', '')
+
         perfil_id = crear_perfil(
             usuario_id=current_user.id,
             nombre=nombre,
@@ -366,11 +540,21 @@ def crear_mi_perfil():
             titulo_otro=titulo_otro_guardar,
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
-            github=github,
+            github=github_desde_sesion,
             linkedin=linkedin
         )
 
         if perfil_id:
+            # Guardar estado de verificación de LinkedIn si aplica
+            if linkedin_verificado:
+                actualizar_perfil(perfil_id, linkedin_verificado=True, estado='pendiente')
+
+            # Persistir verificación de GitHub si vino de sesión
+            if github_desde_sesion:
+                actualizar_perfil(perfil_id, github_verificado=True, estado='pendiente')
+                session.pop('github_url', None)
+                session.pop('github_verificado', None)
+
             # Guardar archivos
             foto = request.files.get('foto')
             cv = request.files.get('cv')
@@ -393,7 +577,9 @@ def crear_mi_perfil():
             flash('Error al crear el perfil', 'error')
 
     return render_template('editar_perfil.html', perfil=None, modo='crear',
-                           catalogos=catalogos, revisiones=None)
+                           catalogos=catalogos, revisiones=None,
+                           github_session=session.get('github_url', ''),
+                           github_verificado_session=session.get('github_verificado', False))
 
 
 @app.route('/mi-perfil/editar', methods=['GET', 'POST'])
@@ -414,7 +600,9 @@ def editar_mi_perfil():
         if not nombre:
             flash('El nombre es obligatorio', 'error')
             return render_template('editar_perfil.html', perfil=perfil, modo='editar',
-                                   catalogos=catalogos)
+                                   catalogos=catalogos,
+                                   github_session=session.get('github_url', ''),
+                                   github_verificado_session=session.get('github_verificado', False))
 
         nuevo_slug = generar_slug(nombre)
 
@@ -425,15 +613,33 @@ def editar_mi_perfil():
             if os.path.exists(old_dir):
                 shutil.move(old_dir, new_dir)
 
-        github = request.form.get('github', '').strip()
+        # GitHub solo se actualiza vía OAuth; preservar el valor actual
         linkedin = request.form.get('linkedin', '').strip()
 
-        errores_url = validar_urls_perfil(github, linkedin)
+        errores_url = validar_urls_perfil('', linkedin)
         if errores_url:
             for error in errores_url:
                 flash(error, 'error')
             return render_template('editar_perfil.html', perfil=perfil, modo='editar',
-                                   catalogos=catalogos)
+                                   catalogos=catalogos,
+                                   github_session=session.get('github_url', ''),
+                                   github_verificado_session=session.get('github_verificado', False))
+
+        # Determinar estado de verificación de LinkedIn
+        linkedin_anterior = perfil.get('linkedin', '') or ''
+        if linkedin and linkedin != linkedin_anterior:
+            # URL cambió: re-verificar y resetear
+            if verificar_linkedin(linkedin):
+                linkedin_verificado = True
+            else:
+                linkedin_verificado = False
+                flash('No se pudo verificar la URL de LinkedIn (el perfil puede ser privado o la URL incorrecta). Se guardará sin verificar.', 'warning')
+        elif linkedin and linkedin == linkedin_anterior:
+            # URL no cambió: mantener el estado actual
+            linkedin_verificado = bool(perfil.get('linkedin_verificado'))
+        else:
+            # Se borró el LinkedIn
+            linkedin_verificado = False
 
         # Procesar título: puede ser ID del catálogo o "otro"
         titulo_sel = request.form.get('titulo_catalogo', '').strip()
@@ -445,17 +651,30 @@ def editar_mi_perfil():
             titulo_final = titulo_sel
             titulo_otro_guardar = ''
 
-        actualizar_perfil(
-            perfil['id'],
+        # Si hay GitHub en sesión (recién autorizado), aplicarlo ahora
+        github_desde_sesion = session.get('github_url', '')
+
+        kwargs_actualizar = dict(
             nombre=nombre,
             slug=nuevo_slug,
             titulo=titulo_final,
             titulo_otro=titulo_otro_guardar,
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
-            github=github,
-            linkedin=linkedin
+            linkedin=linkedin,
+            linkedin_verificado=linkedin_verificado
+            # github NO se pasa por defecto: se preserva el valor actual en BD
         )
+
+        if github_desde_sesion:
+            kwargs_actualizar['github'] = github_desde_sesion
+            kwargs_actualizar['github_verificado'] = True
+
+        actualizar_perfil(perfil['id'], **kwargs_actualizar)
+
+        if github_desde_sesion:
+            session.pop('github_url', None)
+            session.pop('github_verificado', None)
 
         # Archivos
         foto = request.files.get('foto')
@@ -482,7 +701,9 @@ def editar_mi_perfil():
 
     revisiones = obtener_revisiones_perfil(perfil['id'])
     return render_template('editar_perfil.html', perfil=perfil, modo='editar',
-                           catalogos=catalogos, revisiones=revisiones)
+                           catalogos=catalogos, revisiones=revisiones,
+                           github_session=session.get('github_url', ''),
+                           github_verificado_session=session.get('github_verificado', False))
 
 
 # ========================================
@@ -662,10 +883,32 @@ def _guardar_formacion_desde_form(perfil_id, form):
             i += 1
             continue
         if titulo:
+            # Leer año inicio
+            anio_inicio_raw = form.get(f'form_anio_inicio_{i}', '').strip()
+            try:
+                anio_inicio = int(anio_inicio_raw) if anio_inicio_raw else None
+            except ValueError:
+                anio_inicio = None
+
+            # Leer en_curso (checkbox: 'on' si marcado)
+            en_curso = form.get(f'form_en_curso_{i}', '') == 'on'
+
+            # Leer año fin (solo si no está en curso)
+            if en_curso:
+                anio_fin = None
+            else:
+                anio_fin_raw = form.get(f'form_anio_fin_{i}', '').strip()
+                try:
+                    anio_fin = int(anio_fin_raw) if anio_fin_raw else None
+                except ValueError:
+                    anio_fin = None
+
             formaciones.append({
                 'titulo': titulo,
                 'institucion': form.get(f'form_institucion_{i}', '').strip(),
-                'anio': form.get(f'form_anio_{i}', '').strip()
+                'anio_inicio': anio_inicio,
+                'anio_fin': anio_fin,
+                'en_curso': en_curso,
             })
         i += 1
         if i > 20:

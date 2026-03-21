@@ -9,3 +9,5 @@ class Config:
     TEMPLATES_AUTO_RELOAD = True
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB
     DOMINIO_INSTITUCIONAL = os.environ.get('DOMINIO_INSTITUCIONAL', 'amigo.edu.co')
+    GITHUB_CLIENT_ID = os.environ.get('GITHUB_CLIENT_ID', '')
+    GITHUB_CLIENT_SECRET = os.environ.get('GITHUB_CLIENT_SECRET', '')

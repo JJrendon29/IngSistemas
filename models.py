@@ -261,7 +261,8 @@ def actualizar_perfil(perfil_id, **campos):
     try:
         campos_permitidos = [
             'nombre', 'slug', 'titulo', 'titulo_otro', 'descripcion', 'foto_url', 'cv_url',
-            'email_contacto', 'github', 'linkedin', 'estado'
+            'email_contacto', 'github', 'linkedin', 'estado',
+            'github_verificado', 'linkedin_verificado'
         ]
         campos_sql = []
         valores = []
@@ -331,10 +332,15 @@ def guardar_formacion(perfil_id, formaciones):
             for f in formaciones:
                 if f.get('titulo', '').strip():
                     cursor.execute(
-                        "INSERT INTO formacion (perfil_id, titulo, institucion, anio) VALUES (%s, %s, %s, %s)",
-                        (perfil_id, f['titulo'].strip(),
+                        """INSERT INTO formacion
+                           (perfil_id, titulo, institucion, anio_inicio, anio_fin, en_curso)
+                           VALUES (%s, %s, %s, %s, %s, %s)""",
+                        (perfil_id,
+                         f['titulo'].strip(),
                          f.get('institucion', '').strip(),
-                         f.get('anio', '').strip())
+                         f.get('anio_inicio'),
+                         f.get('anio_fin'),
+                         bool(f.get('en_curso', False)))
                     )
             conn.commit()
         return True
@@ -573,7 +579,8 @@ def _obtener_habilidades(cursor, perfil_id):
 
 def _obtener_formacion(cursor, perfil_id):
     cursor.execute(
-        "SELECT titulo, institucion, anio FROM formacion WHERE perfil_id = %s",
+        """SELECT titulo, institucion, anio, anio_inicio, anio_fin, en_curso
+           FROM formacion WHERE perfil_id = %s""",
         (perfil_id,)
     )
     return cursor.fetchall()

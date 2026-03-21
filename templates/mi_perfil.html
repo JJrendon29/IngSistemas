@@ -131,6 +131,26 @@
                             {% endfor %}
                         </div>
                         {% endif %}
+                        {% if perfil.github or perfil.linkedin %}
+                        <div class="redes-resumen" style="margin-top: 0.75rem;">
+                            {% if perfil.github %}
+                            <a href="{{ perfil.github }}" target="_blank" class="red-resumen-link">
+                                💻 GitHub
+                                {% if perfil.github_verificado %}
+                                <span class="badge-verificado-resumen">Verificado</span>
+                                {% endif %}
+                            </a>
+                            {% endif %}
+                            {% if perfil.linkedin %}
+                            <a href="{{ perfil.linkedin }}" target="_blank" class="red-resumen-link">
+                                💼 LinkedIn
+                                {% if perfil.linkedin_verificado %}
+                                <span class="badge-verificado-resumen">Verificado</span>
+                                {% endif %}
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="perfil-resumen-actions">
@@ -160,6 +180,49 @@
 
 {% block extra_css %}
 <style>
+/* ---- Redes sociales en resumen de perfil ---- */
+.redes-resumen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.red-resumen-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.red-resumen-link:hover {
+    text-decoration: underline;
+}
+
+.badge-verificado-resumen {
+    display: inline-flex;
+    align-items: center;
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.badge-verificado-resumen::before {
+    content: '\2713\00a0';
+}
+
+body.dark-mode .badge-verificado-resumen {
+    background-color: #052e16;
+    color: #6ee7b7;
+    border-color: #166534;
+}
+
 /* ---- Estado en revisión ---- */
 .estado-en-revision {
     background-color: #fff7ed;

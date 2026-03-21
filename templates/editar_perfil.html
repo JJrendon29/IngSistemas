@@ -131,12 +131,28 @@
                                 El administrador indicó: {{ revisiones['github']['comentario'] or 'Corrige este campo.' }}
                             </div>
                             {% endif %}
-                            <label for="github">GitHub</label>
-                            <input type="url" id="github" name="github"
-                                value="{{ perfil.github if perfil else '' }}"
-                                placeholder="https://github.com/tu-usuario"
-                                pattern="https?://(www\.)?github\.com/[a-zA-Z0-9_-]+/?"
-                                title="Debe ser una URL de GitHub válida">
+                            <label>GitHub</label>
+                            {# Determinar URL y estado efectivos: sesión tiene prioridad sobre BD #}
+                            {% set github_url_efectivo = github_session if github_session else (perfil.github if perfil else '') %}
+                            {% set github_verificado_efectivo = github_verificado_session or (perfil.github_verificado if perfil else False) %}
+                            {% if github_verificado_efectivo and github_url_efectivo %}
+                                <div class="red-social-verificada">
+                                    <a href="{{ github_url_efectivo }}" target="_blank" class="red-social-link">{{ github_url_efectivo }}</a>
+                                    <span class="badge-verificado">Verificado</span>
+                                </div>
+                                <div style="margin-top: 0.5rem;">
+                                    <a href="{{ url_for('auth_github') }}" class="btn-github">
+                                        Cambiar cuenta de GitHub
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div style="margin-top: 0.25rem;">
+                                    <a href="{{ url_for('auth_github') }}" class="btn-github">
+                                        Conectar con GitHub
+                                    </a>
+                                </div>
+                                <small class="form-hint">Tu GitHub se verificará automáticamente al conectar tu cuenta.</small>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="form-group">
@@ -145,7 +161,14 @@
                             El administrador indicó: {{ revisiones['linkedin']['comentario'] or 'Corrige este campo.' }}
                         </div>
                         {% endif %}
-                        <label for="linkedin">LinkedIn</label>
+                        <label for="linkedin">
+                            LinkedIn
+                            {% if perfil and perfil.linkedin_verificado %}
+                                <span class="badge-verificado" style="margin-left: 0.5rem;">Verificado</span>
+                            {% elif perfil and perfil.linkedin %}
+                                <span class="badge-sin-verificar" style="margin-left: 0.5rem;">Sin verificar</span>
+                            {% endif %}
+                        </label>
                         <input type="url" id="linkedin" name="linkedin"
                             value="{{ perfil.linkedin if perfil else '' }}"
                             placeholder="https://linkedin.com/in/tu-perfil"
@@ -219,7 +242,7 @@
                     {% endfor %}
                 </fieldset>
 
-                <!-- FORMACIÓN ACADÉMICA (dinámico — sin cambios) -->
+                <!-- FORMACIÓN ACADÉMICA -->
                 <fieldset class="form-fieldset">
                     <legend>Formación Académica</legend>
                     {% if revisiones and revisiones.get('formacion', {}).get('estado') == 'rechazado' %}
@@ -230,23 +253,62 @@
                     <div id="formacion-container">
                         {% if perfil and perfil.formacion %}
                             {% for f in perfil.formacion %}
+                            {% set idx = loop.index0 %}
                             <div class="dynamic-block">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <input type="text" name="form_titulo_{{ loop.index0 }}"
+                                        <input type="text" name="form_titulo_{{ idx }}"
                                                value="{{ f.titulo }}" placeholder="Título obtenido">
                                     </div>
                                     <div class="form-group">
-                                        <input type="text" name="form_institucion_{{ loop.index0 }}"
-                                               value="{{ f.institucion }}" placeholder="Institución">
+                                        <div class="institucion-wrapper">
+                                            <input type="text" name="form_institucion_{{ idx }}"
+                                                   value="{{ f.institucion }}" placeholder="Institución"
+                                                   class="institucion-input" autocomplete="off">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="form-row formacion-anios-row">
                                     <div class="form-group">
-                                        <input type="text" name="form_anio_{{ loop.index0 }}"
-                                               value="{{ f.anio }}" placeholder="Año (ej: 2020 - 2024)">
+                                        <label class="form-label-sm">Año inicio</label>
+                                        <select name="form_anio_inicio_{{ idx }}" class="form-select-anio">
+                                            <option value="">Año inicio</option>
+                                            {% for anio in range(2026, 1989, -1) %}
+                                            <option value="{{ anio }}"
+                                                {{ 'selected' if f.anio_inicio == anio }}>{{ anio }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
-                                    <div class="form-group" style="display:flex;align-items:end;">
+                                    <div class="form-group formacion-encurso-group">
+                                        <label class="form-label-sm">&nbsp;</label>
+                                        <label class="encurso-label">
+                                            <input type="checkbox"
+                                                   name="form_en_curso_{{ idx }}"
+                                                   id="en_curso_{{ idx }}"
+                                                   {{ 'checked' if f.en_curso }}
+                                                   onchange="toggleAnioFin(this, 'anio_fin_{{ idx }}', 'presente_txt_{{ idx }}')">
+                                            En curso
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label-sm">Año fin</label>
+                                        <select name="form_anio_fin_{{ idx }}"
+                                                id="anio_fin_{{ idx }}"
+                                                class="form-select-anio"
+                                                {{ 'style="display:none"' if f.en_curso }}>
+                                            <option value="">Año fin</option>
+                                            {% for anio in range(2026, 1989, -1) %}
+                                            <option value="{{ anio }}"
+                                                {{ 'selected' if f.anio_fin == anio }}>{{ anio }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        {% if f.en_curso %}
+                                        <span id="presente_txt_{{ idx }}" class="presente-texto">Presente</span>
+                                        {% else %}
+                                        <span id="presente_txt_{{ idx }}" class="presente-texto" style="display:none">Presente</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-group" style="display:flex;align-items:flex-end;">
                                         <button type="button" class="btn btn-sm btn-delete"
                                                 onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
                                     </div>
@@ -260,14 +322,43 @@
                                         <input type="text" name="form_titulo_0" placeholder="Título obtenido">
                                     </div>
                                     <div class="form-group">
-                                        <input type="text" name="form_institucion_0" placeholder="Institución">
+                                        <div class="institucion-wrapper">
+                                            <input type="text" name="form_institucion_0" placeholder="Institución"
+                                                   class="institucion-input" autocomplete="off">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-row">
+                                <div class="form-row formacion-anios-row">
                                     <div class="form-group">
-                                        <input type="text" name="form_anio_0" placeholder="Año (ej: 2020 - 2024)">
+                                        <label class="form-label-sm">Año inicio</label>
+                                        <select name="form_anio_inicio_0" class="form-select-anio">
+                                            <option value="">Año inicio</option>
+                                            {% for anio in range(2026, 1989, -1) %}
+                                            <option value="{{ anio }}">{{ anio }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
-                                    <div class="form-group" style="display:flex;align-items:end;">
+                                    <div class="form-group formacion-encurso-group">
+                                        <label class="form-label-sm">&nbsp;</label>
+                                        <label class="encurso-label">
+                                            <input type="checkbox"
+                                                   name="form_en_curso_0"
+                                                   id="en_curso_0"
+                                                   onchange="toggleAnioFin(this, 'anio_fin_0', 'presente_txt_0')">
+                                            En curso
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label-sm">Año fin</label>
+                                        <select name="form_anio_fin_0" id="anio_fin_0" class="form-select-anio">
+                                            <option value="">Año fin</option>
+                                            {% for anio in range(2026, 1989, -1) %}
+                                            <option value="{{ anio }}">{{ anio }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span id="presente_txt_0" class="presente-texto" style="display:none">Presente</span>
+                                    </div>
+                                    <div class="form-group" style="display:flex;align-items:flex-end;">
                                         <button type="button" class="btn btn-sm btn-delete"
                                                 onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
                                     </div>
@@ -353,6 +444,100 @@
 
 {% block extra_css %}
 <style>
+/* ---- Badges de verificación ---- */
+.badge-verificado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 20px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.badge-verificado::before {
+    content: '\2713';
+    font-weight: 700;
+}
+
+.badge-sin-verificar {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+/* ---- Contenedor de red social verificada ---- */
+.red-social-verificada {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: var(--border-radius);
+    margin-top: 0.25rem;
+}
+
+.red-social-link {
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.red-social-link:hover {
+    text-decoration: underline;
+}
+
+/* ---- Botón GitHub ---- */
+.btn-github {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #24292e;
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.55rem 1.1rem;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-github:hover {
+    background-color: #1b1f23;
+    color: #ffffff;
+}
+
+/* ---- Dark mode para verificación ---- */
+body.dark-mode .red-social-verificada {
+    background-color: #052e16;
+    border-color: #166534;
+}
+
+body.dark-mode .badge-verificado {
+    background-color: #052e16;
+    color: #6ee7b7;
+    border-color: #166534;
+}
+
+body.dark-mode .badge-sin-verificar {
+    background-color: #374151;
+    color: #9ca3af;
+    border-color: #4b5563;
+}
+
 /* ---- Aviso de campo rechazado por admin ---- */
 .campo-rechazado-aviso {
     background-color: #fef2f2;
@@ -460,6 +645,79 @@ body.dark-mode .campo-rechazado-aviso {
     flex: 2;
 }
 
+/* ---- Formación: fila de años ---- */
+.formacion-anios-row {
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.form-select-anio {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    color: var(--text-primary);
+    background-color: white;
+    transition: var(--transition);
+}
+
+.form-select-anio:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 153, 0.1);
+}
+
+.form-label-sm {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.formacion-encurso-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.encurso-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.55rem 0.1rem;
+    margin-bottom: 0;
+}
+
+.encurso-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.presente-texto {
+    display: inline-block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 0.55rem 0.1rem;
+}
+
+body.dark-mode .form-select-anio {
+    background-color: #1e293b;
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
 /* Dark mode para habilidades */
 body.dark-mode .hab-checkbox-row {
     background-color: #334155;
@@ -477,6 +735,64 @@ body.dark-mode .hab-nivel-select {
 body.dark-mode .categoria-titulo {
     background-color: #1e3a5f;
     color: var(--primary-light);
+}
+
+/* ---- Autocompletado de instituciones ---- */
+.institucion-wrapper {
+    position: relative;
+}
+
+.institucion-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.institucion-dropdown li {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.institucion-dropdown li:hover,
+.institucion-dropdown li.activo {
+    background-color: #e0f2fe;
+    color: var(--primary-color);
+}
+
+.institucion-dropdown li.sin-resultados {
+    color: var(--text-secondary);
+    font-style: italic;
+    cursor: default;
+}
+
+.institucion-dropdown li.sin-resultados:hover {
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+body.dark-mode .institucion-dropdown {
+    background-color: #1e293b;
+    border-color: var(--border-color);
+}
+
+body.dark-mode .institucion-dropdown li:hover,
+body.dark-mode .institucion-dropdown li.activo {
+    background-color: #1e3a5f;
 }
 </style>
 {% endblock %}
@@ -531,25 +847,72 @@ function toggleNivelHabilidad(checkbox, habId) {
     }
 }
 
+// ---- Toggle año fin según checkbox "en curso" ----
+function toggleAnioFin(checkbox, selectId, textoId) {
+    const select = document.getElementById(selectId);
+    const texto = document.getElementById(textoId);
+    if (checkbox.checked) {
+        select.style.display = 'none';
+        select.value = '';
+        texto.style.display = '';
+    } else {
+        select.style.display = '';
+        texto.style.display = 'none';
+    }
+}
+
+// ---- Generar opciones de año para campos dinámicos ----
+function generarOpcionesAnio(nombre, selectedVal) {
+    let html = `<option value="">Año ${nombre === 'inicio' ? 'inicio' : 'fin'}</option>`;
+    for (let y = 2026; y >= 1990; y--) {
+        html += `<option value="${y}"${selectedVal == y ? ' selected' : ''}>${y}</option>`;
+    }
+    return html;
+}
+
 // ---- Agregar fila de formación ----
 function agregarFormacion() {
     const container = document.getElementById('formacion-container');
     const div = document.createElement('div');
     div.className = 'dynamic-block';
+    const idx = formCount;
     div.innerHTML = `
         <div class="form-row">
             <div class="form-group">
-                <input type="text" name="form_titulo_${formCount}" placeholder="Título obtenido">
+                <input type="text" name="form_titulo_${idx}" placeholder="Título obtenido">
             </div>
             <div class="form-group">
-                <input type="text" name="form_institucion_${formCount}" placeholder="Institución">
+                <div class="institucion-wrapper">
+                    <input type="text" name="form_institucion_${idx}" placeholder="Institución"
+                           class="institucion-input" autocomplete="off">
+                </div>
             </div>
         </div>
-        <div class="form-row">
+        <div class="form-row formacion-anios-row">
             <div class="form-group">
-                <input type="text" name="form_anio_${formCount}" placeholder="Año (ej: 2020 - 2024)">
+                <label class="form-label-sm">Año inicio</label>
+                <select name="form_anio_inicio_${idx}" class="form-select-anio">
+                    ${generarOpcionesAnio('inicio', '')}
+                </select>
             </div>
-            <div class="form-group" style="display:flex;align-items:end;">
+            <div class="form-group formacion-encurso-group">
+                <label class="form-label-sm">&nbsp;</label>
+                <label class="encurso-label">
+                    <input type="checkbox"
+                           name="form_en_curso_${idx}"
+                           id="en_curso_${idx}"
+                           onchange="toggleAnioFin(this, 'anio_fin_${idx}', 'presente_txt_${idx}')">
+                    En curso
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="form-label-sm">Año fin</label>
+                <select name="form_anio_fin_${idx}" id="anio_fin_${idx}" class="form-select-anio">
+                    ${generarOpcionesAnio('fin', '')}
+                </select>
+                <span id="presente_txt_${idx}" class="presente-texto" style="display:none">Presente</span>
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;">
                 <button type="button" class="btn btn-sm btn-delete"
                         onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
             </div>
@@ -587,5 +950,160 @@ function agregarIdioma() {
     container.appendChild(div);
     idiomaCount++;
 }
+
+// ============================================================
+// ---- Autocompletado de instituciones (event delegation) ----
+// ============================================================
+
+(function () {
+    let debounceTimer = null;
+    // El dropdown activo en este momento
+    let dropdownActivo = null;
+    // El input que originó el dropdown activo
+    let inputActivo = null;
+    // Índice del ítem resaltado con teclado
+    let idxResaltado = -1;
+
+    function crearDropdown() {
+        const ul = document.createElement('ul');
+        ul.className = 'institucion-dropdown';
+        return ul;
+    }
+
+    function cerrarDropdown() {
+        if (dropdownActivo) {
+            dropdownActivo.remove();
+            dropdownActivo = null;
+        }
+        inputActivo = null;
+        idxResaltado = -1;
+    }
+
+    function renderDropdown(input, nombres) {
+        // Eliminar dropdown previo si existía
+        const wrapper = input.closest('.institucion-wrapper');
+        const viejo = wrapper.querySelector('.institucion-dropdown');
+        if (viejo) viejo.remove();
+
+        if (!nombres.length) {
+            const ul = crearDropdown();
+            const li = document.createElement('li');
+            li.className = 'sin-resultados';
+            li.textContent = 'Sin resultados';
+            ul.appendChild(li);
+            wrapper.appendChild(ul);
+            dropdownActivo = ul;
+            inputActivo = input;
+            idxResaltado = -1;
+            return;
+        }
+
+        const ul = crearDropdown();
+        nombres.forEach(function (nombre) {
+            const li = document.createElement('li');
+            li.textContent = nombre;
+            li.addEventListener('mousedown', function (e) {
+                // mousedown en vez de click para que dispare antes del blur
+                e.preventDefault();
+                input.value = nombre;
+                cerrarDropdown();
+            });
+            ul.appendChild(li);
+        });
+        wrapper.appendChild(ul);
+        dropdownActivo = ul;
+        inputActivo = input;
+        idxResaltado = -1;
+    }
+
+    function moverResaltado(direccion) {
+        if (!dropdownActivo) return;
+        const items = dropdownActivo.querySelectorAll('li:not(.sin-resultados)');
+        if (!items.length) return;
+        // Quitar resaltado anterior
+        if (idxResaltado >= 0 && idxResaltado < items.length) {
+            items[idxResaltado].classList.remove('activo');
+        }
+        idxResaltado += direccion;
+        if (idxResaltado < 0) idxResaltado = items.length - 1;
+        if (idxResaltado >= items.length) idxResaltado = 0;
+        items[idxResaltado].classList.add('activo');
+        items[idxResaltado].scrollIntoView({ block: 'nearest' });
+    }
+
+    function consultarApi(input, q) {
+        fetch('/api/instituciones?q=' + encodeURIComponent(q))
+            .then(function (r) { return r.json(); })
+            .then(function (nombres) {
+                // Solo renderizar si el input todavía tiene el mismo texto
+                if (input.value.trim() === q) {
+                    renderDropdown(input, nombres);
+                }
+            })
+            .catch(function () {
+                cerrarDropdown();
+            });
+    }
+
+    // Delegacion de eventos sobre el contenedor del formulario
+    const formContainer = document.querySelector('.perfil-form');
+    if (!formContainer) return;
+
+    // input: disparar búsqueda con debounce
+    formContainer.addEventListener('input', function (e) {
+        if (!e.target.classList.contains('institucion-input')) return;
+        const input = e.target;
+        const q = input.value.trim();
+
+        clearTimeout(debounceTimer);
+
+        if (q.length < 2) {
+            cerrarDropdown();
+            return;
+        }
+
+        debounceTimer = setTimeout(function () {
+            consultarApi(input, q);
+        }, 300);
+    });
+
+    // keydown: navegación con flechas, Enter, Escape
+    formContainer.addEventListener('keydown', function (e) {
+        if (!e.target.classList.contains('institucion-input')) return;
+        if (!dropdownActivo) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            moverResaltado(1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            moverResaltado(-1);
+        } else if (e.key === 'Enter') {
+            if (idxResaltado >= 0) {
+                e.preventDefault();
+                const items = dropdownActivo.querySelectorAll('li:not(.sin-resultados)');
+                if (items[idxResaltado]) {
+                    e.target.value = items[idxResaltado].textContent;
+                    cerrarDropdown();
+                }
+            }
+        } else if (e.key === 'Escape') {
+            cerrarDropdown();
+        }
+    });
+
+    // blur: cerrar dropdown (con pequeño delay para permitir mousedown)
+    formContainer.addEventListener('blur', function (e) {
+        if (!e.target.classList.contains('institucion-input')) return;
+        setTimeout(cerrarDropdown, 150);
+    }, true);
+
+    // Cerrar al hacer click fuera
+    document.addEventListener('click', function (e) {
+        if (dropdownActivo && !e.target.closest('.institucion-wrapper')) {
+            cerrarDropdown();
+        }
+    });
+})();
 </script>
 {% endblock %}
