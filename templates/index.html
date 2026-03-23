@@ -17,7 +17,7 @@
 <!-- Filtro de búsqueda -->
 <section class="filtro-section">
     <div class="container">
-        <form method="GET" action="{{ url_for('index') }}" class="filtro-form">
+        <form method="GET" action="{{ url_for('public.index') }}" class="filtro-form">
             <div class="filtro-group">
                 <select name="titulo" class="filtro-select">
                     <option value="">Todos los títulos</option>
@@ -41,7 +41,7 @@
                 </select>
                 <button type="submit" class="btn btn-primary">Buscar</button>
                 {% if filtro_titulo or filtro_habilidad or filtro_idioma %}
-                <a href="{{ url_for('index') }}" class="btn btn-outline">Limpiar</a>
+                <a href="{{ url_for('public.index') }}" class="btn btn-outline">Limpiar</a>
                 {% endif %}
             </div>
         </form>
@@ -64,7 +64,7 @@
         {% if perfiles %}
             <div class="perfiles-grid">
                 {% for perfil in perfiles %}
-                <a href="{{ url_for('ver_perfil', slug=perfil.slug) }}" class="perfil-card-link">
+                <a href="{{ url_for('public.ver_perfil', slug=perfil.slug) }}" class="perfil-card-link">
                     <div class="perfil-card-grid">
                         <div class="perfil-card-image">
                             {% if perfil.foto_url and existe_archivo(perfil.foto_url) %}
@@ -124,19 +124,19 @@
         {% if total_pages > 1 %}
         <div class="paginacion">
             {% if page > 1 %}
-            <a href="{{ url_for('index', page=page-1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
+            <a href="{{ url_for('public.index', page=page-1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn">&#8592; Anterior</a>
             {% else %}
             <span class="paginacion-btn paginacion-btn--disabled">&#8592; Anterior</span>
             {% endif %}
 
             {% for p in range(1, total_pages + 1) %}
-            <a href="{{ url_for('index', page=p, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
+            <a href="{{ url_for('public.index', page=p, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn {{ 'paginacion-btn--activo' if p == page }}">{{ p }}</a>
             {% endfor %}
 
             {% if page < total_pages %}
-            <a href="{{ url_for('index', page=page+1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
+            <a href="{{ url_for('public.index', page=page+1, titulo=filtro_titulo if filtro_titulo else '', habilidad=filtro_habilidad if filtro_habilidad else '', idioma=filtro_idioma if filtro_idioma else '') }}"
                class="paginacion-btn">Siguiente &#8594;</a>
             {% else %}
             <span class="paginacion-btn paginacion-btn--disabled">Siguiente &#8594;</span>
@@ -151,7 +151,7 @@
     <div class="container">
         <h2>¿Quieres contactarnos?</h2>
         <p>Deja tu información y nos pondremos en contacto contigo</p>
-        <a href="{{ url_for('contacto') }}" class="btn btn-primary btn-lg">Ir a Contacto</a>
+        <a href="{{ url_for('public.contacto') }}" class="btn btn-primary btn-lg">Ir a Contacto</a>
     </div>
 </section>
 {% endblock %}

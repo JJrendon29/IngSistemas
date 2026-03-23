@@ -96,7 +96,7 @@
                 {% endif %}
 
                 <div style="margin-top: 1.25rem;">
-                    <a href="{{ url_for('editar_mi_perfil') }}" class="btn btn-secondary">
+                    <a href="{{ url_for('perfil.editar_mi_perfil') }}" class="btn btn-secondary">
                         Editar y corregir mi perfil
                     </a>
                 </div>
@@ -154,9 +154,9 @@
                     </div>
                 </div>
                 <div class="perfil-resumen-actions">
-                    <a href="{{ url_for('editar_mi_perfil') }}" class="btn btn-primary">Editar Perfil</a>
+                    <a href="{{ url_for('perfil.editar_mi_perfil') }}" class="btn btn-primary">Editar Perfil</a>
                     {% if perfil.estado == 'aprobado' %}
-                    <a href="{{ url_for('ver_perfil', slug=perfil.slug) }}" class="btn btn-outline" target="_blank">
+                    <a href="{{ url_for('public.ver_perfil', slug=perfil.slug) }}" class="btn btn-outline" target="_blank">
                         Ver como público
                     </a>
                     {% endif %}
@@ -169,7 +169,7 @@
                 <div class="empty-state-icon">📋</div>
                 <h3>Aún no tienes un perfil</h3>
                 <p>Crea tu perfil de practicante para que las empresas puedan conocerte</p>
-                <a href="{{ url_for('crear_mi_perfil') }}" class="btn btn-primary btn-lg" style="margin-top: 1rem;">
+                <a href="{{ url_for('perfil.crear_mi_perfil') }}" class="btn btn-primary btn-lg" style="margin-top: 1rem;">
                     Crear mi Perfil
                 </a>
             </div>

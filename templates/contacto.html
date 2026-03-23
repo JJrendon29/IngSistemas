@@ -16,7 +16,7 @@
             <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--text-primary);">
                 Formulario de Interés
             </h3>
-            <form action="{{ url_for('guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
+            <form action="{{ url_for('public.guardar_contacto') }}" method="POST" class="contacto-form" id="contactoForm">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nombre">Nombre Completo *</label>
@@ -78,80 +78,4 @@
     </div>
 </section>
 
-<style>
-/* ---- Selector de practicantes ---- */
-.practicantes-selector {
-    margin-bottom: 1.25rem;
-}
-.practicantes-label {
-    display: block;
-    font-weight: 600;
-    color: var(--text-primary, #2d3748);
-    margin-bottom: 0.3rem;
-    font-size: 0.95rem;
-}
-.label-opcional {
-    font-weight: 400;
-    font-size: 0.82rem;
-    color: #718096;
-    margin-left: 0.3rem;
-}
-.practicantes-hint {
-    font-size: 0.83rem;
-    color: #718096;
-    margin: 0 0 0.75rem 0;
-}
-.practicantes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0.5rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    background: #f9fbfc;
-    max-height: 260px;
-    overflow-y: auto;
-}
-.practicante-checkbox-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.45rem 0.6rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s;
-    border: 1px solid transparent;
-}
-.practicante-checkbox-item:hover {
-    background: rgba(0, 123, 153, 0.07);
-    border-color: rgba(0, 123, 153, 0.2);
-}
-.practicante-checkbox-item:has(.checkbox-practicante:checked) {
-    background: rgba(0, 123, 153, 0.1);
-    border-color: #007b99;
-}
-.checkbox-practicante {
-    margin-top: 2px;
-    accent-color: #007b99;
-    flex-shrink: 0;
-    width: 15px;
-    height: 15px;
-}
-.checkbox-label-text {
-    font-size: 0.87rem;
-    color: #2d3748;
-    line-height: 1.35;
-}
-.practicante-titulo {
-    color: #718096;
-    font-weight: 400;
-    font-size: 0.82rem;
-}
-
-@media (max-width: 540px) {
-    .practicantes-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
 {% endblock %}

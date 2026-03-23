@@ -17,14 +17,14 @@
 <section class="admin-section">
     <div class="container">
         <div class="admin-nav">
-            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link">Perfiles</a>
-            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link active">Contactos</a>
-            <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
+            <a href="{{ url_for('admin.admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin.admin_contactos') }}" class="admin-nav-link active">Contactos</a>
+            <a href="{{ url_for('admin.admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
         </div>
 
         <!-- Barra de filtros -->
         <div class="filtros-card">
-            <form method="GET" action="{{ url_for('admin_contactos') }}" class="filtros-form">
+            <form method="GET" action="{{ url_for('admin.admin_contactos') }}" class="filtros-form">
                 <div class="filtros-row">
                     <div class="filtro-group">
                         <label for="f-estado">Estado</label>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="filtro-actions">
                         <button type="submit" class="btn-filtrar">Filtrar</button>
-                        <a href="{{ url_for('admin_contactos') }}" class="btn-limpiar">Limpiar</a>
+                        <a href="{{ url_for('admin.admin_contactos') }}" class="btn-limpiar">Limpiar</a>
                     </div>
                 </div>
             </form>
@@ -71,7 +71,7 @@
                 {% if filtros.busqueda %}{% set _ = qs_exportar.append('busqueda=' ~ filtros.busqueda) %}{% endif %}
                 {% if filtros.desde %}{% set _ = qs_exportar.append('desde=' ~ filtros.desde) %}{% endif %}
                 {% if filtros.hasta %}{% set _ = qs_exportar.append('hasta=' ~ filtros.hasta) %}{% endif %}
-                <a href="{{ url_for('exportar_contactos') }}{% if qs_exportar %}?{{ qs_exportar|join('&') }}{% endif %}"
+                <a href="{{ url_for('admin.exportar_contactos') }}{% if qs_exportar %}?{{ qs_exportar|join('&') }}{% endif %}"
                    class="btn-exportar-csv">
                     &#8595; Exportar CSV
                 </a>
@@ -106,7 +106,7 @@
                             <!-- Columna Estado: select inline -->
                             <td>
                                 <form method="POST"
-                                      action="{{ url_for('actualizar_estado_contacto', id=c.id) }}"
+                                      action="{{ url_for('admin.actualizar_estado_contacto', id=c.id) }}"
                                       class="form-estado-inline">
                                     <select name="nuevo_estado"
                                             class="estado-select estado-{{ c.estado_contacto or 'nuevo' }}"
@@ -149,7 +149,7 @@
                             <td>{{ c.fecha_registro.strftime('%d/%m/%Y %H:%M') if c.fecha_registro else '-' }}</td>
 
                             <td>
-                                <form method="POST" action="{{ url_for('eliminar_contacto', id=c.id) }}"
+                                <form method="POST" action="{{ url_for('admin.eliminar_contacto', id=c.id) }}"
                                       onsubmit="return confirm('¿Eliminar este contacto?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
                                 </form>

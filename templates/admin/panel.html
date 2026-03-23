@@ -18,9 +18,9 @@
     <div class="container">
         <!-- Navegación admin -->
         <div class="admin-nav">
-            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link active">Perfiles</a>
-            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link">Contactos</a>
-            <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
+            <a href="{{ url_for('admin.admin_panel') }}" class="admin-nav-link active">Perfiles</a>
+            <a href="{{ url_for('admin.admin_contactos') }}" class="admin-nav-link">Contactos</a>
+            <a href="{{ url_for('admin.admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
         </div>
 
         <!-- Estadísticas rápidas -->
@@ -79,14 +79,14 @@
                             </td>
                             <td>{{ perfil.created_at.strftime('%d/%m/%Y') if perfil.created_at else '-' }}</td>
                             <td class="admin-actions">
-                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
-                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                <a href="{{ url_for('admin.revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
+                                <form method="POST" action="{{ url_for('admin.aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
                                 </form>
-                                <form method="POST" action="{{ url_for('rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                <form method="POST" action="{{ url_for('admin.rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
                                 </form>
-                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
+                                <form method="POST" action="{{ url_for('admin.eliminar_perfil_admin', perfil_id=perfil.id) }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
@@ -125,11 +125,11 @@
                                 {% endfor %}
                             </td>
                             <td class="admin-actions">
-                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
-                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                <a href="{{ url_for('admin.revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
+                                <form method="POST" action="{{ url_for('admin.aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success">Aprobar todo</button>
                                 </form>
-                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
+                                <form method="POST" action="{{ url_for('admin.eliminar_perfil_admin', perfil_id=perfil.id) }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
@@ -178,19 +178,19 @@
                             </td>
                             <td class="admin-actions">
                                 {% if perfil.estado in ('pendiente', 'en_revision') %}
-                                <a href="{{ url_for('revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
+                                <a href="{{ url_for('admin.revisar_perfil', perfil_id=perfil.id) }}" class="btn btn-sm btn-revisar">Revisar</a>
                                 {% endif %}
                                 {% if perfil.estado != 'aprobado' %}
-                                <form method="POST" action="{{ url_for('aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                <form method="POST" action="{{ url_for('admin.aprobar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
                                 </form>
                                 {% endif %}
                                 {% if perfil.estado != 'rechazado' %}
-                                <form method="POST" action="{{ url_for('rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
+                                <form method="POST" action="{{ url_for('admin.rechazar_perfil', perfil_id=perfil.id) }}" style="display:inline;">
                                     <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
                                 </form>
                                 {% endif %}
-                                <form method="POST" action="{{ url_for('eliminar_perfil_admin', perfil_id=perfil.id) }}"
+                                <form method="POST" action="{{ url_for('admin.eliminar_perfil_admin', perfil_id=perfil.id) }}"
                                       style="display:inline;"
                                       onsubmit="return confirm('¿Eliminar este perfil permanentemente?')">
                                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>

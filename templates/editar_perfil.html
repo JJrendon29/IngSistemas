@@ -141,13 +141,13 @@
                                     <span class="badge-verificado">Verificado</span>
                                 </div>
                                 <div style="margin-top: 0.5rem;">
-                                    <a href="{{ url_for('auth_github') }}" class="btn-github">
+                                    <a href="{{ url_for('auth.auth_github') }}" class="btn-github">
                                         Cambiar cuenta de GitHub
                                     </a>
                                 </div>
                             {% else %}
                                 <div style="margin-top: 0.25rem;">
-                                    <a href="{{ url_for('auth_github') }}" class="btn-github">
+                                    <a href="{{ url_for('auth.auth_github') }}" class="btn-github">
                                         Conectar con GitHub
                                     </a>
                                 </div>
@@ -425,7 +425,7 @@
 
                 <!-- SUBMIT -->
                 <div class="form-actions">
-                    <a href="{{ url_for('mi_perfil') }}" class="btn btn-outline">Cancelar</a>
+                    <a href="{{ url_for('perfil.mi_perfil') }}" class="btn btn-outline">Cancelar</a>
                     <button type="submit" class="btn btn-primary btn-lg">
                         {{ 'Guardar Cambios' if modo == 'editar' else 'Crear Perfil' }}
                     </button>
@@ -448,311 +448,17 @@
 
 {% block extra_js %}
 <script>
-// ---- Catálogo de idiomas para filas dinámicas ----
-const catalogoIdiomas = [
-    {% for op in catalogos.idiomas %}
-    { id: {{ op.id }}, nombre: "{{ op.nombre | e }}" }{% if not loop.last %},{% endif %}
-    {% endfor %}
-];
-
-const nivelesIdioma = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Nativo'];
-
-let formCount = {{ (perfil.formacion|length) if perfil and perfil.formacion else 1 }};
-let idiomaCount = {{ (perfil.idiomas|length) if perfil and perfil.idiomas else 1 }};
-
-// ---- Toggle campo "Otro" para título ----
-function toggleTituloOtro(valor) {
-    const contenedor = document.getElementById('titulo-otro-container');
-    const input = document.getElementById('titulo_otro');
-    if (valor === 'otro') {
-        contenedor.style.display = '';
-        input.required = true;
-    } else {
-        contenedor.style.display = 'none';
-        input.required = false;
-        input.value = '';
-    }
-}
-
-// Ejecutar al cargar por si el select ya tiene "otro" seleccionado
-(function() {
-    const sel = document.getElementById('titulo_catalogo');
-    if (sel && sel.value === 'otro') {
-        document.getElementById('titulo-otro-container').style.display = '';
-        document.getElementById('titulo_otro').required = true;
-    }
-})();
-
-// ---- Toggle nivel de habilidad al marcar/desmarcar checkbox ----
-function toggleNivelHabilidad(checkbox, habId) {
-    const selectNivel = document.getElementById('hab-nivel-' + habId);
-    const row = document.getElementById('hab-row-' + habId);
-    if (checkbox.checked) {
-        selectNivel.disabled = false;
-        row.classList.add('activa');
-    } else {
-        selectNivel.disabled = true;
-        row.classList.remove('activa');
-    }
-}
-
-// ---- Toggle año fin según checkbox "en curso" ----
-function toggleAnioFin(checkbox, selectId, textoId) {
-    const select = document.getElementById(selectId);
-    const texto = document.getElementById(textoId);
-    if (checkbox.checked) {
-        select.style.display = 'none';
-        select.value = '';
-        texto.style.display = '';
-    } else {
-        select.style.display = '';
-        texto.style.display = 'none';
-    }
-}
-
-// ---- Generar opciones de año para campos dinámicos ----
-function generarOpcionesAnio(nombre, selectedVal) {
-    let html = `<option value="">Año ${nombre === 'inicio' ? 'inicio' : 'fin'}</option>`;
-    for (let y = 2026; y >= 1990; y--) {
-        html += `<option value="${y}"${selectedVal == y ? ' selected' : ''}>${y}</option>`;
-    }
-    return html;
-}
-
-// ---- Agregar fila de formación ----
-function agregarFormacion() {
-    const container = document.getElementById('formacion-container');
-    const div = document.createElement('div');
-    div.className = 'dynamic-block';
-    const idx = formCount;
-    div.innerHTML = `
-        <div class="form-row">
-            <div class="form-group">
-                <input type="text" name="form_titulo_${idx}" placeholder="Título obtenido">
-            </div>
-            <div class="form-group">
-                <div class="institucion-wrapper">
-                    <input type="text" name="form_institucion_${idx}" placeholder="Institución"
-                           class="institucion-input" autocomplete="off">
-                </div>
-            </div>
-        </div>
-        <div class="form-row formacion-anios-row">
-            <div class="form-group">
-                <label class="form-label-sm">Año inicio</label>
-                <select name="form_anio_inicio_${idx}" class="form-select-anio">
-                    ${generarOpcionesAnio('inicio', '')}
-                </select>
-            </div>
-            <div class="form-group formacion-encurso-group">
-                <label class="form-label-sm">&nbsp;</label>
-                <label class="encurso-label">
-                    <input type="checkbox"
-                           name="form_en_curso_${idx}"
-                           id="en_curso_${idx}"
-                           onchange="toggleAnioFin(this, 'anio_fin_${idx}', 'presente_txt_${idx}')">
-                    En curso
-                </label>
-            </div>
-            <div class="form-group">
-                <label class="form-label-sm">Año fin</label>
-                <select name="form_anio_fin_${idx}" id="anio_fin_${idx}" class="form-select-anio">
-                    ${generarOpcionesAnio('fin', '')}
-                </select>
-                <span id="presente_txt_${idx}" class="presente-texto" style="display:none">Presente</span>
-            </div>
-            <div class="form-group" style="display:flex;align-items:flex-end;">
-                <button type="button" class="btn btn-sm btn-delete"
-                        onclick="this.closest('.dynamic-block').remove()">Eliminar</button>
-            </div>
-        </div>
-    `;
-    container.appendChild(div);
-    formCount++;
-}
-
-// ---- Agregar fila de idioma ----
-function agregarIdioma() {
-    const container = document.getElementById('idiomas-container');
-    const div = document.createElement('div');
-    div.className = 'dynamic-row';
-
-    const opcionesIdioma = catalogoIdiomas.map(
-        op => `<option value="${op.id}">${op.nombre}</option>`
-    ).join('');
-
-    const opcionesNivel = nivelesIdioma.map(
-        nv => `<option value="${nv}">${nv}</option>`
-    ).join('');
-
-    div.innerHTML = `
-        <select name="idioma_catalogo_id_${idiomaCount}" class="idioma-select">
-            <option value="">-- Selecciona un idioma --</option>
-            ${opcionesIdioma}
-        </select>
-        <select name="idioma_nivel_${idiomaCount}">
-            ${opcionesNivel}
-        </select>
-        <button type="button" class="btn-remove"
-                onclick="this.parentElement.remove()">&#x2715;</button>
-    `;
-    container.appendChild(div);
-    idiomaCount++;
-}
-
-// ============================================================
-// ---- Autocompletado de instituciones (event delegation) ----
-// ============================================================
-
-(function () {
-    let debounceTimer = null;
-    // El dropdown activo en este momento
-    let dropdownActivo = null;
-    // El input que originó el dropdown activo
-    let inputActivo = null;
-    // Índice del ítem resaltado con teclado
-    let idxResaltado = -1;
-
-    function crearDropdown() {
-        const ul = document.createElement('ul');
-        ul.className = 'institucion-dropdown';
-        return ul;
-    }
-
-    function cerrarDropdown() {
-        if (dropdownActivo) {
-            dropdownActivo.remove();
-            dropdownActivo = null;
-        }
-        inputActivo = null;
-        idxResaltado = -1;
-    }
-
-    function renderDropdown(input, nombres) {
-        // Eliminar dropdown previo si existía
-        const wrapper = input.closest('.institucion-wrapper');
-        const viejo = wrapper.querySelector('.institucion-dropdown');
-        if (viejo) viejo.remove();
-
-        if (!nombres.length) {
-            const ul = crearDropdown();
-            const li = document.createElement('li');
-            li.className = 'sin-resultados';
-            li.textContent = 'Sin resultados';
-            ul.appendChild(li);
-            wrapper.appendChild(ul);
-            dropdownActivo = ul;
-            inputActivo = input;
-            idxResaltado = -1;
-            return;
-        }
-
-        const ul = crearDropdown();
-        nombres.forEach(function (nombre) {
-            const li = document.createElement('li');
-            li.textContent = nombre;
-            li.addEventListener('mousedown', function (e) {
-                // mousedown en vez de click para que dispare antes del blur
-                e.preventDefault();
-                input.value = nombre;
-                cerrarDropdown();
-            });
-            ul.appendChild(li);
-        });
-        wrapper.appendChild(ul);
-        dropdownActivo = ul;
-        inputActivo = input;
-        idxResaltado = -1;
-    }
-
-    function moverResaltado(direccion) {
-        if (!dropdownActivo) return;
-        const items = dropdownActivo.querySelectorAll('li:not(.sin-resultados)');
-        if (!items.length) return;
-        // Quitar resaltado anterior
-        if (idxResaltado >= 0 && idxResaltado < items.length) {
-            items[idxResaltado].classList.remove('activo');
-        }
-        idxResaltado += direccion;
-        if (idxResaltado < 0) idxResaltado = items.length - 1;
-        if (idxResaltado >= items.length) idxResaltado = 0;
-        items[idxResaltado].classList.add('activo');
-        items[idxResaltado].scrollIntoView({ block: 'nearest' });
-    }
-
-    function consultarApi(input, q) {
-        fetch('/api/instituciones?q=' + encodeURIComponent(q))
-            .then(function (r) { return r.json(); })
-            .then(function (nombres) {
-                // Solo renderizar si el input todavía tiene el mismo texto
-                if (input.value.trim() === q) {
-                    renderDropdown(input, nombres);
-                }
-            })
-            .catch(function () {
-                cerrarDropdown();
-            });
-    }
-
-    // Delegacion de eventos sobre el contenedor del formulario
-    const formContainer = document.querySelector('.perfil-form');
-    if (!formContainer) return;
-
-    // input: disparar búsqueda con debounce
-    formContainer.addEventListener('input', function (e) {
-        if (!e.target.classList.contains('institucion-input')) return;
-        const input = e.target;
-        const q = input.value.trim();
-
-        clearTimeout(debounceTimer);
-
-        if (q.length < 2) {
-            cerrarDropdown();
-            return;
-        }
-
-        debounceTimer = setTimeout(function () {
-            consultarApi(input, q);
-        }, 300);
-    });
-
-    // keydown: navegación con flechas, Enter, Escape
-    formContainer.addEventListener('keydown', function (e) {
-        if (!e.target.classList.contains('institucion-input')) return;
-        if (!dropdownActivo) return;
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            moverResaltado(1);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            moverResaltado(-1);
-        } else if (e.key === 'Enter') {
-            if (idxResaltado >= 0) {
-                e.preventDefault();
-                const items = dropdownActivo.querySelectorAll('li:not(.sin-resultados)');
-                if (items[idxResaltado]) {
-                    e.target.value = items[idxResaltado].textContent;
-                    cerrarDropdown();
-                }
-            }
-        } else if (e.key === 'Escape') {
-            cerrarDropdown();
-        }
-    });
-
-    // blur: cerrar dropdown (con pequeño delay para permitir mousedown)
-    formContainer.addEventListener('blur', function (e) {
-        if (!e.target.classList.contains('institucion-input')) return;
-        setTimeout(cerrarDropdown, 150);
-    }, true);
-
-    // Cerrar al hacer click fuera
-    document.addEventListener('click', function (e) {
-        if (dropdownActivo && !e.target.closest('.institucion-wrapper')) {
-            cerrarDropdown();
-        }
-    });
-})();
+// Datos inyectados por Jinja para el JS externo
+window.PERFIL_CONFIG = {
+    catalogoIdiomas: [
+        {% for op in catalogos.idiomas %}
+        { id: {{ op.id }}, nombre: "{{ op.nombre | e }}" }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    nivelesIdioma: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Nativo'],
+    formCount: {{ (perfil.formacion|length) if perfil and perfil.formacion else 1 }},
+    idiomaCount: {{ (perfil.idiomas|length) if perfil and perfil.idiomas else 1 }}
+};
 </script>
+<script src="{{ url_for('static', filename='js/editar_perfil.js') }}"></script>
 {% endblock %}

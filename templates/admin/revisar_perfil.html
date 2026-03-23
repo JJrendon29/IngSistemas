@@ -32,7 +32,7 @@
                         {% endif %}">
                         Estado actual: {{ perfil.estado | replace('_', ' ') | capitalize }}
                     </span>
-                    <a href="{{ url_for('admin_panel') }}" class="btn btn-outline btn-sm">Volver al panel</a>
+                    <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-outline btn-sm">Volver al panel</a>
                 </div>
             </div>
 
@@ -501,7 +501,7 @@
                           placeholder="Escribe aquí un comentario general sobre la revisión del perfil (opcional)...">{{ perfil.comentario_admin or '' }}</textarea>
 
                 <div class="revision-footer-actions">
-                    <a href="{{ url_for('admin_panel') }}" class="btn btn-outline">Cancelar</a>
+                    <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-outline">Cancelar</a>
                     <button type="submit" class="btn btn-primary btn-lg">Guardar Revisión</button>
                 </div>
             </div>

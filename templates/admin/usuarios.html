@@ -17,9 +17,9 @@
 <section class="admin-section">
     <div class="container">
         <div class="admin-nav">
-            <a href="{{ url_for('admin_panel') }}" class="admin-nav-link">Perfiles</a>
-            <a href="{{ url_for('admin_contactos') }}" class="admin-nav-link">Contactos</a>
-            <a href="{{ url_for('admin_usuarios') }}" class="admin-nav-link active">Usuarios</a>
+            <a href="{{ url_for('admin.admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin.admin_contactos') }}" class="admin-nav-link">Contactos</a>
+            <a href="{{ url_for('admin.admin_usuarios') }}" class="admin-nav-link active">Usuarios</a>
         </div>
 
         <div class="admin-card">
@@ -69,7 +69,7 @@
                             <td>{{ u.created_at.strftime('%d/%m/%Y') if u.created_at else '-' }}</td>
                             <td>
                                 <form method="POST"
-                                      action="{{ url_for('resetear_password_usuario', user_id=u.id) }}"
+                                      action="{{ url_for('admin.resetear_password_usuario', user_id=u.id) }}"
                                       class="admin-reset-form"
                                       onsubmit="return confirm('¿Restablecer la contraseña de {{ u.email }}?')">
                                     <input type="password"
