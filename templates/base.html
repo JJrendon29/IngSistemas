@@ -35,9 +35,11 @@
                 </li>
 
                 {% if current_user.is_authenticated %}
+                    {% if not current_user.es_admin() %}
                     <li class="nav-item">
                         <a href="{{ url_for('perfil.mi_perfil') }}" class="nav-link">Mi Perfil</a>
                     </li>
+                    {% endif %}
                     {% if current_user.es_admin() %}
                     <li class="nav-item">
                         <a href="{{ url_for('admin.admin_panel') }}" class="nav-link nav-link-admin">Admin</a>

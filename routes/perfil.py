@@ -129,6 +129,9 @@ def _guardar_idiomas_desde_form(perfil_id, form):
 @perfil_bp.route('/mi-perfil')
 @login_required
 def mi_perfil():
+    if current_user.es_admin():
+        flash('Los administradores no tienen perfil de practicante.', 'warning')
+        return redirect(url_for('admin.admin_panel'))
     perfil = obtener_perfil_por_usuario(current_user.id)
     revisiones = obtener_revisiones_perfil(perfil['id']) if perfil else {}
     return render_template('mi_perfil.html', perfil=perfil, revisiones=revisiones)
@@ -137,6 +140,9 @@ def mi_perfil():
 @perfil_bp.route('/mi-perfil/crear', methods=['GET', 'POST'])
 @login_required
 def crear_mi_perfil():
+    if current_user.es_admin():
+        flash('Los administradores no tienen perfil de practicante.', 'warning')
+        return redirect(url_for('admin.admin_panel'))
     # Verificar que no tenga perfil ya
     perfil_existente = obtener_perfil_por_usuario(current_user.id)
     if perfil_existente:
@@ -260,6 +266,9 @@ def crear_mi_perfil():
 @perfil_bp.route('/mi-perfil/editar', methods=['GET', 'POST'])
 @login_required
 def editar_mi_perfil():
+    if current_user.es_admin():
+        flash('Los administradores no tienen perfil de practicante.', 'warning')
+        return redirect(url_for('admin.admin_panel'))
     perfil = obtener_perfil_por_usuario(current_user.id)
     if not perfil:
         return redirect(url_for('perfil.crear_mi_perfil'))
