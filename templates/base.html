@@ -30,9 +30,6 @@
                 <li class="nav-item">
                     <a href="{{ url_for('public.index') }}" class="nav-link">Inicio</a>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('public.contacto') }}" class="nav-link">Contacto</a>
-                </li>
 
                 {% if current_user.is_authenticated %}
                     {% if not current_user.es_admin() %}
@@ -49,6 +46,9 @@
                         <a href="{{ url_for('auth.logout') }}" class="nav-link nav-link-logout">Cerrar Sesión</a>
                     </li>
                 {% else %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('public.contacto') }}" class="nav-link">Contacto</a>
+                    </li>
                     <li class="nav-item">
                         <a href="{{ url_for('auth.login') }}" class="nav-link">Iniciar Sesión</a>
                     </li>
