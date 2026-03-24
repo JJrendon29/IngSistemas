@@ -61,7 +61,8 @@
                     'titulo': 'Título / Perfil profesional',
                     'descripcion': 'Descripción / Sobre mí',
                     'habilidades': 'Habilidades técnicas',
-                    'formacion': 'Formación académica',
+                    'formacion_actual': 'Formación actual (programa)',
+                    'formacion': 'Formación previa',
                     'idiomas': 'Idiomas',
                     'github': 'GitHub',
                     'linkedin': 'LinkedIn',
@@ -124,6 +125,9 @@
                     <div class="perfil-resumen-info">
                         <h2>{{ perfil.nombre }}</h2>
                         <p class="perfil-titulo">{{ perfil.titulo or 'Sin título' }}</p>
+                        {% if perfil.programa_nombre %}
+                        <p class="perfil-titulo">{{ perfil.programa_nombre }} — Universidad Católica Luis Amigó{% if perfil.semestre_actual %}, semestre {{ perfil.semestre_actual }}{% endif %}</p>
+                        {% endif %}
                         {% if perfil.habilidades %}
                         <div class="perfil-card-skills" style="margin-top: 0.5rem;">
                             {% for hab in perfil.habilidades[:5] %}

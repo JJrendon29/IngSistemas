@@ -53,22 +53,31 @@ def obtener_todos_perfiles(solo_aprobados=True, page=1, per_page=None):
         return ([], 0) if per_page else []
     try:
         with conn.cursor() as cursor:
-            condicion = "WHERE estado = 'aprobado'" if solo_aprobados else ""
-
             if per_page:
                 # Contar total
-                cursor.execute(f"SELECT COUNT(*) AS total FROM perfiles {condicion}")
+                if solo_aprobados:
+                    cursor.execute("SELECT COUNT(*) AS total FROM perfiles WHERE estado = 'aprobado'")
+                else:
+                    cursor.execute("SELECT COUNT(*) AS total FROM perfiles")
                 total = cursor.fetchone()['total']
 
                 # Obtener página
                 offset = (page - 1) * per_page
+                where = "WHERE p.estado = 'aprobado'" if solo_aprobados else ""
                 cursor.execute(
-                    f"SELECT * FROM perfiles {condicion} ORDER BY nombre ASC LIMIT %s OFFSET %s",
+                    f"""SELECT p.*, cp.nombre AS programa_nombre
+                        FROM perfiles p
+                        LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                        {where} ORDER BY p.nombre ASC LIMIT %s OFFSET %s""",
                     (per_page, offset)
                 )
             else:
+                where = "WHERE p.estado = 'aprobado'" if solo_aprobados else ""
                 cursor.execute(
-                    f"SELECT * FROM perfiles {condicion} ORDER BY nombre ASC"
+                    f"""SELECT p.*, cp.nombre AS programa_nombre
+                        FROM perfiles p
+                        LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                        {where} ORDER BY p.nombre ASC"""
                 )
 
             perfiles = cursor.fetchall()
@@ -94,11 +103,20 @@ def obtener_perfil_por_slug(slug, solo_aprobados=True):
         with conn.cursor() as cursor:
             if solo_aprobados:
                 cursor.execute(
-                    "SELECT * FROM perfiles WHERE slug = %s AND estado = 'aprobado'",
+                    """SELECT p.*, cp.nombre AS programa_nombre
+                       FROM perfiles p
+                       LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                       WHERE p.slug = %s AND p.estado = 'aprobado'""",
                     (slug,)
                 )
             else:
-                cursor.execute("SELECT * FROM perfiles WHERE slug = %s", (slug,))
+                cursor.execute(
+                    """SELECT p.*, cp.nombre AS programa_nombre
+                       FROM perfiles p
+                       LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                       WHERE p.slug = %s""",
+                    (slug,)
+                )
             perfil = cursor.fetchone()
 
             if perfil:
@@ -119,7 +137,11 @@ def obtener_perfil_por_usuario(usuario_id):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "SELECT * FROM perfiles WHERE usuario_id = %s", (usuario_id,)
+                """SELECT p.*, cp.nombre AS programa_nombre
+                   FROM perfiles p
+                   LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                   WHERE p.usuario_id = %s""",
+                (usuario_id,)
             )
             perfil = cursor.fetchone()
 
@@ -134,7 +156,8 @@ def obtener_perfil_por_usuario(usuario_id):
 
 
 def crear_perfil(usuario_id, nombre, slug, titulo='', titulo_otro='',
-                 descripcion='', email_contacto='', github='', linkedin=''):
+                 descripcion='', email_contacto='', github='', linkedin='',
+                 programa_id=None, semestre_actual=None):
     """Crea un nuevo perfil (estado pendiente por defecto)"""
     conn = get_db_connection()
     if not conn:
@@ -144,10 +167,10 @@ def crear_perfil(usuario_id, nombre, slug, titulo='', titulo_otro='',
             cursor.execute(
                 """INSERT INTO perfiles
                    (usuario_id, nombre, slug, titulo, titulo_otro, descripcion,
-                    email_contacto, github, linkedin)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    email_contacto, github, linkedin, programa_id, semestre_actual)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (usuario_id, nombre, slug, titulo, titulo_otro, descripcion,
-                 email_contacto, github, linkedin)
+                 email_contacto, github, linkedin, programa_id, semestre_actual)
             )
             conn.commit()
             return cursor.lastrowid
@@ -168,7 +191,7 @@ def actualizar_perfil(perfil_id, **campos):
         campos_permitidos = [
             'nombre', 'slug', 'titulo', 'titulo_otro', 'descripcion', 'foto_url', 'cv_url',
             'email_contacto', 'github', 'linkedin', 'estado',
-            'github_verificado', 'linkedin_verificado'
+            'github_verificado', 'linkedin_verificado', 'programa_id', 'semestre_actual'
         ]
         campos_sql = []
         valores = []

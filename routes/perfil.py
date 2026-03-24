@@ -14,6 +14,7 @@ from models import (
     obtener_catalogo_titulos,
     obtener_catalogo_habilidades,
     obtener_catalogo_idiomas,
+    obtener_catalogo_programas,
     obtener_revisiones_perfil,
     resetear_revisiones_pendientes,
 )
@@ -147,7 +148,8 @@ def crear_mi_perfil():
     catalogos = {
         'titulos': obtener_catalogo_titulos(),
         'habilidades': obtener_catalogo_habilidades(),
-        'idiomas': obtener_catalogo_idiomas()
+        'idiomas': obtener_catalogo_idiomas(),
+        'programas': obtener_catalogo_programas(),
     }
 
     if request.method == 'POST':
@@ -194,6 +196,18 @@ def crear_mi_perfil():
         # Recuperar GitHub de sesión si el usuario lo vinculó antes de guardar
         github_desde_sesion = session.get('github_url', '')
 
+        # Programa académico actual
+        programa_id_raw = request.form.get('programa_id', '').strip()
+        try:
+            programa_id = int(programa_id_raw) if programa_id_raw else None
+        except (ValueError, TypeError):
+            programa_id = None
+        semestre_raw = request.form.get('semestre_actual', '').strip()
+        try:
+            semestre_actual = int(semestre_raw) if semestre_raw else None
+        except (ValueError, TypeError):
+            semestre_actual = None
+
         perfil_id = crear_perfil(
             usuario_id=current_user.id,
             nombre=nombre,
@@ -203,7 +217,9 @@ def crear_mi_perfil():
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
             github=github_desde_sesion,
-            linkedin=linkedin
+            linkedin=linkedin,
+            programa_id=programa_id,
+            semestre_actual=semestre_actual
         )
 
         if perfil_id:
@@ -254,7 +270,8 @@ def editar_mi_perfil():
     catalogos = {
         'titulos': obtener_catalogo_titulos(),
         'habilidades': obtener_catalogo_habilidades(),
-        'idiomas': obtener_catalogo_idiomas()
+        'idiomas': obtener_catalogo_idiomas(),
+        'programas': obtener_catalogo_programas(),
     }
 
     if request.method == 'POST':
@@ -316,6 +333,18 @@ def editar_mi_perfil():
         # Si hay GitHub en sesión (recién autorizado), aplicarlo ahora
         github_desde_sesion = session.get('github_url', '')
 
+        # Programa académico actual
+        programa_id_raw = request.form.get('programa_id', '').strip()
+        try:
+            programa_id = int(programa_id_raw) if programa_id_raw else None
+        except (ValueError, TypeError):
+            programa_id = None
+        semestre_raw = request.form.get('semestre_actual', '').strip()
+        try:
+            semestre_actual = int(semestre_raw) if semestre_raw else None
+        except (ValueError, TypeError):
+            semestre_actual = None
+
         kwargs_actualizar = dict(
             nombre=nombre,
             slug=nuevo_slug,
@@ -324,7 +353,9 @@ def editar_mi_perfil():
             descripcion=request.form.get('descripcion', '').strip(),
             email_contacto=request.form.get('email_contacto', '').strip(),
             linkedin=linkedin,
-            linkedin_verificado=linkedin_verificado
+            linkedin_verificado=linkedin_verificado,
+            programa_id=programa_id,
+            semestre_actual=semestre_actual,
             # github NO se pasa por defecto: se preserva el valor actual en BD
         )
 

@@ -91,7 +91,13 @@ def revisar_perfil(perfil_id):
     if conn:
         try:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM perfiles WHERE id = %s", (perfil_id,))
+                cursor.execute(
+                    """SELECT p.*, cp.nombre AS programa_nombre
+                       FROM perfiles p
+                       LEFT JOIN catalogo_programas cp ON cp.id = p.programa_id
+                       WHERE p.id = %s""",
+                    (perfil_id,)
+                )
                 perfil = cursor.fetchone()
                 if perfil:
                     perfil['habilidades'] = _obtener_habilidades(cursor, perfil_id)

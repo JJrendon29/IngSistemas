@@ -11,6 +11,7 @@ from models.catalogo import (
     obtener_catalogo_titulos,
     obtener_catalogo_habilidades,
     obtener_catalogo_idiomas,
+    obtener_catalogo_programas,
 )
 
 from models.perfil import (
@@ -51,6 +52,7 @@ __all__ = [
     'obtener_catalogo_titulos',
     'obtener_catalogo_habilidades',
     'obtener_catalogo_idiomas',
+    'obtener_catalogo_programas',
     # perfil
     'obtener_todos_perfiles',
     'obtener_perfil_por_slug',

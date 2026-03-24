@@ -36,11 +36,31 @@ CREATE TABLE IF NOT EXISTS perfiles (
     email_contacto VARCHAR(150) DEFAULT NULL,
     github VARCHAR(255) DEFAULT NULL,
     linkedin VARCHAR(255) DEFAULT NULL,
-    estado ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
+    estado ENUM('pendiente', 'aprobado', 'rechazado', 'en_revision') NOT NULL DEFAULT 'pendiente',
+    titulo_otro VARCHAR(200) DEFAULT NULL,
+    comentario_admin TEXT DEFAULT NULL,
+    github_verificado BOOLEAN NOT NULL DEFAULT FALSE,
+    linkedin_verificado BOOLEAN NOT NULL DEFAULT FALSE,
+    programa_id INT DEFAULT NULL,
+    semestre_actual TINYINT DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (programa_id) REFERENCES catalogo_programas(id)
 ) ENGINE=InnoDB;
+
+-- ========================================
+-- TABLA: catalogo_programas (programas académicos de la universidad)
+-- ========================================
+CREATE TABLE IF NOT EXISTS catalogo_programas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(200) NOT NULL UNIQUE,
+    activo BOOLEAN NOT NULL DEFAULT TRUE
+) ENGINE=InnoDB;
+
+INSERT INTO catalogo_programas (nombre) VALUES
+('Ingeniería de Sistemas'),
+('Tecnología en Desarrollo de Software');
 
 -- ========================================
 -- TABLA: habilidades (texto libre por perfil)

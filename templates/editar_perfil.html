@@ -242,9 +242,46 @@
                     {% endfor %}
                 </fieldset>
 
-                <!-- FORMACIÓN ACADÉMICA -->
+                <!-- FORMACIÓN ACTUAL -->
                 <fieldset class="form-fieldset">
-                    <legend>Formación Académica</legend>
+                    <legend>Formación Actual</legend>
+                    {% if revisiones and revisiones.get('formacion_actual', {}).get('estado') == 'rechazado' %}
+                    <div class="campo-rechazado-aviso" style="margin-bottom:1rem;">
+                        El administrador indicó: {{ revisiones['formacion_actual']['comentario'] or 'Corrige este campo.' }}
+                    </div>
+                    {% endif %}
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="programa_id">Programa académico *</label>
+                            <select id="programa_id" name="programa_id">
+                                <option value="">-- Selecciona tu programa --</option>
+                                {% for prog in catalogos.programas %}
+                                <option value="{{ prog.id }}"
+                                    {% if perfil and perfil.programa_id == prog.id %}selected{% endif %}>
+                                    {{ prog.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-hint">Universidad Católica Luis Amigó</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="semestre_actual">Semestre actual</label>
+                            <select id="semestre_actual" name="semestre_actual">
+                                <option value="">-- Selecciona --</option>
+                                {% for s in range(1, 11) %}
+                                <option value="{{ s }}"
+                                    {% if perfil and perfil.semestre_actual == s %}selected{% endif %}>
+                                    {{ s }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- FORMACIÓN PREVIA -->
+                <fieldset class="form-fieldset">
+                    <legend>Formación Previa</legend>
                     {% if revisiones and revisiones.get('formacion', {}).get('estado') == 'rechazado' %}
                     <div class="campo-rechazado-aviso" style="margin-bottom:1rem;">
                         El administrador indicó: {{ revisiones['formacion']['comentario'] or 'Corrige este campo.' }}

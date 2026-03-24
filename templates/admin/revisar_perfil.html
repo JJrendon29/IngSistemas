@@ -280,14 +280,56 @@
                 </div>
             </div>
 
-            <!-- ======================== FORMACIÓN ======================== -->
+            <!-- ======================== FORMACIÓN ACTUAL ======================== -->
+            {% set rev_formacion_actual = revisiones.get('formacion_actual', {}) %}
+            <div class="campo-card {% if rev_formacion_actual.estado == 'aprobado' %}estado-aprobado{% elif rev_formacion_actual.estado == 'rechazado' %}estado-rechazado{% endif %}">
+                <div class="campo-card-inner">
+                    <div class="campo-preview">
+                        <h4>
+                            {% if rev_formacion_actual.estado == 'aprobado' %}✅{% elif rev_formacion_actual.estado == 'rechazado' %}❌{% endif %}
+                            Formación Actual
+                        </h4>
+                        <div class="campo-preview-content">
+                            {% if perfil.programa_nombre %}
+                                <div class="formacion-preview-item">
+                                    <strong>{{ perfil.programa_nombre }}</strong>
+                                    <span>Universidad Católica Luis Amigó{% if perfil.semestre_actual %} &mdash; Semestre {{ perfil.semestre_actual }}{% endif %}</span>
+                                </div>
+                            {% else %}
+                                <p class="sin-dato">Sin programa registrado</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="campo-controles">
+                        <p class="campo-label-revision">Decisión sobre la formación actual:</p>
+                        <div class="revision-radios">
+                            <label class="revision-radio-label opcion-aprobar">
+                                <input type="radio" name="revision_estado_formacion_actual" value="aprobado"
+                                    {{ 'checked' if rev_formacion_actual.estado == 'aprobado' }}>
+                                Aprobar
+                            </label>
+                            <label class="revision-radio-label opcion-rechazar">
+                                <input type="radio" name="revision_estado_formacion_actual" value="rechazado"
+                                    {{ 'checked' if rev_formacion_actual.estado == 'rechazado' }}>
+                                Rechazar
+                            </label>
+                        </div>
+                        <p class="campo-label-revision">Comentario (opcional):</p>
+                        <textarea name="revision_comentario_formacion_actual"
+                                  class="revision-comentario {{ 'tiene-rechazo' if rev_formacion_actual.estado == 'rechazado' }}"
+                                  placeholder="Indica al estudiante qué debe mejorar...">{{ rev_formacion_actual.comentario or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================== FORMACIÓN PREVIA ======================== -->
             {% set rev_formacion = revisiones.get('formacion', {}) %}
             <div class="campo-card {% if rev_formacion.estado == 'aprobado' %}estado-aprobado{% elif rev_formacion.estado == 'rechazado' %}estado-rechazado{% endif %}">
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
                             {% if rev_formacion.estado == 'aprobado' %}✅{% elif rev_formacion.estado == 'rechazado' %}❌{% endif %}
-                            Formación Académica
+                            Formación Previa
                         </h4>
                         <div class="campo-preview-content">
                             {% if perfil.formacion %}

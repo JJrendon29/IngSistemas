@@ -100,9 +100,24 @@
                 </div>
                 {% endif %}
                 
+                {% if perfil.programa_nombre %}
+                <div class="perfil-section">
+                    <h2 class="section-title-small">Formación Actual</h2>
+                    <div class="formacion-list">
+                        <div class="formacion-item">
+                            <h3 class="formacion-titulo">{{ perfil.programa_nombre }}</h3>
+                            <p class="formacion-institucion">Universidad Católica Luis Amigó</p>
+                            {% if perfil.semestre_actual %}
+                            <p class="formacion-año">Semestre {{ perfil.semestre_actual }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if perfil.formacion %}
                 <div class="perfil-section">
-                    <h2 class="section-title-small">Formación Académica</h2>
+                    <h2 class="section-title-small">Formación Previa</h2>
                     <div class="formacion-list">
                         {% for item in perfil.formacion %}
                         <div class="formacion-item">

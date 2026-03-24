@@ -58,3 +58,18 @@ def obtener_catalogo_idiomas():
             return cursor.fetchall()
     finally:
         conn.close()
+
+
+def obtener_catalogo_programas():
+    """Retorna lista de {id, nombre} de programas académicos activos"""
+    conn = get_db_connection()
+    if not conn:
+        return []
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, nombre FROM catalogo_programas WHERE activo = 1 ORDER BY nombre ASC"
+            )
+            return cursor.fetchall()
+    finally:
+        conn.close()

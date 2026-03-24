@@ -7,7 +7,7 @@ from db_connection import get_db_connection
 
 CAMPOS_REVISABLES = [
     'foto', 'cv', 'nombre', 'titulo', 'descripcion',
-    'habilidades', 'formacion', 'idiomas', 'github', 'linkedin', 'email_contacto'
+    'habilidades', 'formacion_actual', 'formacion', 'idiomas', 'github', 'linkedin', 'email_contacto'
 ]
 
 
