@@ -79,7 +79,7 @@ def ver_perfil(slug):
     if perfil is None:
         abort(404)
     # Verificar imagen en disco
-    perfil['_imagen_disco'] = obtener_ruta_imagen_perfil(slug)
+    perfil['_imagen_disco'] = obtener_ruta_imagen_perfil(perfil['id'])
     return render_template('perfil.html', perfil=perfil)
 
 

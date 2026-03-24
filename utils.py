@@ -48,16 +48,16 @@ def validar_urls_perfil(github, linkedin):
 # HELPERS: ARCHIVOS DE PERFIL
 # ========================================
 
-def guardar_archivo_perfil(perfil_slug, archivo, tipo):
+def guardar_archivo_perfil(perfil_id, archivo, tipo):
     """
-    Guarda foto o CV en static/usuarios/<slug>/
+    Guarda foto o CV en static/usuarios/<perfil_id>/
     tipo: 'foto' o 'cv'
     Retorna la ruta relativa guardada o None
     """
     if not archivo or not archivo.filename:
         return None
 
-    usuario_dir = os.path.join(current_app.static_folder, 'usuarios', perfil_slug)
+    usuario_dir = os.path.join(current_app.static_folder, 'usuarios', str(perfil_id))
     os.makedirs(usuario_dir, exist_ok=True)
 
     if tipo == 'foto':
@@ -79,15 +79,15 @@ def guardar_archivo_perfil(perfil_slug, archivo, tipo):
 
     filepath = os.path.join(usuario_dir, filename)
     archivo.save(filepath)
-    return f'usuarios/{perfil_slug}/{filename}'
+    return f'usuarios/{perfil_id}/{filename}'
 
 
-def obtener_ruta_imagen_perfil(perfil_slug):
+def obtener_ruta_imagen_perfil(perfil_id):
     """Busca la imagen de perfil en disco"""
-    usuario_dir = os.path.join(current_app.static_folder, 'usuarios', perfil_slug)
+    usuario_dir = os.path.join(current_app.static_folder, 'usuarios', str(perfil_id))
     for ext in ('jpg', 'jpeg', 'png'):
         if os.path.exists(os.path.join(usuario_dir, f'perfil.{ext}')):
-            return f'usuarios/{perfil_slug}/perfil.{ext}'
+            return f'usuarios/{perfil_id}/perfil.{ext}'
     return None
 
 

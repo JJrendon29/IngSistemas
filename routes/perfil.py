@@ -1,6 +1,3 @@
-import os
-import shutil
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_required, current_user
 
@@ -237,11 +234,11 @@ def crear_mi_perfil():
             foto = request.files.get('foto')
             cv = request.files.get('cv')
             if foto and foto.filename:
-                ruta = guardar_archivo_perfil(slug, foto, 'foto')
+                ruta = guardar_archivo_perfil(perfil_id, foto, 'foto')
                 if ruta:
                     actualizar_perfil(perfil_id, foto_url=ruta, estado='pendiente')
             if cv and cv.filename:
-                ruta = guardar_archivo_perfil(slug, cv, 'cv')
+                ruta = guardar_archivo_perfil(perfil_id, cv, 'cv')
                 if ruta:
                     actualizar_perfil(perfil_id, cv_url=ruta, estado='pendiente')
 
@@ -284,13 +281,6 @@ def editar_mi_perfil():
                                    github_verificado_session=session.get('github_verificado', False))
 
         nuevo_slug = generar_slug(nombre)
-
-        # Si cambió el slug, renombrar carpeta de archivos
-        if nuevo_slug != perfil['slug']:
-            old_dir = os.path.join(current_app.static_folder, 'usuarios', perfil['slug'])
-            new_dir = os.path.join(current_app.static_folder, 'usuarios', nuevo_slug)
-            if os.path.exists(old_dir):
-                shutil.move(old_dir, new_dir)
 
         # GitHub solo se actualiza vía OAuth; preservar el valor actual
         linkedin = request.form.get('linkedin', '').strip()
@@ -373,11 +363,11 @@ def editar_mi_perfil():
         foto = request.files.get('foto')
         cv = request.files.get('cv')
         if foto and foto.filename:
-            ruta = guardar_archivo_perfil(nuevo_slug, foto, 'foto')
+            ruta = guardar_archivo_perfil(perfil['id'], foto, 'foto')
             if ruta:
                 actualizar_perfil(perfil['id'], foto_url=ruta, estado='pendiente')
         if cv and cv.filename:
-            ruta = guardar_archivo_perfil(nuevo_slug, cv, 'cv')
+            ruta = guardar_archivo_perfil(perfil['id'], cv, 'cv')
             if ruta:
                 actualizar_perfil(perfil['id'], cv_url=ruta, estado='pendiente')
 

@@ -29,7 +29,7 @@
                 </div>
                 
                 <div class="perfil-links">
-                    {% set cv_path = 'usuarios/' ~ perfil.slug ~ '/cv.pdf' %}
+                    {% set cv_path = 'usuarios/' ~ perfil.id|string ~ '/cv.pdf' %}
                     {% if perfil.cv_url and existe_archivo(perfil.cv_url) %}
                     <a href="{{ url_for('static', filename=perfil.cv_url) }}" 
                        class="btn btn-primary btn-block" target="_blank">

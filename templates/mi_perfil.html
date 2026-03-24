@@ -108,8 +108,8 @@
             <div class="perfil-resumen-card">
                 <div class="perfil-resumen-header">
                     <div class="perfil-resumen-foto">
-                        {% set imagen_jpg = 'usuarios/' ~ perfil.slug ~ '/perfil.jpg' %}
-                        {% set imagen_png = 'usuarios/' ~ perfil.slug ~ '/perfil.png' %}
+                        {% set imagen_jpg = 'usuarios/' ~ perfil.id|string ~ '/perfil.jpg' %}
+                        {% set imagen_png = 'usuarios/' ~ perfil.id|string ~ '/perfil.png' %}
                         {% if perfil.foto_url and existe_archivo(perfil.foto_url) %}
                             <img src="{{ url_for('static', filename=perfil.foto_url) }}" alt="{{ perfil.nombre }}">
                         {% elif existe_archivo(imagen_jpg) %}

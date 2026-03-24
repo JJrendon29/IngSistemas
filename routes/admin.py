@@ -60,18 +60,14 @@ def eliminar_perfil_admin(perfil_id):
     if conn:
         try:
             with conn.cursor() as cursor:
-                # Obtener slug para eliminar archivos
-                cursor.execute("SELECT slug FROM perfiles WHERE id = %s", (perfil_id,))
-                perfil = cursor.fetchone()
-                if perfil:
-                    usuario_dir = os.path.join(
-                        current_app.static_folder, 'usuarios', perfil['slug']
-                    )
-                    if os.path.exists(usuario_dir):
-                        shutil.rmtree(usuario_dir)
-                    cursor.execute("DELETE FROM perfiles WHERE id = %s", (perfil_id,))
-                    conn.commit()
-                    flash('Perfil eliminado', 'success')
+                usuario_dir = os.path.join(
+                    current_app.static_folder, 'usuarios', str(perfil_id)
+                )
+                if os.path.exists(usuario_dir):
+                    shutil.rmtree(usuario_dir)
+                cursor.execute("DELETE FROM perfiles WHERE id = %s", (perfil_id,))
+                conn.commit()
+                flash('Perfil eliminado', 'success')
         except Exception as e:
             print(f"Error al eliminar perfil: {e}")
             conn.rollback()
@@ -130,7 +126,7 @@ def revisar_perfil(perfil_id):
         return redirect(url_for('admin.admin_panel'))
 
     revisiones = obtener_revisiones_perfil(perfil_id)
-    imagen = obtener_ruta_imagen_perfil(perfil['slug'])
+    imagen = obtener_ruta_imagen_perfil(perfil['id'])
     return render_template('admin/revisar_perfil.html',
                            perfil=perfil,
                            revisiones=revisiones,
