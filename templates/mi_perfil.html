@@ -16,25 +16,25 @@
             <!-- Estado del perfil -->
             <div class="estado-card {% if perfil.estado == 'en_revision' %}estado-en-revision{% else %}estado-{{ perfil.estado }}{% endif %}">
                 {% if perfil.estado == 'pendiente' %}
-                    <span class="estado-icon">⏳</span>
+                    <span class="estado-icon"><i data-lucide="clock" class="lucide-icon"></i></span>
                     <div>
                         <strong>Tu perfil está pendiente de aprobación</strong>
                         <p>Un administrador revisará tu perfil pronto.</p>
                     </div>
                 {% elif perfil.estado == 'aprobado' %}
-                    <span class="estado-icon">✅</span>
+                    <span class="estado-icon"><i data-lucide="circle-check" class="lucide-icon"></i></span>
                     <div>
                         <strong>Tu perfil está aprobado y visible</strong>
                         <p>Las empresas pueden ver tu perfil en la página principal.</p>
                     </div>
                 {% elif perfil.estado == 'rechazado' %}
-                    <span class="estado-icon">❌</span>
+                    <span class="estado-icon"><i data-lucide="circle-x" class="lucide-icon"></i></span>
                     <div>
                         <strong>Tu perfil fue rechazado</strong>
                         <p>Edita tu perfil y envíalo nuevamente para revisión.</p>
                     </div>
                 {% elif perfil.estado == 'en_revision' %}
-                    <span class="estado-icon">🔍</span>
+                    <span class="estado-icon"><i data-lucide="search" class="lucide-icon"></i></span>
                     <div>
                         <strong>Tu perfil está en revisión</strong>
                         <p>Revisa los comentarios del administrador y corrige los campos indicados.</p>
@@ -74,12 +74,12 @@
                     {% for campo, datos in revisiones.items() %}
                     <li class="revision-item revision-item-{{ datos.estado }}">
                         {% if datos.estado == 'aprobado' %}
-                            <span class="revision-icono">✅</span>
+                            <span class="revision-icono"><i data-lucide="circle-check" class="lucide-icon"></i></span>
                             <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
                             <span class="revision-etiqueta etiqueta-aprobado">Aprobado</span>
                         {% elif datos.estado == 'rechazado' %}
                             <div class="revision-fila-principal">
-                                <span class="revision-icono">❌</span>
+                                <span class="revision-icono"><i data-lucide="circle-x" class="lucide-icon"></i></span>
                                 <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
                                 <span class="revision-etiqueta etiqueta-rechazado">Requiere corrección</span>
                             </div>
@@ -87,7 +87,7 @@
                             <p class="revision-comentario-texto">"{{ datos.comentario }}"</p>
                             {% endif %}
                         {% else %}
-                            <span class="revision-icono">⏳</span>
+                            <span class="revision-icono"><i data-lucide="clock" class="lucide-icon"></i></span>
                             <span class="revision-campo">{{ nombres_campo.get(campo, campo) }}</span>
                             <span class="revision-etiqueta etiqueta-pendiente">Pendiente</span>
                         {% endif %}
@@ -139,7 +139,7 @@
                         <div class="redes-resumen" style="margin-top: 0.75rem;">
                             {% if perfil.github %}
                             <a href="{{ perfil.github }}" target="_blank" class="red-resumen-link">
-                                💻 GitHub
+                                <i data-lucide="github" class="lucide-icon"></i> GitHub
                                 {% if perfil.github_verificado %}
                                 <span class="badge-verificado-resumen">Verificado</span>
                                 {% endif %}
@@ -147,7 +147,7 @@
                             {% endif %}
                             {% if perfil.linkedin %}
                             <a href="{{ perfil.linkedin }}" target="_blank" class="red-resumen-link">
-                                💼 LinkedIn
+                                <i data-lucide="linkedin" class="lucide-icon"></i> LinkedIn
                                 {% if perfil.linkedin_verificado %}
                                 <span class="badge-verificado-resumen">Verificado</span>
                                 {% endif %}
@@ -170,7 +170,7 @@
         {% else %}
             <!-- No tiene perfil aún -->
             <div class="empty-state">
-                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-icon"><i data-lucide="clipboard-list" class="lucide-icon"></i></div>
                 <h3>Aún no tienes un perfil</h3>
                 <p>Crea tu perfil de practicante para que las empresas puedan conocerte</p>
                 <a href="{{ url_for('perfil.crear_mi_perfil') }}" class="btn btn-primary btn-lg" style="margin-top: 1rem;">

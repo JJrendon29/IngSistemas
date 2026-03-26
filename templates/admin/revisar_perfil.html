@@ -42,7 +42,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_foto.estado == 'aprobado' %}✅{% elif rev_foto.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_foto.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_foto.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Foto de Perfil
                         </h4>
                         <div class="campo-preview-content">
@@ -82,7 +82,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_cv.estado == 'aprobado' %}✅{% elif rev_cv.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_cv.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_cv.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Hoja de Vida (CV)
                         </h4>
                         <div class="campo-preview-content">
@@ -122,7 +122,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_nombre.estado == 'aprobado' %}✅{% elif rev_nombre.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_nombre.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_nombre.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Nombre Completo
                         </h4>
                         <div class="campo-preview-content">
@@ -161,7 +161,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_titulo.estado == 'aprobado' %}✅{% elif rev_titulo.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_titulo.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_titulo.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Título / Perfil Profesional
                         </h4>
                         <div class="campo-preview-content">
@@ -203,7 +203,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_descripcion.estado == 'aprobado' %}✅{% elif rev_descripcion.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_descripcion.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_descripcion.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Descripción / Sobre mí
                         </h4>
                         <div class="campo-preview-content">
@@ -242,7 +242,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_habilidades.estado == 'aprobado' %}✅{% elif rev_habilidades.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_habilidades.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_habilidades.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Habilidades Técnicas
                         </h4>
                         <div class="campo-preview-content">
@@ -286,7 +286,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_formacion_actual.estado == 'aprobado' %}✅{% elif rev_formacion_actual.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_formacion_actual.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_formacion_actual.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Formación Actual
                         </h4>
                         <div class="campo-preview-content">
@@ -328,7 +328,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_formacion.estado == 'aprobado' %}✅{% elif rev_formacion.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_formacion.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_formacion.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Formación Previa
                         </h4>
                         <div class="campo-preview-content">
@@ -382,7 +382,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_idiomas.estado == 'aprobado' %}✅{% elif rev_idiomas.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_idiomas.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_idiomas.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Idiomas
                         </h4>
                         <div class="campo-preview-content">
@@ -425,7 +425,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_github.estado == 'aprobado' %}✅{% elif rev_github.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_github.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_github.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             GitHub
                         </h4>
                         <div class="campo-preview-content">
@@ -464,7 +464,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_linkedin.estado == 'aprobado' %}✅{% elif rev_linkedin.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_linkedin.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_linkedin.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             LinkedIn
                         </h4>
                         <div class="campo-preview-content">
@@ -503,7 +503,7 @@
                 <div class="campo-card-inner">
                     <div class="campo-preview">
                         <h4>
-                            {% if rev_email.estado == 'aprobado' %}✅{% elif rev_email.estado == 'rechazado' %}❌{% endif %}
+                            {% if rev_email.estado == 'aprobado' %}<i data-lucide="circle-check" class="lucide-icon"></i>{% elif rev_email.estado == 'rechazado' %}<i data-lucide="circle-x" class="lucide-icon"></i>{% endif %}
                             Email de Contacto
                         </h4>
                         <div class="campo-preview-content">

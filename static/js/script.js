@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     const scrollTopBtn = document.createElement('button');
-    scrollTopBtn.innerHTML = '↑';
+    scrollTopBtn.innerHTML = '<i data-lucide="arrow-up"></i>';
     scrollTopBtn.className = 'scroll-to-top';
     scrollTopBtn.style.cssText = `
         position: fixed;
@@ -210,7 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     
     document.body.appendChild(scrollTopBtn);
-    
+    if (window.lucide) { lucide.createIcons(); }
+
     window.addEventListener('scroll', function() {
         if (window.scrollY > 300) {
             scrollTopBtn.style.opacity = '1';

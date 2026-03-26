@@ -33,24 +33,24 @@
                     {% if perfil.cv_url and existe_archivo(perfil.cv_url) %}
                     <a href="{{ url_for('static', filename=perfil.cv_url) }}" 
                        class="btn btn-primary btn-block" target="_blank">
-                        📄 Descargar CV
+                        <i data-lucide="file-text" class="lucide-icon"></i> Descargar CV
                     </a>
                     {% elif existe_archivo(cv_path) %}
                     <a href="{{ url_for('static', filename=cv_path) }}" 
                        class="btn btn-primary btn-block" target="_blank">
-                        📄 Descargar CV
+                        <i data-lucide="file-text" class="lucide-icon"></i> Descargar CV
                     </a>
                     {% endif %}
                     
                     {% if perfil.email_contacto or perfil.get('email') %}
                     <a href="mailto:{{ perfil.email_contacto or perfil.email }}" class="btn btn-secondary btn-block">
-                        ✉️ {{ perfil.email_contacto or perfil.email }}
+                        <i data-lucide="mail" class="lucide-icon"></i> {{ perfil.email_contacto or perfil.email }}
                     </a>
                     {% endif %}
                     
                     {% if perfil.github %}
                     <a href="{{ perfil.github }}" class="btn btn-secondary btn-block" target="_blank">
-                        💻 GitHub
+                        <i data-lucide="github" class="lucide-icon"></i> GitHub
                         {% if perfil.github_verificado %}
                         <span class="badge-verificado-perfil">Verificado</span>
                         {% endif %}
@@ -59,7 +59,7 @@
 
                     {% if perfil.linkedin %}
                     <a href="{{ perfil.linkedin }}" class="btn btn-secondary btn-block" target="_blank">
-                        💼 LinkedIn
+                        <i data-lucide="linkedin" class="lucide-icon"></i> LinkedIn
                         {% if perfil.linkedin_verificado %}
                         <span class="badge-verificado-perfil">Verificado</span>
                         {% endif %}

@@ -1848,3 +1848,31 @@ body.dark-mode .page-header {
     .section-title { font-size: var(--font-size-2xl); }
     .error-code { font-size: 5rem; }
 }
+
+/* ========================================
+   LUCIDE ICONS
+   ======================================== */
+.lucide-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    display: inline-block;
+}
+
+.estado-icon .lucide-icon,
+.estado-icon i[data-lucide] {
+    width: 2rem;
+    height: 2rem;
+}
+
+.empty-state-icon .lucide-icon,
+.empty-state-icon i[data-lucide] {
+    width: 4rem;
+    height: 4rem;
+}
+
+.auth-icon .lucide-icon,
+.auth-icon i[data-lucide] {
+    width: 3rem;
+    height: 3rem;
+}
