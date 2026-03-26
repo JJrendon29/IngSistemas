@@ -232,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.createElement('button');
-    darkModeToggle.innerHTML = '🌓';
     darkModeToggle.style.cssText = `
         position: fixed;
         top: 80px;
@@ -246,18 +245,33 @@ document.addEventListener('DOMContentLoaded', function() {
         cursor: pointer;
         z-index: 999;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
     `;
-    
+
     document.body.appendChild(darkModeToggle);
-    
-    darkModeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
-    
+
+    // Aplicar modo guardado antes de setear el ícono
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
+
+    function actualizarIcono() {
+        const isDark = document.body.classList.contains('dark-mode');
+        darkModeToggle.innerHTML = isDark
+            ? '<i data-lucide="sun" style="width:20px;height:20px;"></i>'
+            : '<i data-lucide="moon" style="width:20px;height:20px;"></i>';
+        lucide.createIcons();
+    }
+
+    actualizarIcono();
+
+    darkModeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        actualizarIcono();
+    });
 });
 
 console.log('✅ JavaScript cargado correctamente');
