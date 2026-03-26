@@ -20,6 +20,10 @@ from models import (
     _obtener_habilidades,
     _obtener_formacion,
     _obtener_idiomas,
+    obtener_todas_habilidades_admin,
+    agregar_habilidad,
+    editar_habilidad,
+    toggle_habilidad,
 )
 from utils import admin_required, obtener_ruta_imagen_perfil
 
@@ -408,3 +412,70 @@ def resetear_password_usuario(user_id):
     else:
         flash('Error al restablecer la contraseña.', 'error')
     return redirect(url_for('admin.admin_usuarios'))
+
+
+# ========================================
+# RUTAS: DATOS MAESTROS (ADMIN)
+# ========================================
+
+@admin_bp.route('/datos-maestros')
+@admin_required
+def admin_datos_maestros():
+    habilidades = obtener_todas_habilidades_admin()
+    total = len(habilidades)
+    activas = sum(1 for h in habilidades if h['activo'])
+    return render_template(
+        'admin/datos_maestros.html',
+        habilidades=habilidades,
+        total=total,
+        activas=activas
+    )
+
+
+@admin_bp.route('/datos-maestros/habilidades/agregar', methods=['POST'])
+@admin_required
+def admin_agregar_habilidad():
+    nombre = request.form.get('nombre', '').strip()
+    categoria = request.form.get('categoria', '').strip()
+
+    categorias_validas = {'lenguaje', 'framework', 'base_datos', 'herramienta'}
+    if not nombre or categoria not in categorias_validas:
+        flash('Nombre y categoría son requeridos.', 'error')
+        return redirect(url_for('admin.admin_datos_maestros'))
+
+    ok = agregar_habilidad(nombre, categoria)
+    if ok:
+        flash(f'Habilidad "{nombre}" agregada correctamente.', 'success')
+    else:
+        flash(f'Ya existe una habilidad con ese nombre en esa categoría.', 'error')
+    return redirect(url_for('admin.admin_datos_maestros'))
+
+
+@admin_bp.route('/datos-maestros/habilidades/<int:id>/editar', methods=['POST'])
+@admin_required
+def admin_editar_habilidad(id):
+    nombre = request.form.get('nombre', '').strip()
+    categoria = request.form.get('categoria', '').strip()
+
+    categorias_validas = {'lenguaje', 'framework', 'base_datos', 'herramienta'}
+    if not nombre or categoria not in categorias_validas:
+        flash('Nombre y categoría son requeridos.', 'error')
+        return redirect(url_for('admin.admin_datos_maestros'))
+
+    ok = editar_habilidad(id, nombre, categoria)
+    if ok:
+        flash(f'Habilidad actualizada correctamente.', 'success')
+    else:
+        flash('Error al actualizar la habilidad.', 'error')
+    return redirect(url_for('admin.admin_datos_maestros'))
+
+
+@admin_bp.route('/datos-maestros/habilidades/<int:id>/toggle', methods=['POST'])
+@admin_required
+def admin_toggle_habilidad(id):
+    ok = toggle_habilidad(id)
+    if ok:
+        flash('Estado de la habilidad actualizado.', 'success')
+    else:
+        flash('Error al actualizar el estado.', 'error')
+    return redirect(url_for('admin.admin_datos_maestros'))

@@ -12,6 +12,10 @@ from models.catalogo import (
     obtener_catalogo_habilidades,
     obtener_catalogo_idiomas,
     obtener_catalogo_programas,
+    obtener_todas_habilidades_admin,
+    agregar_habilidad,
+    editar_habilidad,
+    toggle_habilidad,
 )
 
 from models.perfil import (
@@ -53,6 +57,10 @@ __all__ = [
     'obtener_catalogo_habilidades',
     'obtener_catalogo_idiomas',
     'obtener_catalogo_programas',
+    'obtener_todas_habilidades_admin',
+    'agregar_habilidad',
+    'editar_habilidad',
+    'toggle_habilidad',
     # perfil
     'obtener_todos_perfiles',
     'obtener_perfil_por_slug',

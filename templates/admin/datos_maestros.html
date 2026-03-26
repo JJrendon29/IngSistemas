@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Datos Maestros - Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Datos Maestros</h1>
+        <p>Gestión de catálogos del sistema</p>
+    </div>
+</section>
+
+<section class="admin-section">
+    <div class="container">
+        <div class="admin-nav">
+            <a href="{{ url_for('admin.admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin.admin_contactos') }}" class="admin-nav-link">Contactos</a>
+            <a href="{{ url_for('admin.admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
+            <a href="{{ url_for('admin.admin_datos_maestros') }}" class="admin-nav-link active">Datos Maestros</a>
+        </div>
+
+        <!-- Tarjeta Habilidades Técnicas -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    Habilidades Técnicas
+                    <span style="font-size:0.85rem; font-weight:400; color:var(--text-secondary); margin-left:0.75rem;">
+                        {{ activas }} activas / {{ total }} total
+                    </span>
+                </h3>
+                <button type="button" class="btn-filtrar" onclick="abrirModalAgregar()">
+                    + Agregar habilidad
+                </button>
+            </div>
+
+            <!-- Filtro por categoría (JS) -->
+            <div style="margin-bottom:1rem; display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <label style="font-size:0.85rem; font-weight:700; color:var(--primary-color); text-transform:uppercase; letter-spacing:0.05em;">
+                    Filtrar:
+                </label>
+                <select id="filtroCat" class="filtro-select" style="max-width:260px;" onchange="filtrarCategoria(this.value)">
+                    <option value="">Todas las categorías</option>
+                    <option value="lenguaje">Lenguajes de Programación</option>
+                    <option value="framework">Frameworks y Librerías</option>
+                    <option value="base_datos">Bases de Datos</option>
+                    <option value="herramienta">Herramientas y DevOps</option>
+                </select>
+            </div>
+
+            {% if habilidades %}
+            <div class="admin-table-container">
+                <table class="admin-table" id="tablaHabilidades">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in habilidades %}
+                        <tr data-categoria="{{ h.categoria }}">
+                            <td><strong>{{ h.nombre }}</strong></td>
+                            <td>
+                                {% if h.categoria == 'lenguaje' %}Lenguajes de Programación
+                                {% elif h.categoria == 'framework' %}Frameworks y Librerías
+                                {% elif h.categoria == 'base_datos' %}Bases de Datos
+                                {% elif h.categoria == 'herramienta' %}Herramientas y DevOps
+                                {% else %}{{ h.categoria }}{% endif %}
+                            </td>
+                            <td>
+                                <span class="badge-activo {{ 'badge-activo--si' if h.activo else 'badge-activo--no' }}">
+                                    {{ 'Activa' if h.activo else 'Inactiva' }}
+                                </span>
+                            </td>
+                            <td class="admin-actions">
+                                <button type="button" class="btn btn-sm btn-revisar"
+                                        onclick="abrirModalEditar({{ h.id }}, '{{ h.nombre | e }}', '{{ h.categoria }}')">
+                                    Editar
+                                </button>
+                                <form method="POST"
+                                      action="{{ url_for('admin.admin_toggle_habilidad', id=h.id) }}"
+                                      style="display:inline;">
+                                    <button type="submit" class="btn btn-sm {{ 'btn-warning' if h.activo else 'btn-success' }}">
+                                        {{ 'Desactivar' if h.activo else 'Activar' }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align:center; color:var(--text-secondary); padding:2rem;">
+                No hay habilidades registradas.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Modal Agregar Habilidad -->
+<div id="modal-agregar" class="modal-overlay" style="display:none;" onclick="cerrarModalAgregar(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Agregar Habilidad</h4>
+            <button type="button" class="modal-cerrar" onclick="cerrarModalAgregar()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('admin.admin_agregar_habilidad') }}">
+            <div class="modal-body">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--primary-color); margin-bottom:0.3rem;">
+                            Nombre *
+                        </label>
+                        <input type="text" name="nombre" required maxlength="100"
+                               placeholder="Ej: TypeScript"
+                               class="modal-textarea"
+                               style="min-height:unset; height:38px; resize:none; padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--primary-color); margin-bottom:0.3rem;">
+                            Categoría *
+                        </label>
+                        <select name="categoria" required class="filtro-select" style="width:100%; max-width:100%;">
+                            <option value="">-- Selecciona --</option>
+                            <option value="lenguaje">Lenguajes de Programación</option>
+                            <option value="framework">Frameworks y Librerías</option>
+                            <option value="base_datos">Bases de Datos</option>
+                            <option value="herramienta">Herramientas y DevOps</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-limpiar" onclick="cerrarModalAgregar()">Cancelar</button>
+                <button type="submit" class="btn-filtrar">Agregar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Habilidad -->
+<div id="modal-editar" class="modal-overlay" style="display:none;" onclick="cerrarModalEditar(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4>Editar Habilidad</h4>
+            <button type="button" class="modal-cerrar" onclick="cerrarModalEditar()">&times;</button>
+        </div>
+        <form id="form-editar" method="POST" action="">
+            <div class="modal-body">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--primary-color); margin-bottom:0.3rem;">
+                            Nombre *
+                        </label>
+                        <input type="text" id="editar-nombre" name="nombre" required maxlength="100"
+                               class="modal-textarea"
+                               style="min-height:unset; height:38px; resize:none; padding:0.4rem 0.6rem;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:600; color:var(--primary-color); margin-bottom:0.3rem;">
+                            Categoría *
+                        </label>
+                        <select id="editar-categoria" name="categoria" required class="filtro-select" style="width:100%; max-width:100%;">
+                            <option value="lenguaje">Lenguajes de Programación</option>
+                            <option value="framework">Frameworks y Librerías</option>
+                            <option value="base_datos">Bases de Datos</option>
+                            <option value="herramienta">Herramientas y DevOps</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-limpiar" onclick="cerrarModalEditar()">Cancelar</button>
+                <button type="submit" class="btn-filtrar">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalAgregar() {
+    document.getElementById('modal-agregar').style.display = 'flex';
+}
+function cerrarModalAgregar(e) {
+    if (e && e.target !== document.getElementById('modal-agregar')) return;
+    document.getElementById('modal-agregar').style.display = 'none';
+}
+
+function abrirModalEditar(id, nombre, categoria) {
+    var form = document.getElementById('form-editar');
+    form.action = '/admin/datos-maestros/habilidades/' + id + '/editar';
+    document.getElementById('editar-nombre').value = nombre;
+    document.getElementById('editar-categoria').value = categoria;
+    document.getElementById('modal-editar').style.display = 'flex';
+    document.getElementById('editar-nombre').focus();
+}
+function cerrarModalEditar(e) {
+    if (e && e.target !== document.getElementById('modal-editar')) return;
+    document.getElementById('modal-editar').style.display = 'none';
+}
+
+function filtrarCategoria(cat) {
+    var filas = document.querySelectorAll('#tablaHabilidades tbody tr');
+    filas.forEach(function(fila) {
+        if (!cat || fila.dataset.categoria === cat) {
+            fila.style.display = '';
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -18,6 +18,14 @@
 <section class="revisar-section">
     <div class="container">
 
+        <!-- Navegación admin -->
+        <div class="admin-nav">
+            <a href="{{ url_for('admin.admin_panel') }}" class="admin-nav-link">Perfiles</a>
+            <a href="{{ url_for('admin.admin_contactos') }}" class="admin-nav-link">Contactos</a>
+            <a href="{{ url_for('admin.admin_usuarios') }}" class="admin-nav-link">Usuarios</a>
+            <a href="{{ url_for('admin.admin_datos_maestros') }}" class="admin-nav-link">Datos Maestros</a>
+        </div>
+
         <form method="POST">
 
             <!-- Encabezado con botón volver -->
