@@ -918,7 +918,7 @@ img {
     box-shadow: var(--shadow-lg);
     padding: var(--spacing-xl);
     width: 100%;
-    max-width: 460px;
+    max-width: 560px;
     border-top: 4px solid var(--primary-color);
 }
 
