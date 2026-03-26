@@ -13,7 +13,30 @@
 <section class="editar-perfil-section">
     <div class="container">
         <div class="form-container">
+            <!-- Stepper -->
+            <div class="wizard-stepper" id="wizardStepper">
+                <div class="wizard-step-item active" data-step="1">
+                    <div class="wizard-step-number">1</div>
+                    <div class="wizard-step-label">Básico</div>
+                </div>
+                <div class="wizard-step-item" data-step="2">
+                    <div class="wizard-step-number">2</div>
+                    <div class="wizard-step-label">Contacto</div>
+                </div>
+                <div class="wizard-step-item" data-step="3">
+                    <div class="wizard-step-number">3</div>
+                    <div class="wizard-step-label">Habilidades</div>
+                </div>
+                <div class="wizard-step-item" data-step="4">
+                    <div class="wizard-step-number">4</div>
+                    <div class="wizard-step-label">Formación</div>
+                </div>
+            </div>
+
             <form method="POST" enctype="multipart/form-data" class="perfil-form">
+
+                <!-- PASO 1: Información Básica + Foto y CV -->
+                <div class="wizard-step active" id="step-1">
 
                 <!-- INFORMACIÓN BÁSICA -->
                 <fieldset class="form-fieldset">
@@ -110,6 +133,15 @@
                     </div>
                 </fieldset>
 
+                <div class="wizard-navigation">
+                    <span></span>
+                    <button type="button" class="btn-wizard-next" onclick="wizardNext(1)">Siguiente &rarr;</button>
+                </div>
+                </div><!-- /step-1 -->
+
+                <!-- PASO 2: Contacto y Redes -->
+                <div class="wizard-step" id="step-2">
+
                 <!-- CONTACTO Y REDES -->
                 <fieldset class="form-fieldset">
                     <legend>Contacto y Redes</legend>
@@ -177,6 +209,15 @@
                     </div>
                 </fieldset>
 
+                <div class="wizard-navigation">
+                    <button type="button" class="btn-wizard-prev" onclick="wizardPrev(2)">&larr; Anterior</button>
+                    <button type="button" class="btn-wizard-next" onclick="wizardNext(2)">Siguiente &rarr;</button>
+                </div>
+                </div><!-- /step-2 -->
+
+                <!-- PASO 3: Habilidades -->
+                <div class="wizard-step" id="step-3">
+
                 <!-- HABILIDADES: checkboxes agrupados por categoría -->
                 <fieldset class="form-fieldset">
                     <legend>Habilidades Técnicas</legend>
@@ -241,6 +282,15 @@
                         {% endif %}
                     {% endfor %}
                 </fieldset>
+
+                <div class="wizard-navigation">
+                    <button type="button" class="btn-wizard-prev" onclick="wizardPrev(3)">&larr; Anterior</button>
+                    <button type="button" class="btn-wizard-next" onclick="wizardNext(3)">Siguiente &rarr;</button>
+                </div>
+                </div><!-- /step-3 -->
+
+                <!-- PASO 4: Formación e Idiomas -->
+                <div class="wizard-step" id="step-4">
 
                 <!-- FORMACIÓN ACTUAL -->
                 <fieldset class="form-fieldset">
@@ -473,6 +523,13 @@
                     Al guardar cambios, tu perfil volverá a estado <strong>pendiente</strong> hasta que un administrador lo apruebe.
                 </p>
                 {% endif %}
+
+                <div class="wizard-navigation" style="border-top: none; padding-top: 0;">
+                    <button type="button" class="btn-wizard-prev" onclick="wizardPrev(4)">&larr; Anterior</button>
+                    <span></span>
+                </div>
+                </div><!-- /step-4 -->
+
             </form>
         </div>
     </div>
@@ -496,6 +553,77 @@ window.PERFIL_CONFIG = {
     formCount: {{ (perfil.formacion|length) if perfil and perfil.formacion else 1 }},
     idiomaCount: {{ (perfil.idiomas|length) if perfil and perfil.idiomas else 1 }}
 };
+</script>
+<script>
+// ---- Campos rechazados por paso ----
+var CAMPOS_POR_PASO = {
+    1: ['nombre', 'titulo', 'descripcion', 'foto', 'cv'],
+    2: ['email_contacto', 'github', 'linkedin'],
+    3: ['habilidades'],
+    4: ['formacion_actual', 'formacion', 'idiomas']
+};
+
+var CAMPOS_RECHAZADOS = [];
+{% if revisiones %}
+    {% for campo, datos in revisiones.items() %}
+        {% if datos.estado == 'rechazado' %}
+        CAMPOS_RECHAZADOS.push('{{ campo }}');
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+function wizardIrAPaso(paso) {
+    // Ocultar todos los pasos
+    document.querySelectorAll('.wizard-step').forEach(function(s) {
+        s.classList.remove('active');
+    });
+    // Mostrar el paso indicado
+    var stepEl = document.getElementById('step-' + paso);
+    if (stepEl) stepEl.classList.add('active');
+
+    // Actualizar stepper
+    document.querySelectorAll('.wizard-step-item').forEach(function(item) {
+        var n = parseInt(item.dataset.step);
+        item.classList.remove('active', 'completed');
+        if (n === paso) item.classList.add('active');
+        else if (n < paso) item.classList.add('completed');
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function wizardNext(pasoActual) {
+    // Validación básica de required en el paso actual
+    var stepEl = document.getElementById('step-' + pasoActual);
+    var requeridos = stepEl ? stepEl.querySelectorAll('[required]') : [];
+    for (var i = 0; i < requeridos.length; i++) {
+        if (!requeridos[i].value.trim()) {
+            requeridos[i].focus();
+            requeridos[i].reportValidity();
+            return;
+        }
+    }
+    wizardIrAPaso(pasoActual + 1);
+}
+
+function wizardPrev(pasoActual) {
+    wizardIrAPaso(pasoActual - 1);
+}
+
+// Al cargar, abrir en el paso que tenga campos rechazados
+document.addEventListener('DOMContentLoaded', function() {
+    if (CAMPOS_RECHAZADOS.length > 0) {
+        for (var paso = 1; paso <= 4; paso++) {
+            var campsPaso = CAMPOS_POR_PASO[paso] || [];
+            for (var j = 0; j < CAMPOS_RECHAZADOS.length; j++) {
+                if (campsPaso.indexOf(CAMPOS_RECHAZADOS[j]) !== -1) {
+                    wizardIrAPaso(paso);
+                    return;
+                }
+            }
+        }
+    }
+});
 </script>
 <script src="{{ url_for('static', filename='js/editar_perfil.js') }}"></script>
 {% endblock %}
