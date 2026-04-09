@@ -15,7 +15,7 @@ Sistema web para gestionar y publicar perfiles de practicantes del programa de I
 - **Catálogos dinámicos**: Títulos, habilidades por categoría (lenguaje, framework, base de datos, herramienta), idiomas y programas académicos gestionados desde el panel admin
 - **Formación Actual**: Programa académico UCatólica (Ingeniería de Sistemas o Tecnología en Desarrollo de Software) y semestre actual
 - **Formación Previa**: Historial académico con autocompletado de instituciones educativas via API de datos.gov.co
-- **Formulario de edición por etapas**: Wizard de 4 pasos (Información básica → Habilidades → Formación → Archivos)
+- **Formulario de edición por etapas**: Wizard de 4 pasos (Básico + Foto/CV → Contacto y Redes → Habilidades → Formación e Idiomas)
 - **Subida de archivos**: Foto de perfil (JPG/PNG) y CV (PDF) almacenados en `static/usuarios/<perfil_id>/`
 - **Búsqueda con filtros combinables**: Por título profesional, habilidad e idioma, con paginación
 - **Formulario de contacto**: Las empresas envían sus datos e indican qué practicantes les interesan
