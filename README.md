@@ -84,7 +84,7 @@ mysql -u root -p practicantes_db < catalogos.sql
 python app.py
 ```
 
-Abrir http://localhost:5000
+Abrir https://ingsistemas-production.up.railway.app/
 
 ---
 
@@ -239,6 +239,32 @@ Esta sección aplica cuando la universidad quiera poner el sistema en producció
 - **HTTPS**: Railway lo provee por defecto. Si se usa otro hosting, verificar que esté configurado
 - **Backups de la base de datos**: Configurar backups automáticos del MySQL en producción
 - **Actualizar catálogos**: Revisar y actualizar el catálogo de habilidades desde el panel de Datos Maestros según las necesidades del programa académico
+
+---
+
+## Consideraciones de Seguridad
+
+### Implementado actualmente
+- **Contraseñas hasheadas** con bcrypt (nunca se almacenan en texto plano)
+- **Validación de contraseña segura**: mínimo 8 caracteres, mayúscula, minúscula, número y carácter especial
+- **Restricción de dominio**: solo correos `@amigo.edu.co` pueden registrarse
+- **Protección de rutas**: decorador `@admin_required` y `@login_required` en todas las rutas sensibles
+- **Sesiones firmadas** con SECRET_KEY via Flask-Login
+- **Prevención de envío duplicado** de formularios en el frontend
+
+### Pendiente para producción
+- **Verificación de correo electrónico**: Actualmente no se valida que el correo `@amigo.edu.co` sea real. Se recomienda implementar envío de email con token de confirmación antes de activar la cuenta
+- **CSRF Protection**: Agregar Flask-WTF para protección contra Cross-Site Request Forgery en todos los formularios
+- **Rate limiting**: Implementar límites de intentos en login y registro para prevenir ataques de fuerza bruta (Flask-Limiter)
+- **Almacenamiento de archivos**: Las fotos y CVs se guardan en el filesystem del servidor (`static/usuarios/`), lo cual tiene limitaciones:
+  - Los archivos se pierden si el servidor se reinicia o se redespliega (en Railway los deployments son efímeros)
+  - No hay validación de contenido de archivos (un usuario podría subir un archivo malicioso renombrado como .jpg)
+  - Para producción, migrar a un servicio externo como AWS S3 o Google Cloud Storage
+- **Validación de archivos**: Implementar verificación del contenido real del archivo (no solo la extensión) usando librerías como `python-magic`
+- **SQL Injection**: Aunque se usan queries parametrizadas (%s), la función `api_instituciones` en `routes/public.py` construye el parámetro `$where` con concatenación de strings, lo cual podría ser vulnerable. Revisar y sanitizar
+- **Headers de seguridad**: Agregar headers HTTP de seguridad (Content-Security-Policy, X-Content-Type-Options, X-Frame-Options) con Flask-Talisman
+- **Variables de entorno**: Asegurar que DEBUG=False y que SECRET_KEY sea un valor largo y aleatorio, nunca el valor por defecto
+- **GitHub OAuth callback URL**: En producción debe apuntar al dominio definitivo con HTTPS, nunca a localhost
 
 ---
 
