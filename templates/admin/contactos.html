@@ -126,7 +126,7 @@
                                     {% if c.notas_admin %}
                                         {{ c.notas_admin[:50] }}{{ '...' if c.notas_admin|length > 50 }}
                                     {% else %}
-                                        <em class="sin-notas">—</em>
+                                        <em class="sin-notas">-</em>
                                     {% endif %}
                                 </span>
                                 <button type="button"
@@ -143,7 +143,7 @@
                                     <span class="badge-practicante">{{ p.nombre }}</span>
                                     {% endfor %}
                                 {% else %}
-                                    <span class="sin-practicantes">—</span>
+                                    <span class="sin-practicantes">-</span>
                                 {% endif %}
                             </td>
 

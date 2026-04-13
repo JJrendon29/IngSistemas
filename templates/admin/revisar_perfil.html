@@ -301,7 +301,7 @@
                             {% if perfil.programa_nombre %}
                                 <div class="formacion-preview-item">
                                     <strong>{{ perfil.programa_nombre }}</strong>
-                                    <span>Universidad Católica Luis Amigó{% if perfil.semestre_actual %} &mdash; Semestre {{ perfil.semestre_actual }}{% endif %}</span>
+                                    <span>Universidad Católica Luis Amigó{% if perfil.semestre_actual %} - Semestre {{ perfil.semestre_actual }}{% endif %}</span>
                                 </div>
                             {% else %}
                                 <p class="sin-dato">Sin programa registrado</p>
@@ -346,13 +346,13 @@
                                     <strong>{{ f.titulo }}</strong>
                                     <span>{{ f.institucion }}
                                         {% if f.en_curso %}
-                                            &mdash; {{ f.anio_inicio }} - Presente
+                                            - {{ f.anio_inicio }} - Presente
                                         {% elif f.anio_fin %}
-                                            &mdash; {{ f.anio_inicio }} - {{ f.anio_fin }}
+                                            - {{ f.anio_inicio }} - {{ f.anio_fin }}
                                         {% elif f.anio_inicio %}
-                                            &mdash; {{ f.anio_inicio }}
+                                            - {{ f.anio_inicio }}
                                         {% elif f.anio %}
-                                            &mdash; {{ f.anio }}
+                                            - {{ f.anio }}
                                         {% endif %}
                                     </span>
                                 </div>
@@ -397,7 +397,7 @@
                             {% if perfil.idiomas %}
                                 {% for i in perfil.idiomas %}
                                 <span class="idioma-preview-item">
-                                    {{ i.idioma }} &mdash; {{ i.nivel }}
+                                    {{ i.idioma }} - {{ i.nivel }}
                                 </span>
                                 {% endfor %}
                             {% else %}
